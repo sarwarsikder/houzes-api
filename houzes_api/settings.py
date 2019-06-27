@@ -26,7 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'DEV'  # PROD, DEV
+APP_ENV = 'PROD'  # PROD, DEV
 
 # Application definition
 
@@ -76,12 +76,12 @@ WSGI_APPLICATION = 'houzes_api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ra_marketplace',
-        'USER': 'realacqcom',
-        'PASSWORD': 'K0ffeeKlub',
-        'HOST': 'db.realacquisitions.com',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ra_houzes',
+        'USER': 'root',
+        'PASSWORD': 'wsit97480',
+        'HOST': '172.18.1.11',
+        'PORT': '5454',
     },
 }
 
