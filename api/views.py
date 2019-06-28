@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from api.serializers import *
 from api.models import *
 
@@ -6,7 +6,7 @@ from api.models import *
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
+    permission_classes = (permissions.AllowAny,)
 
 class UserLocationViewSet(viewsets.ModelViewSet):
     queryset = UserLocation.objects.all()

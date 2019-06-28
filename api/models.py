@@ -1,22 +1,66 @@
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(models.Model):
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None):
+        user = self.model(
+            email=email
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email,password=None):
+        user = self.create_user(
+            email=email
+        )
+        user.set_password(password)
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+
+class User(AbstractBaseUser):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
-    email_address = models.CharField(max_length=255, null=True)
+    email = models.CharField(max_length=255, null=True, unique=True)
     phone_number = models.CharField(max_length=255, null=True)
-    password = models.CharField(max_length=255, null=True)
+    # password = models.CharField(max_length=255, null=True)
     invited_by = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
     class Meta:
         db_table = 'user'
 
+    def __str__(self):
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission"
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
+
 
 class UserLocation(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     lattitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     is_driving = models.BooleanField(default=False)
@@ -29,7 +73,7 @@ class UserLocation(models.Model):
 
 class UserVerifications(models.Model):
     code = models.TextField(null=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     expires_at = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
     verification_type = models.CharField(max_length=255, null=True)
@@ -41,7 +85,7 @@ class UserVerifications(models.Model):
 
 
 class PropertyTags(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, null=True)
     color = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -52,8 +96,8 @@ class PropertyTags(models.Model):
 
 
 class PropertyNotes(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    property_id = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     notes = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -63,8 +107,8 @@ class PropertyNotes(models.Model):
 
 
 class PropertyPhotos(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    property_id = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     photo_url = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -75,7 +119,7 @@ class PropertyPhotos(models.Model):
 
 class UserList(models.Model):
     name = models.CharField(max_length=255, null=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     leads_count = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -85,13 +129,13 @@ class UserList(models.Model):
 
 
 class ListProperties(models.Model):
-    list_id = models.ForeignKey(UserList, on_delete=models.CASCADE)
+    list = models.ForeignKey(UserList, on_delete=models.CASCADE)
     property_address = models.CharField(max_length=255, null=True)
     cad_acct = models.CharField(max_length=255, null=True)
     gma_tag = models.IntegerField(null=True)
     lattitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
-    tag_id = models.ForeignKey(PropertyTags, on_delete=models.CASCADE)
+    tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -100,8 +144,8 @@ class ListProperties(models.Model):
 
 
 class UserDriver(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    list_id = models.ForeignKey(UserList, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    list = models.ForeignKey(UserList, on_delete=models.CASCADE)
     distance = models.DecimalField(max_digits=9, decimal_places=6)
     travel_shape = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -112,8 +156,8 @@ class UserDriver(models.Model):
 
 
 class UserOwnershipUsage(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    property_id = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -122,8 +166,8 @@ class UserOwnershipUsage(models.Model):
 
 
 class VisitedProperties(models.Model):
-    drive_id = models.ForeignKey(UserDriver, on_delete=models.CASCADE)
-    property_id = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    drive = models.ForeignKey(UserDriver, on_delete=models.CASCADE)
+    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

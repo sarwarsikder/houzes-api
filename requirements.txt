@@ -5,3 +5,4 @@ django-oauth-toolkit
 django-oauth2-provider==0.2.6.1
 coreapi
 psycopg2-
+django-cors-middleware
