@@ -68,3 +68,8 @@ class UserOwnershipUsageViewSet(viewsets.ModelViewSet):
 class VisitedPropertiesViewSet(viewsets.ModelViewSet):
     queryset = VisitedProperties.objects.all()
     serializer_class = VisitedPropertiesSerializer
+
+
+class UserSocketsViewSet(viewsets.ModelViewSet):
+    queryset = UserSockets.objects.all()
+    serializer_class = UserSocketsSerializer

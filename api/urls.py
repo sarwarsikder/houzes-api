@@ -16,6 +16,7 @@ router.register(r'list_properties', ListPropertiesViewSet)
 router.register(r'user_driver', UserDriverViewSet)
 router.register(r'user_ownership_usage', UserOwnershipUsageViewSet)
 router.register(r'visited_properties', VisitedPropertiesViewSet)
+router.register(r'user_sockets', UserSocketsViewSet)
 
 urlpatterns = [
 ]
