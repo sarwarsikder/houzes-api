@@ -21,6 +21,8 @@ from rest_framework.documentation import include_docs_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('docs/', include_docs_urls(title='API Lists')),
+    url(r'^docs/', include_docs_urls(title='Your API',
+                                     authentication_classes=[],
+                                     permission_classes=[])),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
