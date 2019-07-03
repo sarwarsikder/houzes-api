@@ -1,4 +1,7 @@
+from django.http import JsonResponse
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from oauth2_provider.models import AccessToken
 from api.serializers import *
 from api.models import *
 
@@ -7,6 +10,15 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.AllowAny,)
+
+    @action(detail=False, methods=['GET'], url_path='get-current-userinfo')
+    def get_current_userinfo(self, request):
+        access_token = request.META["HTTP_AUTHORIZATION"][7:].split("-")[0]
+        access_token_object = AccessToken.objects.get(token=access_token)
+        user = access_token_object.user
+        serializer = UserSerializer(user)
+        return JsonResponse(serializer.data, safe=False)
+
 
 class UserLocationViewSet(viewsets.ModelViewSet):
     queryset = UserLocation.objects.all()

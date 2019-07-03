@@ -66,3 +66,9 @@ class VisitedPropertiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = VisitedProperties
         fields = '__all__'
+
+
+class UserSocketsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSockets
+        fields = '__all__'
