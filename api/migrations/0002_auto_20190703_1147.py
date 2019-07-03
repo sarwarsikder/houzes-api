@@ -28,18 +28,4 @@ class Migration(migrations.Migration):
             name='userownershipusage',
             table='user_ownership_usages',
         ),
-        migrations.CreateModel(
-            name='UserSockets',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('socket_id', models.CharField(max_length=255, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_connected', models.BooleanField(default=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'user_sockets',
-            },
-        ),
     ]
