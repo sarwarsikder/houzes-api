@@ -13,7 +13,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email,password=None):
+    def create_superuser(self, email, password=None):
         user = self.create_user(
             email=email
         )
@@ -42,7 +42,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     class Meta:
-        db_table = 'user'
+        db_table = 'users'
 
     def __str__(self):
         return self.email
@@ -68,7 +68,7 @@ class UserLocation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'user_location'
+        db_table = 'user_locations'
 
 
 class UserVerifications(models.Model):
@@ -125,7 +125,7 @@ class UserList(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'user_list'
+        db_table = 'user_lists'
 
 
 class ListProperties(models.Model):
@@ -162,7 +162,7 @@ class UserOwnershipUsage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'user_ownership_usage'
+        db_table = 'user_ownership_usages'
 
 
 class VisitedProperties(models.Model):
@@ -173,3 +173,14 @@ class VisitedProperties(models.Model):
 
     class Meta:
         db_table = 'visited_properties'
+
+
+class UserSockets(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    socket_id = models.CharField(max_length=255, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_connected = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'user_sockets'
