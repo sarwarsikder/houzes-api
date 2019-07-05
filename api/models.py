@@ -26,9 +26,8 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
-    email = models.CharField(max_length=255, null=True, unique=True)
-    phone_number = models.CharField(max_length=255, null=True)
-    # password = models.CharField(max_length=255, null=True)
+    email = models.CharField(max_length=255, null=False, unique=True)
+    phone_number = models.CharField(max_length=255, null=False)
     invited_by = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,7 +47,6 @@ class User(AbstractBaseUser):
         return self.email
 
     def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission"
         return True
 
     def has_module_perms(self, app_label):
@@ -61,7 +59,7 @@ class User(AbstractBaseUser):
 
 class UserLocation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    lattitude = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     is_driving = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -133,7 +131,7 @@ class ListProperties(models.Model):
     property_address = models.CharField(max_length=255, null=True)
     cad_acct = models.CharField(max_length=255, null=True)
     gma_tag = models.IntegerField(null=True)
-    lattitude = models.DecimalField(max_digits=9, decimal_places=6)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
