@@ -62,6 +62,7 @@ class UserLocation(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     is_driving = models.BooleanField(default=False)
+    angle = models.DecimalField(max_digits=9, decimal_places=6, default=90)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
