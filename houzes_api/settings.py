@@ -79,6 +79,11 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),
@@ -100,7 +105,7 @@ OAUTH2_PROVIDER = {
         'groups': 'Access to your groups',
         'introspection': 'introspection'
     },
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 86400,  # 1 Day.
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 864000,  # 10 Day.
 }
 
 WSGI_APPLICATION = 'houzes_api.wsgi.application'
