@@ -56,6 +56,20 @@ class User(AbstractBaseUser):
     def is_staff(self):
         return self.is_admin
 
+class PropertyInfo(models.Model):
+    cad_acct = models.CharField(max_length=255,null=True)
+    gma_tag = models.CharField(max_length=255,null=True)
+    property_address = models.CharField(max_length=255,null=True)
+    owner_name = models.CharField(max_length=255,null=True)
+    owner_address = models.CharField(max_length=255,null=True)
+    lat = models.CharField(max_length=255,null=True)
+    lon = models.CharField(max_length=255,null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'property_infos'
+
 
 class UserLocation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -96,7 +110,7 @@ class PropertyTags(models.Model):
 
 class PropertyNotes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo,on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     notes = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -107,7 +121,7 @@ class PropertyNotes(models.Model):
 
 class PropertyPhotos(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo, on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     photo_url = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -156,7 +170,7 @@ class UserDriver(models.Model):
 
 class UserOwnershipUsage(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo, on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -166,7 +180,7 @@ class UserOwnershipUsage(models.Model):
 
 class VisitedProperties(models.Model):
     drive = models.ForeignKey(UserDriver, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo, on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

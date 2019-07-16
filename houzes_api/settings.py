@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'PROD'  # PROD, DEV
+APP_ENV = 'DEV'  # PROD, DEV
 
 # Application definition
 
@@ -161,6 +161,12 @@ AUTH_USER_MODEL = "api.User"
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"
+AWS_SECRET_KEY = "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"
+AWS_REGION = "us-east-2"
+S3_BUCKET_NAME = "houzes"
+
 
 try:
     if APP_ENV is 'DEV':
