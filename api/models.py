@@ -56,6 +56,18 @@ class User(AbstractBaseUser):
     def is_staff(self):
         return self.is_admin
 
+
+class PropertyTags(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, null=True)
+    color = models.CharField(max_length=255, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'property_tags'
+
+
 class PropertyInfo(models.Model):
     cad_acct = models.CharField(max_length=255,null=True)
     gma_tag = models.CharField(max_length=255,null=True)
@@ -64,6 +76,7 @@ class PropertyInfo(models.Model):
     owner_address = models.CharField(max_length=255,null=True)
     lat = models.CharField(max_length=255,null=True)
     lon = models.CharField(max_length=255,null=True)
+    property_tags = models.ManyToManyField(PropertyTags)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -95,17 +108,6 @@ class UserVerifications(models.Model):
 
     class Meta:
         db_table = 'user_verifications'
-
-
-class PropertyTags(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, null=True)
-    color = models.CharField(max_length=255, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'property_tags'
 
 
 class PropertyNotes(models.Model):
@@ -165,7 +167,7 @@ class UserDriver(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'user_drives'
+        db_table = 'user_drivers'
 
 
 class UserOwnershipUsage(models.Model):
