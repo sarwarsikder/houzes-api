@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'corsheaders',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [
@@ -64,8 +65,7 @@ ROOT_URLCONF = 'houzes_api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -159,7 +159,7 @@ AUTH_USER_MODEL = "api.User"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static')
 STATIC_URL = '/static/'
 
 AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"

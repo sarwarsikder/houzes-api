@@ -329,7 +329,7 @@ class PropertyInfoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def get_details(self,request,*args,**kwargs):
-        property_id =2
+        property_id =1
         propertyInfo = PropertyInfo.objects.get(id=property_id)
         propertyPhotos = PropertyPhotos.objects.filter(property = propertyInfo)
         propertyNotes = PropertyNotes.objects.filter(property = propertyInfo)
