@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -199,3 +200,9 @@ class UserSockets(models.Model):
 
     class Meta:
         db_table = 'user_sockets'
+
+
+admin.site.register(User)
+admin.site.register(UserSockets)
+admin.site.register(UserLocation)
+admin.site.register(UserDriver)
