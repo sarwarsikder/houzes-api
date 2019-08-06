@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -57,6 +58,33 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 
+class PropertyTags(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, null=True)
+    color = models.CharField(max_length=255, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'property_tags'
+
+
+class PropertyInfo(models.Model):
+    cad_acct = models.CharField(max_length=255,null=True)
+    gma_tag = models.CharField(max_length=255,null=True)
+    property_address = models.CharField(max_length=255,null=True)
+    owner_name = models.CharField(max_length=255,null=True)
+    owner_address = models.CharField(max_length=255,null=True)
+    lat = models.CharField(max_length=255,null=True)
+    lon = models.CharField(max_length=255,null=True)
+    property_tags = models.ManyToManyField(PropertyTags)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'property_infos'
+
+
 class UserLocation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
@@ -83,20 +111,9 @@ class UserVerifications(models.Model):
         db_table = 'user_verifications'
 
 
-class PropertyTags(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, null=True)
-    color = models.CharField(max_length=255, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'property_tags'
-
-
 class PropertyNotes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo,on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     notes = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -107,7 +124,7 @@ class PropertyNotes(models.Model):
 
 class PropertyPhotos(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo, on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     photo_url = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -151,12 +168,12 @@ class UserDriver(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'user_drives'
+        db_table = 'user_drivers'
 
 
 class UserOwnershipUsage(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo, on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -166,7 +183,7 @@ class UserOwnershipUsage(models.Model):
 
 class VisitedProperties(models.Model):
     drive = models.ForeignKey(UserDriver, on_delete=models.CASCADE)
-    property = models.IntegerField(null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    property = models.ForeignKey(PropertyInfo, on_delete=models.CASCADE,null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -183,3 +200,9 @@ class UserSockets(models.Model):
 
     class Meta:
         db_table = 'user_sockets'
+
+
+admin.site.register(User)
+admin.site.register(UserSockets)
+admin.site.register(UserLocation)
+admin.site.register(UserDriver)

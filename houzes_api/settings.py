@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'PROD'  # PROD, DEV
+APP_ENV = 'DEV'  # PROD, DEV
 
 # Application definition
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'corsheaders',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [
@@ -64,8 +65,7 @@ ROOT_URLCONF = 'houzes_api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -160,8 +160,14 @@ AUTH_USER_MODEL = "api.User"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static')
 STATIC_URL = '/static/'
+
+AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"
+AWS_SECRET_KEY = "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"
+AWS_REGION = "us-east-2"
+S3_BUCKET_NAME = "houzes"
+
 
 try:
     if APP_ENV is 'DEV':

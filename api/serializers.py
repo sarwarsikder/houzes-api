@@ -35,8 +35,8 @@ class PropertyNotesSerializer(serializers.ModelSerializer):
 class PropertyPhotosSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyPhotos
-        fields = '__all__'
-
+        # fields = ['user','property','photo_url']
+        fields ='__all__'
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -72,3 +72,12 @@ class UserSocketsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSockets
         fields = '__all__'
+
+
+class PropertyInfoSerializer(serializers.ModelSerializer):
+    # property_photos = PropertyPhotosSerializer(many=True,read_only=True)
+
+    class Meta:
+        model = PropertyInfo
+        # fields = ['id','cad_acct','gma_tag','property_address','owner_name','owner_address','property_photos']
+        fields ='__all__'
