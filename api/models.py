@@ -117,9 +117,9 @@ class PropertyPhotos(models.Model):
 
 
 class UserList(models.Model):
-    name = models.CharField(max_length=255, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    leads_count = models.IntegerField(default=0)
+    name = models.CharField(max_length=255, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    leads_count = models.IntegerField(default=0, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -134,7 +134,7 @@ class ListProperties(models.Model):
     gma_tag = models.IntegerField(null=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
-    tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE)
+    tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
