@@ -119,7 +119,7 @@ class PropertyPhotos(models.Model):
 class UserList(models.Model):
     name = models.CharField(max_length=255, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    leads_count = models.IntegerField(null=True)
+    leads_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
