@@ -74,10 +74,10 @@ class UserSocketsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PropertyInfoSerializer(serializers.ModelSerializer):
+class PropertySerializer(serializers.ModelSerializer):
     # property_photos = PropertyPhotosSerializer(many=True,read_only=True)
 
     class Meta:
-        model = PropertyInfo
+        model = Property
         # fields = ['id','cad_acct','gma_tag','property_address','owner_name','owner_address','property_photos']
         fields ='__all__'

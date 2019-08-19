@@ -12,8 +12,6 @@ from houzes_api import settings
 from houzes_api.util.file_upload import file_upload
 from decimal import Decimal
 
-
-
 from api.serializers import *
 from api.models import *
 
@@ -55,22 +53,22 @@ class UserLocationViewSet(viewsets.ModelViewSet):
         is_driving = request.POST.get('is_driving')
         angle = request.POST.get('angle')
 
-        if is_driving =='True':
+        if is_driving == 'True':
             is_driving = True
         else:
             is_driving = False
-        userLocation = UserLocation(user = user,latitude = Decimal(latitude),longitude = Decimal(longitude),is_driving=is_driving, angle=Decimal(angle))
+        userLocation = UserLocation(user=user, latitude=Decimal(latitude), longitude=Decimal(longitude),
+                                    is_driving=is_driving, angle=Decimal(angle))
         userLocation.save()
 
         userLocationSerializer = UserLocationSerializer(userLocation)
         return Response(userLocationSerializer.data, status=status.HTTP_201_CREATED)
 
-
     @action(detail=False)
-    def userLocation_by_userId(self,request,*args,**kwargs):
+    def userLocation_by_userId(self, request, *args, **kwargs):
         user_id = 4
-        user = User.objects.get(id = user_id)
-        userLocation = UserLocation.objects.filter(user = user)
+        user = User.objects.get(id=user_id)
+        userLocation = UserLocation.objects.filter(user=user)
         print(userLocation)
         userLocationSerializer = UserLocationSerializer(userLocation, many=True)
         return Response(userLocationSerializer.data)
@@ -88,22 +86,23 @@ class UserVerificationsViewSet(viewsets.ModelViewSet):
         is_used = request.POST.get('is_used')
         verification_type = request.POST.get('verification_type')
 
-        if is_used =='True':
+        if is_used == 'True':
             is_used = True
         else:
             is_used = False
 
-        userVerifications = UserVerifications(user = user,code = code,is_used = is_used,verification_type = verification_type)
+        userVerifications = UserVerifications(user=user, code=code, is_used=is_used,
+                                              verification_type=verification_type)
         userVerifications.save()
 
         userVerificationsSerializer = UserVerificationsSerializer(userVerifications)
         return Response(userVerificationsSerializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False)
-    def userVerification_by_userId(self,request,*args,**kwargs):
+    def userVerification_by_userId(self, request, *args, **kwargs):
         user_id = 4
-        user = User.objects.get(id = user_id)
-        userVerifications = UserVerifications.objects.filter(user = user)
+        user = User.objects.get(id=user_id)
+        userVerifications = UserVerifications.objects.filter(user=user)
         print(userVerifications)
         userVerificationsSerializer = UserVerificationsSerializer(userVerifications, many=True)
         return Response(userVerificationsSerializer.data)
@@ -120,17 +119,17 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
 
         user = User.objects.get(id=user_id)
 
-        propertyTags = PropertyTags(user=user,name =name ,color= color)
+        propertyTags = PropertyTags(user=user, name=name, color=color)
         propertyTags.save()
 
         propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
         return Response(propertyTagsSerializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False)
-    def PropertyTags_by_userId(self,request,*args,**kwargs):
+    def PropertyTags_by_userId(self, request, *args, **kwargs):
         user_id = 4
-        user = User.objects.get(id = user_id)
-        propertyTags = PropertyTags.objects.filter(user = user)
+        user = User.objects.get(id=user_id)
+        propertyTags = PropertyTags.objects.filter(user=user)
         print(propertyTags)
         propertyTagsSerializer = PropertyTagsSerializer(propertyTags, many=True)
         return Response(propertyTagsSerializer.data)
@@ -140,60 +139,62 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
     queryset = PropertyNotes.objects.all()
     serializer_class = PropertyNotesSerializer
 
+    def get_queryset(self):
+        return PropertyNotes.objects.filter(user_id=self.request.user.id)
+
     def create(self, request, *args, **kwargs):
-        user_id = 4
-        user = User.objects.get(id = user_id)
-        property_id = request.POST.get('property')
-        property = PropertyInfo.objects.get(id = int(property_id))
-        notes = request.POST.get('notes')
+        request.data['user'] = request.user.id
+        return super().create(request, *args, **kwargs)
 
-        propertyNotes = PropertyNotes(user=user,property=property,notes = notes)
-        propertyNotes.save()
+    #
+    # @action(detail=False)
+    # def propertyNotes_by_userId(self, request, *args, **kwargs):
+    #     user_id = 4
+    #     user = User.objects.get(id=user_id)
+    #     propertyNotes = PropertyNotes.objects.filter(user=user)
+    #     print(propertyNotes)
+    #     propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
+    #     return Response(propertyNotesSerializer.data)
 
-        propertyNotesSerializer = PropertyNotesSerializer(propertyNotes)
-        return Response(propertyNotesSerializer.data, status=status.HTTP_201_CREATED)
-
-    @action(detail=False)
-    def propertyNotes_by_userId(self,request,*args,**kwargs):
-        user_id = 4
-        user = User.objects.get(id = user_id)
-        propertyNotes = PropertyNotes.objects.filter(user = user)
-        print(propertyNotes)
-        propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
-        return Response(propertyNotesSerializer.data)
 
 class PropertyPhotosViewSet(viewsets.ModelViewSet):
     queryset = PropertyPhotos.objects.all()
     serializer_class = PropertyPhotosSerializer
 
+    def get_queryset(self):
+        return PropertyPhotos.objects.filter(user_id=self.request.user.id)
+
     def create(self, request, *args, **kwargs):
-        user_id = 4
-        user = User.objects.get(id = user_id)
-        property_id = request.POST.get('property')
-        property = PropertyInfo.objects.get(id = int(property_id))
-        s3_url= ""
+        request.data['user'] = request.user.id
+        return super().create(request, *args, **kwargs)
 
-        if 'property_photo' in request.FILES:
-            file = request.FILES['property_photo']
-            file_path = "photos/property_photos/{}/{}/{}".format(str(user_id),property_id, str(time.time())+'.jpg')
-            s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
-            file_upload(file, file_path)
-
-        propertyPhotos = PropertyPhotos(user= user,property=property,photo_url=s3_url)
-        propertyPhotos.save()
-
-        propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos)
-        return Response(propertyPhotosSerializer.data, status=status.HTTP_201_CREATED)
+    # def create(self, request, *args, **kwargs):
+    #     user_id = 4
+    #     user = User.objects.get(id=user_id)
+    #     property_id = request.POST.get('property')
+    #     property = Property.objects.get(id=int(property_id))
+    #     s3_url = ""
+    #
+    #     if 'property_photo' in request.FILES:
+    #         file = request.FILES['property_photo']
+    #         file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '.jpg')
+    #         s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+    #         file_upload(file, file_path)
+    #
+    #     propertyPhotos = PropertyPhotos(user=user, property=property, photo_url=s3_url)
+    #     propertyPhotos.save()
+    #
+    #     propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos)
+    #     return Response(propertyPhotosSerializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False)
-    def propertyPhotos_by_userId(self,request,*args,**kwargs):
+    def propertyPhotos_by_userId(self, request, *args, **kwargs):
         user_id = 4
-        user = User.objects.get(id = user_id)
-        propertyPhotos = PropertyPhotos.objects.filter(user = user)
+        user = User.objects.get(id=user_id)
+        propertyPhotos = PropertyPhotos.objects.filter(user=user)
         print(propertyPhotos)
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
         return Response(propertyPhotosSerializer.data)
-
 
 
 class UserListViewSet(viewsets.ModelViewSet):
@@ -224,19 +225,19 @@ class UserDriverViewSet(viewsets.ModelViewSet):
         distance = request.POST.get('distance')
         travel_shape = request.POST.get('travel_shape')
 
-        userList = UserList.objects.get(id = int(list))
+        userList = UserList.objects.get(id=int(list))
 
-        userDriver = UserDriver(list = userList,user = user,distance = Decimal(distance),travel_shape = travel_shape)
+        userDriver = UserDriver(list=userList, user=user, distance=Decimal(distance), travel_shape=travel_shape)
         userDriver.save()
 
         userDriverSerializer = UserDriverSerializer(userDriver)
         return Response(userDriverSerializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False)
-    def userDriver_by_userId(self,request,*args,**kwargs):
+    def userDriver_by_userId(self, request, *args, **kwargs):
         user_id = 4
-        user = User.objects.get(id = user_id)
-        userDriver = UserDriver.objects.filter(user = user)
+        user = User.objects.get(id=user_id)
+        userDriver = UserDriver.objects.filter(user=user)
         print(userDriver)
         userDriverSerializer = UserDriverSerializer(userDriver, many=True)
         return Response(userDriverSerializer.data)
@@ -252,19 +253,19 @@ class UserOwnershipUsageViewSet(viewsets.ModelViewSet):
 
         property_id = request.POST.get('property')
 
-        property = PropertyInfo.objects.get(id = int(property_id))
+        property = Property.objects.get(id=int(property_id))
 
-        userOwnershipUsage = UserOwnershipUsage(user = user,property = property)
+        userOwnershipUsage = UserOwnershipUsage(user=user, property=property)
         userOwnershipUsage.save()
 
         userOwnershipUsageSerializer = UserOwnershipUsageSerializer(userOwnershipUsage)
         return Response(userOwnershipUsageSerializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False)
-    def userOwnershipUsage_by_userId(self,request,*args,**kwargs):
+    def userOwnershipUsage_by_userId(self, request, *args, **kwargs):
         user_id = 4
-        user = User.objects.get(id = user_id)
-        userOwnershipUsage = UserOwnershipUsage.objects.filter(user = user)
+        user = User.objects.get(id=user_id)
+        userOwnershipUsage = UserOwnershipUsage.objects.filter(user=user)
         print(userOwnershipUsage)
         userOwnershipUsagerSerializer = UserOwnershipUsageSerializer(userOwnershipUsage, many=True)
         return Response(userOwnershipUsagerSerializer.data)
@@ -286,87 +287,54 @@ class UserSocketsViewSet(viewsets.ModelViewSet):
         socket_id = request.POST.get('socket_id')
         is_connected = request.POST.get('is_connected')
 
-        if is_connected =='True':
+        if is_connected == 'True':
             is_connected = True
         else:
             is_connected = False
 
-        userSockets = UserSockets(user = user,socket_id = socket_id,is_connected=is_connected)
+        userSockets = UserSockets(user=user, socket_id=socket_id, is_connected=is_connected)
         userSockets.save()
 
         userSocketsSerializer = UserSocketsSerializer(userSockets)
         return Response(userSocketsSerializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False)
-    def userSockets_by_userId(self,request,*args,**kwargs):
+    def userSockets_by_userId(self, request, *args, **kwargs):
         user_id = 4
-        user = User.objects.get(id = user_id)
-        userSockets = UserSockets.objects.filter(user = user)
+        user = User.objects.get(id=user_id)
+        userSockets = UserSockets.objects.filter(user=user)
         print(userSockets)
         userSocketsSerializer = UserSocketsSerializer(userSockets, many=True)
         return Response(userSocketsSerializer.data)
 
 
-class PropertyInfoViewSet(viewsets.ModelViewSet):
-    queryset = PropertyInfo.objects.all()
-    serializer_class = PropertyInfoSerializer
+class PropertyViewSet(viewsets.ModelViewSet):
+    queryset = Property.objects.all()
+    serializer_class = PropertySerializer
 
     @action(detail=False)
-    def get_details(self,request,*args,**kwargs):
-        property_id =1
-        propertyInfo = PropertyInfo.objects.get(id=property_id)
-        propertyPhotos = PropertyPhotos.objects.filter(property = propertyInfo)
-        propertyNotes = PropertyNotes.objects.filter(property = propertyInfo)
+    def get_details(self, request, *args, **kwargs):
+        # property_id = request.data.get('id')
+        property_id = 1
+        property = Property.objects.get(id=property_id)
+        property_with_notes = property.propertynotes_set.all()
+        property_with_photos = property.propertyphotos_set.all()
+        property = PropertySerializer(property).data
+        property['notes'] = PropertyNotesSerializer(property_with_notes, many=True).data
+        property['photos'] = PropertyPhotosSerializer(property_with_photos, many=True).data
+        return HttpResponse(content=json.dumps(property), status=200, content_type="application/json")
 
+    @action(detail=False)
+    def get_info(self, request, *args, **kwargs):
+        google_place_id = request.data.get('place_id')
+        property = Property.objects.get(google_place_id=google_place_id)
+        if property:
+            property_with_notes = property.propertynotes_set.all()
+            property_with_photos = property.propertyphotos_set.all()
+            property = PropertySerializer(property).data
+            property['notes'] = PropertyNotesSerializer(property_with_notes, many=True).data
+            property['photos'] = PropertyPhotosSerializer(property_with_photos, many=True).data
+            return HttpResponse(content=json.dumps(property), status=200, content_type="application/json")
 
-        propertyPhotosResponses = []
-        for propertyPhoto in propertyPhotos:
-            propertyPhotosResponse = {}
-            propertyPhotosResponse['id'] = propertyPhoto.id
-            propertyPhotosResponse['user'] = propertyPhoto.user_id
-            propertyPhotosResponse['property'] = propertyPhoto.property_id
-            propertyPhotosResponse['photo_url'] = propertyPhoto.photo_url
-            propertyPhotosResponse['created_at'] = str(propertyPhoto.created_at)
-            propertyPhotosResponse['updated_at'] = str(propertyPhoto.updated_at)
-            propertyPhotosResponses.append(propertyPhotosResponse)
-
-        propertyNotesResponses = []
-        for propertyNote in propertyNotes:
-            propertyNotesResponse = {}
-            propertyNotesResponse['id'] = propertyNote.id
-            propertyNotesResponse['user'] = propertyNote.user_id
-            propertyNotesResponse['property'] = propertyNote.property_id
-            propertyNotesResponse['notes'] = propertyNote.notes
-            propertyNotesResponse['created_at'] = str(propertyNote.created_at)
-            propertyNotesResponse['updated_at'] = str(propertyNote.updated_at)
-            propertyNotesResponses.append(propertyNotesResponse)
-
-        propertyTagResponses = []
-        for propertyTag in propertyInfo.property_tags.values():
-            propertyTagResponse = {}
-            propertyTagResponse['user'] = propertyTag['user_id']
-            propertyTagResponse['name'] = propertyTag['name']
-            propertyTagResponse['color'] = propertyTag['color']
-            propertyTagResponse['created_at'] = str(propertyTag['created_at'])
-            propertyTagResponse['updated_at'] = str(propertyTag['updated_at'])
-            propertyTagResponses.append(propertyTagResponse)
-
-
-        propertyInfoResponse ={}
-        propertyInfoResponse['id'] = propertyInfo.id
-        propertyInfoResponse['cad_acct'] = propertyInfo.cad_acct
-        propertyInfoResponse['gma_tag'] = propertyInfo.gma_tag
-        propertyInfoResponse['property_address'] = propertyInfo.property_address
-        propertyInfoResponse['owner_name'] = propertyInfo.owner_name
-        propertyInfoResponse['owner_address'] = propertyInfo.owner_address
-        propertyInfoResponse['lat'] = propertyInfo.lat
-        propertyInfoResponse['lon'] = propertyInfo.lon
-        propertyInfoResponse['property_tags'] = propertyTagResponses
-        propertyInfoResponse['created_at'] = str(propertyInfo.created_at)
-        propertyInfoResponse['updated_at'] = str(propertyInfo.updated_at)
-        propertyInfoResponse['property_photos'] = propertyPhotosResponses
-        propertyInfoResponse['property_notes'] = propertyNotesResponses
-
-        return HttpResponse(content=json.dumps(propertyInfoResponse), status=200, content_type="application/json")
-
-
+        else:
+            return super().create(request, *args, **kwargs)

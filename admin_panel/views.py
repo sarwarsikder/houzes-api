@@ -11,7 +11,7 @@ def Index(request):
     active_user_count = User.objects.filter(is_active=True).count()
     admin_user_count = User.objects.filter(is_admin= True).count()
 
-    propertyInfo = PropertyInfo.objects.all()
+    propertyInfo = Property.objects.all()
     propertyInfo_count = propertyInfo.count()
 
     print(users.values())
@@ -46,7 +46,7 @@ def User_detail(request,user_id):
 
 def Property_detail(request,property_id):
     template = loader.get_template('property-detail.html')
-    propertyInfo = PropertyInfo.objects.get(id = property_id)
+    propertyInfo = Property.objects.get(id = property_id)
     propertyNotes = PropertyNotes.objects.filter(property = propertyInfo)
     propertyPhotos = PropertyPhotos.objects.filter(property = propertyInfo)
 
@@ -113,7 +113,7 @@ def Property_detail_update(request,property_id):
         lat = request.POST.get('lat')
         lon = request.POST.get('lon')
 
-        propertyInfo = PropertyInfo.objects.get(id = property_id)
+        propertyInfo = Property.objects.get(id = property_id)
         propertyInfo.cad_acct = cad_acct
         propertyInfo.gma_tag = gma_tag
         propertyInfo.property_address = property_address
@@ -124,7 +124,7 @@ def Property_detail_update(request,property_id):
         propertyInfo.save()
 
     template = loader.get_template('property-detail-update.html')
-    propertyInfo = PropertyInfo.objects.get(id = property_id)
+    propertyInfo = Property.objects.get(id = property_id)
     context ={
         'propertyInfo':propertyInfo
     }
@@ -140,7 +140,7 @@ def Property_detail_create(request):
         owner_address = request.POST.get('owner_address')
         lat = request.POST.get('lat')
         lon = request.POST.get('lon')
-        propertyInfo = PropertyInfo.objects.create(cad_acct=cad_acct,gma_tag=gma_tag,property_address=property_address,owner_name=owner_name,owner_address = owner_address,lat=lat,lon=lon)
+        propertyInfo = Property.objects.create(cad_acct=cad_acct, gma_tag=gma_tag, property_address=property_address, owner_name=owner_name, owner_address = owner_address, lat=lat, lon=lon)
         propertyInfo.save()
 
     template = loader.get_template('property-detail-create.html')
@@ -173,7 +173,7 @@ def User_block(request,user_id):
 
 def Property_list(request):
     template = loader.get_template('property-list.html')
-    propertyInfo = PropertyInfo.objects.all()
+    propertyInfo = Property.objects.all()
     context ={
         'propertyInfos':propertyInfo,
     }
