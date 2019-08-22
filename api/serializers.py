@@ -81,3 +81,8 @@ class PropertySerializer(serializers.ModelSerializer):
         model = Property
         # fields = ['id','cad_acct','gma_tag','property_address','owner_name','owner_address','property_photos']
         fields ='__all__'
+
+class InvitationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitations
+        fields = '__all__'

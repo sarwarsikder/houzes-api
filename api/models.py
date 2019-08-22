@@ -3,6 +3,9 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.postgres.fields.jsonb import JSONField
+import shortuuid
+
+
 
 
 class UserManager(BaseUserManager):
@@ -211,6 +214,22 @@ class UserSockets(models.Model):
 
     class Meta:
         db_table = 'user_sockets'
+
+def generate_shortuuid():
+    shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
+    gUid = str(shortuuid.random(length=16))
+    return gUid
+
+class Invitations(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.CharField(max_length=255, null=False)
+    status = models.IntegerField(null=True) # invited => 0,in progress =>1,done =>3
+    invitation_key = models.CharField(max_length=200, unique=True, default=generate_shortuuid)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'invitations'
 
 
 admin.site.register(User)
