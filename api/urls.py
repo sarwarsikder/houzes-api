@@ -17,6 +17,7 @@ from api.views.user_ownership_usage_view import UserOwnershipUsageViewSet
 from api.views.visited_properties_view import VisitedPropertiesViewSet
 from api.views.user_socket_view import UserSocketsViewSet
 from api.views.property_view import PropertyViewSet
+from api.views.invitations_view import InvitationsViewSet
 
 router = routers.DefaultRouter()
 router.register(r'user', UserViewSet)
@@ -32,6 +33,7 @@ router.register(r'user_ownership_usage', UserOwnershipUsageViewSet)
 router.register(r'visited_properties', VisitedPropertiesViewSet)
 router.register(r'user_sockets', UserSocketsViewSet)
 router.register(r'property_info', PropertyViewSet)
+router.register(r'teams',InvitationsViewSet)
 
 
 urlpatterns = [

@@ -179,3 +179,11 @@ def Property_list(request):
     }
     return HttpResponse(template.render(context,request))
 
+def Admin_list(request):
+    template = loader.get_template('admin-list.html')
+    propertyInfo = Property.objects.all()
+    admins = User.objects.filter(is_admin=True)
+    context ={
+        'admins': admins,
+    }
+    return HttpResponse(template.render(context,request))

@@ -312,22 +312,21 @@ desired effect
                             <th>Phone Number</th>
                             <th>Invited by</th>
                             <th>Is Active</th>
-                            <th>Is Admin</th>
                             <th>Update</th>
                         </tr>
                     </thead>
-                    {% for user in users %}
+                    {% for admin in admins %}
 {#                        {% propertyInfo = PropertyInfo.objects.get(id=int(propertyNote.property_id))  %}#}
                         <tbody>
                             <tr>
-                                <td><a href="../user-detail/{{ user.id }}">{{ user.id }} </a> </td>
-                                <td>{{ user.first_name }}</td>
-                                <td>{{ user.last_name }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.phone_number }}</td>
-                                <td>{{ user.invited_by }}</td>
+                                <td><a href="../user-detail/{{ admin.id }}">{{ admin.id }} </a> </td>
+                                <td>{{ admin.first_name }}</td>
+                                <td>{{ admin.last_name }}</td>
+                                <td>{{ admin.email }}</td>
+                                <td>{{ admin.phone_number }}</td>
+                                <td>{{ admin.invited_by }}</td>
                                 <td>{{ user.is_active }}</td>
-                                <td><a href="../user-detail-update/{{ user.id }}">Update</a></td>
+                                <td><a href="../user-detail-update/{{ admin.id }}">Update</a></td>
 
                             </tr>
                         <tbody>

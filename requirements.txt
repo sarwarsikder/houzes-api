@@ -7,3 +7,4 @@ coreapi
 django-cors-middleware
 psycopg2-binary
 boto3==1.9.188
+shortuuid==0.5.0

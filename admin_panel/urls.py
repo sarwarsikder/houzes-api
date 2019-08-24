@@ -14,6 +14,7 @@ urlpatterns = [
     path('user-detail-update/<str:user_id>', views.User_detail_update, name='user-detail-update'),
     path('user-detail-create/', views.User_detail_create, name='user-detail-create'),
     path('user-list/', views.User_list, name='user-list'),
+    path('admin-list/', views.Admin_list, name='admin-list'),
     path('property-list/', views.Property_list, name='property-list'),
     path('property-detail/<str:property_id>', views.Property_detail, name='property-detail'),
     path('property-detail-update/<str:property_id>', views.Property_detail_update, name='user-detail-update'),
