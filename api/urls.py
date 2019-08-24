@@ -33,7 +33,7 @@ router.register(r'user_ownership_usage', UserOwnershipUsageViewSet)
 router.register(r'visited_properties', VisitedPropertiesViewSet)
 router.register(r'user_sockets', UserSocketsViewSet)
 router.register(r'property_info', PropertyViewSet)
-router.register(r'invitations',InvitationsViewSet)
+router.register(r'teams',InvitationsViewSet)
 
 
 urlpatterns = [

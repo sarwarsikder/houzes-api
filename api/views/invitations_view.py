@@ -1,4 +1,5 @@
 from oauth2_provider.models import AccessToken
+# from django.utils import simplejson
 from rest_framework import viewsets, status
 from api.serializers import *
 from api.models import *
@@ -6,6 +7,11 @@ from django.core.mail import send_mail
 from rest_framework.response import Response
 import shortuuid
 from django.conf import settings
+from django.http import HttpResponse, JsonResponse
+import json
+import datetime
+from django.core import serializers
+
 
 class InvitationsViewSet(viewsets.ModelViewSet):
     queryset = Invitations.objects.all()
@@ -37,3 +43,16 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         request.data['invitation_key'] = invitation_key
         request.data._mutable = _mutable
         return super().create(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        users = UserSerializer(User.objects.filter(invited_by=request.user.id),many=True)
+        unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(status=0),many=True)
+        dict = {
+            # 'users': list(),
+            'users': users.data,
+            'unregistered_invitations': unregistered_invitations.data,
+        }
+        print(dict)
+        # return HttpResponse(json.dumps(str(dict)))
+
+        return JsonResponse(dict)
