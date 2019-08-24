@@ -1,9 +1,0 @@
-Django
-django-cors-headers==2.4.0
-djangorestframework==3.9.0
-django-oauth-toolkit
-django-oauth2-provider==0.2.6.1
-coreapi
-django-cors-middleware
-psycopg2-binary
-boto3==1.9.188
