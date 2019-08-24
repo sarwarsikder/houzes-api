@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'DEV'  # PROD, DEV
+APP_ENV = 'PROD'  # PROD, DEV
 
 # Application definition
 
