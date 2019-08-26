@@ -26,4 +26,5 @@ urlpatterns = [
                                      permission_classes=[])),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     url('admin-panel/', include(('admin_panel.urls','admin_panel'), namespace = 'admin_panel')),
+    url('recurring-bill/', include(('recurring_bill.urls', 'recurring_bill'), namespace='recurring_bill')),
 ]
