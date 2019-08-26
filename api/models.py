@@ -225,6 +225,8 @@ class Invitations(models.Model):
     email = models.CharField(max_length=255, null=False)
     status = models.IntegerField(null=True) # invited => 0,in progress =>1,done =>3
     invitation_key = models.CharField(max_length=200, unique=True, default=generate_shortuuid)
+    first_name = models.CharField(max_length=255,null=True)
+    last_name = models.CharField(max_length=255,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

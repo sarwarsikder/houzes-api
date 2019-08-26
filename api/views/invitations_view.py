@@ -25,11 +25,12 @@ class InvitationsViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         print(request.user)
 
-        _mutable = request.data._mutable
-        request.data._mutable = True
+        receiver = request.data['email']
 
-        # receiver = request.data['email']
-        receiver = 'nadimauswsit@gmail.com'
+        # _mutable = request.data._mutable
+        # request.data._mutable = True
+        print(receiver)
+        # receiver = 'nadimauswsit@gmail.com'
         invitation_key = generate_shortuuid()
         # print(User.objects.get(id=request.user.id))
         print(invitation_key)
@@ -41,7 +42,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
                   )
 
         request.data['invitation_key'] = invitation_key
-        request.data._mutable = _mutable
+        # request.data._mutable = _mutable
         return super().create(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
