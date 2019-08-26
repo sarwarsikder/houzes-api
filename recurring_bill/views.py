@@ -137,11 +137,10 @@ def create_subscription_from_customer_profile(request):
 
 @csrf_exempt
 def get_subscription_details(request):
-    # body_unicode = request.body.decode('utf-8')
-    # body = json.loads(body_unicode)
-    # subscriptionId = body['subscriptionId']
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    subscriptionId = body['subscriptionId']
 
-    subscriptionId = request.POST.get('subscriptionId')
 
     merchantAuth = apicontractsv1.merchantAuthenticationType()
     merchantAuth.name = '5wW5bq9qD5y'
@@ -150,7 +149,7 @@ def get_subscription_details(request):
 
     getSubscription = apicontractsv1.ARBGetSubscriptionRequest()
     getSubscription.merchantAuthentication = merchantAuth
-    getSubscription.subscriptionId = subscriptionId
+    getSubscription.subscriptionId = str(subscriptionId)
     getSubscription.includeTransactions = True
 
     getSubscriptionController = ARBGetSubscriptionController(getSubscription)
@@ -176,7 +175,7 @@ def get_subscription_status(request):
     request = apicontractsv1.ARBGetSubscriptionStatusRequest()
     request.merchantAuthentication = merchantAuth
     request.refId = "Sample"
-    request.subscriptionId = subscriptionId
+    request.subscriptionId = str(subscriptionId)
     # Executing the controller
     controller = ARBGetSubscriptionStatusController(request)
     controller.execute()
@@ -285,12 +284,12 @@ def update_subscription(request):
 
 @csrf_exempt
 def update_amount_of_subscription(request):
-    # body_unicode = request.body.decode('utf-8')
-    # body = json.loads(body_unicode)
-    # amount = body['amount']
-    # subscriptionId = body['subscriptionId']
-    subscriptionId = request.POST.get('subscriptionId')
-    amount = request.POST.get('amount')
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    amount = body['amount']
+    subscriptionId = body['subscriptionId']
+    # subscriptionId = request.body['subscriptionId']
+    # amount = request.body['amount']
 
     merchantAuth = apicontractsv1.merchantAuthenticationType()
     merchantAuth.name = '5wW5bq9qD5y'
@@ -303,7 +302,7 @@ def update_amount_of_subscription(request):
     request = apicontractsv1.ARBUpdateSubscriptionRequest()
     request.merchantAuthentication = merchantAuth
     request.refId = "Sample"
-    request.subscriptionId = subscriptionId
+    request.subscriptionId = str(subscriptionId)
     request.subscription = subscription
 
     controller = ARBUpdateSubscriptionController(request)
