@@ -86,3 +86,8 @@ class InvitationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitations
         fields = '__all__'
+
+class ScoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Scout
+        fields = '__all__'
