@@ -233,6 +233,17 @@ class Invitations(models.Model):
     class Meta:
         db_table = 'invitations'
 
+class Scout(models.Model):
+    first_name = models.CharField(max_length=255,null=True)
+    last_name = models.CharField(max_length=255,null=True)
+    url = models.CharField(max_length=255,null=True)
+    manager_id = models.ForeignKey(User,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'scouts'
+
 
 admin.site.register(User)
 admin.site.register(UserSockets)
