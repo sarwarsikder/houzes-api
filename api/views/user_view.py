@@ -59,7 +59,8 @@ class UserViewSet(viewsets.ModelViewSet):
         data = request.data
         print(kwargs['pk'])
         data['photo'] = None
-        data['password'] = make_password(data['password'])
+        if 'password' in data:
+            data['password'] = make_password(data['password'])
 
         # data['photo'] = str(self.upload_photo(request.FILES, kwargs['pk']))
 
