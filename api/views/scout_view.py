@@ -17,4 +17,9 @@ class ScoutViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         url = generate_shortuuid()
         request.data['url'] = "https://www.sample.com/"+url
+        # user_list = UserList()
+        # user_list.name = request.data['first_name']+' '+request.data['last_name']
+        # user_list.user = User.objects.get(id=request.data['manager_id'])
+        # user_list.leads_count = 1
+        # user_list.save()
         return super().create(request, *args, **kwargs)

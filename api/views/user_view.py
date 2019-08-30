@@ -31,7 +31,7 @@ class UserViewSet(viewsets.ModelViewSet):
         data = request.data
         data['password'] = make_password(data['password'])
         data['is_active'] = True
-        data['photo'] = None
+        data['photo'] = "in progress"
 
         s3_url = ""
         if 'photo' in request.FILES:
@@ -45,7 +45,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        instance.photo = instance.photo.replace("id", str(instance.id))
+        instance.is_active = True
+        if instance.photo == "in progress":
+            instance.photo = None
+        else:
+            instance.photo = instance.photo.replace("id", str(instance.id))
 
     #
     # @action(detail=False, methods=['POST'], url_path='user-photo-upload')

@@ -158,7 +158,7 @@ class UserList(models.Model):
 
 
 class ListProperties(models.Model):
-    user_list = models.ForeignKey(UserList, on_delete=models.CASCADE)
+    list = models.ForeignKey(UserList, on_delete=models.CASCADE)
     property_address = models.CharField(max_length=255, null=True)
     cad_acct = models.CharField(max_length=255, null=True)
     gma_tag = models.IntegerField(null=True)
