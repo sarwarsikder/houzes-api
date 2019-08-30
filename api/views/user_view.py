@@ -4,6 +4,9 @@ from rest_framework.decorators import action
 from oauth2_provider.models import AccessToken
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
+from houzes_api import settings
+from houzes_api.util.file_upload import file_upload
+import time
 
 from api.serializers import *
 from api.models import *
@@ -27,8 +30,22 @@ class UserViewSet(viewsets.ModelViewSet):
         data = request.data
         data['password'] = make_password(data['password'])
         data['is_active'] = True
+        data['photo'] = None
+
+        s3_url = ""
+        if 'photo' in request.FILES:
+            file = request.FILES['photo']
+            file_path = "photos/user/{}/{}".format("id", str(time.time())+'.jpg')
+            s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+            file_upload(file, file_path)
+            data['photo'] = s3_url
+
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        instance.photo = instance.photo.replace("id",str(instance.id))

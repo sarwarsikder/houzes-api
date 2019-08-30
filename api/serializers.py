@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.relations import PrimaryKeyRelatedField
+
 from api.models import *
 
 
@@ -45,6 +47,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
 
 class ListPropertiesSerializer(serializers.ModelSerializer):
+    # property = PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = ListProperties
         fields = '__all__'
@@ -90,4 +93,9 @@ class InvitationsSerializer(serializers.ModelSerializer):
 class ScoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scout
+        fields = '__all__'
+
+class ScoutsListPropertySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScoutsListProperty
         fields = '__all__'

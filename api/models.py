@@ -34,6 +34,7 @@ class User(AbstractBaseUser):
     email = models.CharField(max_length=255, null=False, unique=True)
     phone_number = models.CharField(max_length=255, null=False)
     invited_by = models.IntegerField(null=True)
+    photo = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -157,13 +158,16 @@ class UserList(models.Model):
 
 
 class ListProperties(models.Model):
-    list = models.ForeignKey(UserList, on_delete=models.CASCADE)
+    user_list = models.ForeignKey(UserList, on_delete=models.CASCADE)
     property_address = models.CharField(max_length=255, null=True)
     cad_acct = models.CharField(max_length=255, null=True)
     gma_tag = models.IntegerField(null=True)
     latitude = models.DecimalField(max_digits=20, decimal_places=16)
     longitude = models.DecimalField(max_digits=20, decimal_places=16)
     tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE, null=True)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    # A property can have multiple owner
+    owner_info = JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -244,6 +248,14 @@ class Scout(models.Model):
     class Meta:
         db_table = 'scouts'
 
+class ScoutsListProperty(models.Model):
+    scout = models.ForeignKey(Scout,on_delete=models.CASCADE)
+    list_properties = models.ForeignKey(ListProperties,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'scouts_list_properties'
 
 admin.site.register(User)
 admin.site.register(UserSockets)
