@@ -26,6 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(user)
         return JsonResponse(serializer.data, safe=False)
 
+
     def create(self, request, *args, **kwargs):
         data = request.data
         data['password'] = make_password(data['password'])
@@ -40,17 +41,29 @@ class UserViewSet(viewsets.ModelViewSet):
             file_upload(file, file_path)
             data['photo'] = s3_url
 
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        instance.photo = instance.photo.replace("id",str(instance.id))
+        instance.photo = instance.photo.replace("id", str(instance.id))
+
+    #
+    # @action(detail=False, methods=['POST'], url_path='user-photo-upload')
+    # def user_photo_upload(self, request):
 
     def partial_update(self, request, *args, **kwargs):
         data = request.data
+        print(kwargs['pk'])
+        data['photo'] = None
         data['password'] = make_password(data['password'])
+
+        # data['photo'] = str(self.upload_photo(request.FILES, kwargs['pk']))
+
+        s3_url = ""
+        if 'photo' in request.FILES:
+            file = request.FILES['photo']
+            file_path = "photos/user/{}/{}".format(kwargs['pk'], str(time.time()) + '.jpg')
+            s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+            file_upload(file, file_path)
+            data['photo'] = s3_url
         return super().partial_update(request, *args, **kwargs)
