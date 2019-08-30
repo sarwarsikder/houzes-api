@@ -49,3 +49,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save()
         instance.photo = instance.photo.replace("id",str(instance.id))
+
+    def partial_update(self, request, *args, **kwargs):
+        data = request.data
+        data['password'] = make_password(data['password'])
+        return super().partial_update(request, *args, **kwargs)
