@@ -26,6 +26,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         print(request.user)
 
         receiver = request.data['email']
+        request.data['status'] = 0
 
         # _mutable = request.data._mutable
         # request.data._mutable = True
@@ -34,7 +35,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         invitation_key = generate_shortuuid()
         # print(User.objects.get(id=request.user.id))
         print(invitation_key)
-        send_mail(subject="invitation",
+        send_mail(subject="Invitation",
                   message=str(request.user)+" sent you an invitation "+str(invitation_key),
                   from_email=settings.EMAIL_HOST_USER,
                   recipient_list=[receiver],
