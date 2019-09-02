@@ -9,7 +9,7 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
     serializer_class = PropertyNotesSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     filterset_fields = "__all__"
-    search_fields = "__all__"
+    search_fields = ['title', 'notes']
     ordering = ['-id']
 
 
