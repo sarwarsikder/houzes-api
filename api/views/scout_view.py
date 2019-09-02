@@ -9,6 +9,9 @@ class ScoutViewSet(viewsets.ModelViewSet):
     queryset = Scout.objects.all()
     serializer_class = ScoutSerializer
 
+    def get_queryset(self):
+        return Scout.objects.filter(manager_id=self.request.user.id)
+
     def generate_shortuuid(self):
         shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
         gUid = str(shortuuid.random(length=16))
@@ -19,6 +22,9 @@ class ScoutViewSet(viewsets.ModelViewSet):
         print(str(request.data['manager_id'])+' '+request.data['first_name'])
         print("---------------------------")
         print(User.objects.get(id=request.data['manager_id']))
+
+        request.data['manager_id'] = request.user.id
+
         name = "List of "+request.data['first_name'] + ' ' + request.data['last_name']
         # user = User.objects.get(id=request.data['manager_id'])
 
@@ -30,5 +36,9 @@ class ScoutViewSet(viewsets.ModelViewSet):
         user_list.save()
         # front end url
         base_url= "http://172.18.1.11:8191"
-        request.data['url'] = base_url+"/"+str(user_list.id)+"/"+generate_shortuuid()
+        request.data['url'] = base_url+"/scout-form/"+str(user_list.id)+"/"+generate_shortuuid()
         return super().create(request, *args, **kwargs)
+
+    # def list(self, request, *args, **kwargs):
+    #     request.data['manager_id'] = request.user.id
+    #     return super().list(request,*args,**kwargs)

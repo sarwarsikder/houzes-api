@@ -17,6 +17,10 @@ class InvitationsViewSet(viewsets.ModelViewSet):
     queryset = Invitations.objects.all()
     serializer_class = InvitationsSerializer
 
+
+    # def get_queryset(self):
+    #     return Invitations.objects.filter(user=self.request.user.id)
+
     def generate_shortuuid(self):
         shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
         gUid = str(shortuuid.random(length=16))
