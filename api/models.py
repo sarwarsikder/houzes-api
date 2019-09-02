@@ -126,6 +126,7 @@ class PropertyNotes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     property = models.ForeignKey(Property, on_delete=models.CASCADE,
                                  null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255,null=True)
     notes = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
