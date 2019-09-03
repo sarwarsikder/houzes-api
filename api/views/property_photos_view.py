@@ -41,10 +41,17 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def propertyPhotos_by_userId(self, request, *args, **kwargs):
-        user_id = 4
+        user_id = request.user.id
         user = User.objects.get(id=user_id)
         propertyPhotos = PropertyPhotos.objects.filter(user=user)
         print(propertyPhotos)
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
         return Response(propertyPhotosSerializer.data)
 
+    @action(detail=False)
+    def propertyPhotos_by_propertyId(self, request, *args, **kwargs):
+        propertyId = request.GET.get('property')
+        propertyPhotos = PropertyPhotos.objects.filter(property=propertyId)
+        print(propertyPhotos)
+        propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
+        return Response(propertyPhotosSerializer.data)
