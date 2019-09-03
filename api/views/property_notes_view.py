@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from api.serializers import *
 from api.models import *
 
@@ -29,3 +30,12 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
     #     print(propertyNotes)
     #     propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
     #     return Response(propertyNotesSerializer.data)
+
+    @action(detail=False)
+    def propertyNotes_by_propertyId(self, request, *args, **kwargs):
+        propertyId = request.GET.get('property')
+        property = Property.objects.get(id=propertyId)
+        propertyNotes = PropertyNotes.objects.filter(property=property)
+        print(propertyNotes)
+        propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
+        return Response(propertyNotesSerializer.data)

@@ -12,7 +12,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     @action(detail=False)
     def get_details(self, request, *args, **kwargs):
         # property_id = request.data.get('id')
-        property_id = 1
+        property_id = request.GET.get('property')
         property = Property.objects.get(id=property_id)
         property_with_notes = property.propertynotes_set.all()
         property_with_photos = property.propertyphotos_set.all()
@@ -23,7 +23,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def get_info(self, request, *args, **kwargs):
-        google_place_id = request.data.get('place_id')
+        google_place_id = request.GET.get('place_id')
         property = Property.objects.get(google_place_id=google_place_id)
         if property:
             property_with_notes = property.propertynotes_set.all()
