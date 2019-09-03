@@ -86,8 +86,8 @@ class Property(models.Model):
 
     # place id must be null because user can upload property by csv import
     google_place_id = models.CharField(max_length=255, null=True, unique=True)
-    lat = models.CharField(max_length=255, null=True)
-    lon = models.CharField(max_length=255, null=True)
+    lat = models.DecimalField(max_digits=50, decimal_places=10,null=True)
+    lon = models.DecimalField(max_digits=50, decimal_places=10,null=True)
     property_tags = models.ManyToManyField(PropertyTags, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -163,8 +163,8 @@ class ListProperties(models.Model):
     property_address = models.CharField(max_length=255, null=True)
     cad_acct = models.CharField(max_length=255, null=True)
     gma_tag = models.IntegerField(null=True)
-    latitude = models.DecimalField(max_digits=20, decimal_places=16)
-    longitude = models.DecimalField(max_digits=20, decimal_places=16)
+    latitude = models.DecimalField(max_digits=50, decimal_places=10)
+    longitude = models.DecimalField(max_digits=50, decimal_places=10)
     tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE, null=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     # A property can have multiple owner
