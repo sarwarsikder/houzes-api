@@ -56,6 +56,10 @@ class UserViewSet(viewsets.ModelViewSet):
     # def user_photo_upload(self, request):
 
     def partial_update(self, request, *args, **kwargs):
+
+        if not request.data._mutable:
+            state = request.data._mutable
+            request.data._mutable = True
         # if '_mutable' in request.data.keys():
         #     print('hocce')
         #     state = request.data._mutable
@@ -77,5 +81,8 @@ class UserViewSet(viewsets.ModelViewSet):
             request.data['photo'] = s3_url
         # if '_mutable' in request.data:
         #     request.data._mutable = state
+
+        if not request.data._mutable:
+            request.data._mutable = state
 
         return super().partial_update(request, *args, **kwargs)
