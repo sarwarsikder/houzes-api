@@ -56,10 +56,10 @@ class UserViewSet(viewsets.ModelViewSet):
     # def user_photo_upload(self, request):
 
     def partial_update(self, request, *args, **kwargs):
-        if '_mutable' in request.data:
-            state = request.data._mutable
-            request.data._mutable = True
-
+        # if '_mutable' in request.data.keys():
+        #     print('hocce')
+        #     state = request.data._mutable
+        #     request.data._mutable = True
         print(kwargs['pk'])
         if 'password' in request.data:
             request.data['password'] = make_password(request.data['password'])
@@ -75,6 +75,7 @@ class UserViewSet(viewsets.ModelViewSet):
             s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
             file_upload(file, file_path)
             request.data['photo'] = s3_url
-        if '_mutable' in request.data:
-            request.data._mutable = state
+        # if '_mutable' in request.data:
+        #     request.data._mutable = state
+
         return super().partial_update(request, *args, **kwargs)
