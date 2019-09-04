@@ -18,7 +18,15 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
         return PropertyNotes.objects.filter(user_id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
+        if not request.data._mutable:
+            state = request.data._mutable
+            request.data._mutable = True
+
         request.data['user'] = request.user.id
+
+        if not request.data._mutable:
+            request.data._mutable = state
+
         return super().create(request, *args, **kwargs)
 
     #
@@ -35,7 +43,9 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
     def propertyNotes_by_propertyId(self, request, *args, **kwargs):
         propertyId = request.GET.get('property')
         property = Property.objects.get(id=propertyId)
-        propertyNotes = PropertyNotes.objects.filter(property=property)
+        userId = request.user.id
+        user = User.objects.get(id = userId)
+        propertyNotes = PropertyNotes.objects.filter(property=property, user = user)
         print(propertyNotes)
         propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
         return Response(propertyNotesSerializer.data)
