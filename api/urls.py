@@ -35,13 +35,12 @@ router.register(r'user_ownership_usage', UserOwnershipUsageViewSet)
 router.register(r'visited_properties', VisitedPropertiesViewSet)
 router.register(r'user_sockets', UserSocketsViewSet)
 router.register(r'property_info', PropertyViewSet)
-router.register(r'teams',InvitationsViewSet)
-router.register(r'scout',ScoutViewSet)
-router.register(r'scouts-list-property',ScoutsListPropertyViewSet)
+router.register(r'teams', InvitationsViewSet)
+router.register(r'scout', ScoutViewSet)
+router.register(r'scouts-list-property', ScoutsListPropertyViewSet)
 
 
 urlpatterns = [
 ]
 
 urlpatterns += router.urls
-

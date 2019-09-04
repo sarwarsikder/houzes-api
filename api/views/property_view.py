@@ -9,10 +9,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
 
-    @action(detail=False)
+    @action(detail=False,url_path='property')
     def get_details(self, request, *args, **kwargs):
         # property_id = request.data.get('id')
-        property_id = request.GET.get('property')
+        property_id = request.GET.get('id')
         property = Property.objects.get(id=property_id)
         property_with_notes = property.propertynotes_set.all()
         property_with_photos = property.propertyphotos_set.all()
@@ -21,9 +21,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
         property['photos'] = PropertyPhotosSerializer(property_with_photos, many=True).data
         return HttpResponse(content=json.dumps(property), status=200, content_type="application/json")
 
-    @action(detail=False)
+    @action(detail=False, url_path='google-place')
     def get_info(self, request, *args, **kwargs):
-        google_place_id = request.GET.get('place_id')
+        google_place_id = request.GET.get('id')
         property = Property.objects.get(google_place_id=google_place_id)
         if property:
             property_with_notes = property.propertynotes_set.all()

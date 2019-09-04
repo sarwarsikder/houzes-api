@@ -18,7 +18,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (permissions.AllowAny,)
 
-    @action(detail=False, methods=['GET'], url_path='get-current-userinfo')
+    @action(detail=False, methods=['GET'], url_path='get-current-user-info')
     def get_current_userinfo(self, request):
         access_token = request.META["HTTP_AUTHORIZATION"][7:]
         access_token_object = AccessToken.objects.get(token=access_token)

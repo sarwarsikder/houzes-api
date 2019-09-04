@@ -39,9 +39,9 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
     #     propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
     #     return Response(propertyNotesSerializer.data)
 
-    @action(detail=False,url_path='property-notes-by-property-id')
+    @action(detail=False,url_path='property')
     def propertyNotes_by_propertyId(self, request, *args, **kwargs):
-        propertyId = request.GET.get('property')
+        propertyId = request.GET.get('id')
         property = Property.objects.get(id=propertyId)
         userId = request.user.id
         user = User.objects.get(id = userId)
