@@ -47,12 +47,14 @@ class InvitationsViewSet(viewsets.ModelViewSet):
                   )
 
         request.data['invitation_key'] = invitation_key
+        request.data['user'] = request.user.id
         # request.data._mutable = _mutable
         return super().create(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         users = UserSerializer(User.objects.filter(invited_by=request.user.id),many=True)
-        unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(status=0),many=True)
+        # user = User.objects.get(id = re)
+        unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(status=0, user_id=request.user.id),many=True)
         dict = {
             # 'users': list(),
             'users': users.data,

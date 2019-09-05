@@ -2,6 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from api.serializers import *
 from api.models import *
 
@@ -12,7 +13,6 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
     filterset_fields = "__all__"
     search_fields = ['title', 'notes']
     ordering = ['-id']
-
 
     def get_queryset(self):
         return PropertyNotes.objects.filter(user_id=self.request.user.id)

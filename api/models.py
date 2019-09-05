@@ -226,7 +226,7 @@ def generate_shortuuid():
     return gUid
 
 class Invitations(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     email = models.CharField(max_length=255, null=False)
     status = models.IntegerField(null=True) # invited => 0,in progress =>1,done =>3
     invitation_key = models.CharField(max_length=200, unique=True, default=generate_shortuuid)
@@ -242,7 +242,7 @@ class Scout(models.Model):
     first_name = models.CharField(max_length=255,null=True)
     last_name = models.CharField(max_length=255,null=True)
     url = models.CharField(max_length=255,null=True)
-    manager_id = models.ForeignKey(User,on_delete=models.CASCADE)
+    manager_id = models.ForeignKey(User,on_delete=models.CASCADE, null = True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
