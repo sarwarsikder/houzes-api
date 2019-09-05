@@ -48,9 +48,9 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
         return Response(propertyPhotosSerializer.data)
 
-    @action(detail=False, url_path='property')
+    @action(detail=False, url_path='property/(?P<pk>[\w-]+)')
     def propertyPhotos_by_propertyId(self, request, *args, **kwargs):
-        propertyId = request.GET.get('id')
+        propertyId = kwargs['pk']
         propertyPhotos = PropertyPhotos.objects.filter(property=propertyId)
         print(propertyPhotos)
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
