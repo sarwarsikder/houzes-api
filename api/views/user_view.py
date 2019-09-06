@@ -75,10 +75,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if 'password' in request.data:
             request.data['password'] = make_password(request.data['password'])
 
-        request.data['photo'] = None
-
-        # data['photo'] = str(self.upload_photo(request.FILES, kwargs['pk']))
-
         s3_url = ""
         if 'photo' in request.FILES:
             file = request.FILES['photo']
