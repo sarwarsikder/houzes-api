@@ -163,8 +163,8 @@ class ListProperties(models.Model):
     property_address = models.CharField(max_length=255, null=True)
     cad_acct = models.CharField(max_length=255, null=True)
     gma_tag = models.IntegerField(null=True)
-    latitude = models.DecimalField(max_digits=20, decimal_places=3)
-    longitude = models.DecimalField(max_digits=20, decimal_places=3)
+    latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
     tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE, null=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     # A property can have multiple owner
