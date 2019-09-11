@@ -159,7 +159,7 @@ class UserList(models.Model):
 
 
 class ListProperties(models.Model):
-    list = models.ForeignKey(UserList, on_delete=models.CASCADE)
+    user_list = models.ForeignKey(UserList, on_delete=models.CASCADE)
     property_address = models.CharField(max_length=255, null=True)
     cad_acct = models.CharField(max_length=255, null=True)
     gma_tag = models.IntegerField(null=True)
@@ -168,7 +168,7 @@ class ListProperties(models.Model):
     tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE, null=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     # A property can have multiple owner
-    owner_info = JSONField(default=list)
+    owner_info = JSONField(default=list, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
