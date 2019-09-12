@@ -27,17 +27,16 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         return gUid
 
     def create(self, request, *args, **kwargs):
-        print(request.user)
+        if '_mutable' in request.data:
+            if not request.data._mutable:
+                state = request.data._mutable
+                request.data._mutable = True
 
         receiver = request.data['email']
         request.data['status'] = 0
 
-        # _mutable = request.data._mutable
-        # request.data._mutable = True
         print(receiver)
-        # receiver = 'nadimauswsit@gmail.com'
         invitation_key = generate_shortuuid()
-        # print(User.objects.get(id=request.user.id))
         print(invitation_key)
         send_mail(subject="Invitation",
                   message=str(request.user)+" sent you an invitation "+str(invitation_key),
@@ -48,7 +47,11 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
         request.data['invitation_key'] = invitation_key
         request.data['user'] = request.user.id
-        # request.data._mutable = _mutable
+
+        if '_mutable' in request.data:
+            if not request.data._mutable:
+                request.data._mutable = state
+
         return super().create(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
