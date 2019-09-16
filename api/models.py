@@ -27,6 +27,11 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+def generate_shortuuid():
+    shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
+    gUid = str(shortuuid.random(length=16))
+    return gUid
+
 
 class User(AbstractBaseUser):
     first_name = models.CharField(max_length=255, null=True)
@@ -219,11 +224,6 @@ class UserSockets(models.Model):
 
     class Meta:
         db_table = 'user_sockets'
-
-def generate_shortuuid():
-    shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
-    gUid = str(shortuuid.random(length=16))
-    return gUid
 
 class Invitations(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
