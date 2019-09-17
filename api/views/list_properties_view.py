@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
 from rest_framework import viewsets
@@ -27,15 +28,20 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
         page_size = request.GET.get('limit')
         list = UserList.objects.get(id=listId)
         listProperties = ListProperties.objects.filter(user_list = list)
-        print(listProperties)
-        # listPropertiesSerializer = ListPropertiesSerializer(listProperties, many=True)
+        # print(listProperties)
 
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size
         else:
             paginator.page_size = 10
-        # paginator.offset = 0
+
+        ##TEST CODE
+        # tlistProperties = ListProperties.objects.filter(user_list = list).values('property')
+        # print(tlistProperties)
+        # tpropertyPhotos = PropertyPhotos.objects.filter(property_id = )
+        # print(tpropertyPhotos)
+        ##
         result_page = paginator.paginate_queryset(listProperties, request)
         serializer = ListPropertiesSerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)

@@ -64,3 +64,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
         ListProperties.objects.bulk_create(objs, batch_size=50)
 
         return JsonResponse({'response': 'success'})
+
+    @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
+    def get_property_by_tag(self, request, *args, **kwargs):
+        tagId = kwargs['id']
+        property = Property.objects.filter(property_tags__id = tagId)
+        propertySerializer = PropertySerializer(property, many=True).data
+        return HttpResponse(content=json.dumps(propertySerializer), status=200, content_type="application/json")

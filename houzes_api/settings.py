@@ -11,6 +11,16 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+default_headers = (
+    'x-requested-with',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'x-csrftoken',
+    'user-agent',
+    'accept-encoding',
+)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -58,9 +68,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'houzes_api.urls'
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = ('localhost:4200')
+CORS_ORIGIN_REGEX_WHITELIST = (
+    'localhost:4200',
+    'https://www.google.com'
+)
+CORS_ALLOW_HEADERS = default_headers + (
+    'cache-control',
+)
+
+
 
 TEMPLATES = [
     {
@@ -190,3 +210,5 @@ EMAIL_HOST_PASSWORD = 'Reboot2@18'
 EMAIL_USE_TLS = True
 # EMAIL_USE_SSL = True
 
+CLIENT_ID = "enKpO5OOK8AFVY2U5fuR5l3uD9UH4mGKrJXpTbGJ"
+CLIENT_SECRET = "vQgrl1HEfiUktjgXFmC3wK5t7JkU6L6mDwDKkBfb4h4F5yAslvaKXs9kKcH5g0Gcmwi67CC8Lhi1p9Bd0Roo9kexnC9VRanLp1SMmzrskfjLTJwyUALFbckI0j58QL1Q"
