@@ -48,6 +48,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
 class ListPropertiesSerializer(serializers.ModelSerializer):
     # property = PrimaryKeyRelatedField(read_only=True)
+    photo_count = serializers.IntegerField(read_only=True, default=None)
     class Meta:
         model = ListProperties
         fields = '__all__'

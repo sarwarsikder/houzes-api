@@ -27,8 +27,10 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
         listId = kwargs['pk']
         page_size = request.GET.get('limit')
         list = UserList.objects.get(id=listId)
-        listProperties = ListProperties.objects.filter(user_list = list)
+        listProperties = ListProperties.objects.filter(user_list = list).annotate(photo_count=Count('property__propertyphotos'))
         # print(listProperties)
+        # for prop in listProperties:
+        #     print(prop.__dict__)
 
         paginator = CustomPagination()
         if page_size:
@@ -36,12 +38,6 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
         else:
             paginator.page_size = 10
 
-        ##TEST CODE
-        # tlistProperties = ListProperties.objects.filter(user_list = list).values('property')
-        # print(tlistProperties)
-        # tpropertyPhotos = PropertyPhotos.objects.filter(property_id = )
-        # print(tpropertyPhotos)
-        ##
         result_page = paginator.paginate_queryset(listProperties, request)
         serializer = ListPropertiesSerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
