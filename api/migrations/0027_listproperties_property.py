@@ -17,9 +17,9 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='api.Property'),
             preserve_default=False,
         ),
-        migrations.AlterField(
-            model_name='listproperties',
-            name='owner_info',
-            field=django.contrib.postgres.fields.jsonb.JSONField(default=list),
-        ),
+        # migrations.AlterField(
+        #     model_name='listproperties',
+        #     name='owner_info',
+        #     field=django.contrib.postgres.fields.jsonb.JSONField(default=list),
+        # ),
     ]
