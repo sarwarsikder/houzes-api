@@ -38,7 +38,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'DEV'  # PROD, DEV
+APP_ENV = 'PROD'  # PROD, DEV
 
 # Application definition
 
@@ -74,7 +74,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = ('localhost:4200')
 CORS_ORIGIN_REGEX_WHITELIST = (
     'localhost:4200',
-    'https://www.google.com'
+    'https://www.google.com',
+    'http://houzes.com.s3-website-us-east-1.amazonaws.com',
 )
 CORS_ALLOW_HEADERS = default_headers + (
     'cache-control',
@@ -138,11 +139,11 @@ WSGI_APPLICATION = 'houzes_api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ra_houzes',
-        'USER': 'root',
+        'NAME': 'houzes',
+        'USER': 'postgres',
         'PASSWORD': 'wsit97480',
-        'HOST': '172.18.1.11',
-        'PORT': '5454',
+        'HOST': 'houzes-db.cacdyf2lutyz.us-east-1.rds.amazonaws.com',
+        'PORT': '5432',
     },
 }
 
@@ -196,13 +197,6 @@ AWS_REGION = "us-east-2"
 S3_BUCKET_NAME = "houzes"
 
 
-try:
-    if APP_ENV is 'DEV':
-        from .local_settings import *
-except ImportError:
-    pass
-
-
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'support@realacquisitions.com'
@@ -212,3 +206,10 @@ EMAIL_USE_TLS = True
 
 CLIENT_ID = "enKpO5OOK8AFVY2U5fuR5l3uD9UH4mGKrJXpTbGJ"
 CLIENT_SECRET = "vQgrl1HEfiUktjgXFmC3wK5t7JkU6L6mDwDKkBfb4h4F5yAslvaKXs9kKcH5g0Gcmwi67CC8Lhi1p9Bd0Roo9kexnC9VRanLp1SMmzrskfjLTJwyUALFbckI0j58QL1Q"
+
+
+try:
+    if APP_ENV is 'DEV':
+        from .dev_settings import *
+except ImportError:
+    pass
