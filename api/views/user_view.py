@@ -36,10 +36,10 @@ class UserViewSet(viewsets.ModelViewSet):
         data = request.data
         data['password'] = make_password(data['password'])
         data['is_active'] = True
-        data['photo'] = "in progress"
 
         s3_url = ""
         if 'photo' in request.FILES:
+            # data['photo'] = "in progress"
             file = request.FILES['photo']
             file_path = "photos/user/{}/{}".format("id", str(time.time())+'.jpg')
             s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
@@ -55,9 +55,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save()
         instance.is_active = True
-        if instance.photo == "in progress":
-            instance.photo = None
-        else:
+
+        if "http" in instance.photo :
             instance.photo = instance.photo.replace("id", str(instance.id))
 
     #
