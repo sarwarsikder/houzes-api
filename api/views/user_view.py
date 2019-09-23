@@ -1,3 +1,6 @@
+import os
+import sys
+
 from django.http import JsonResponse
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -64,15 +67,11 @@ class UserViewSet(viewsets.ModelViewSet):
     # def user_photo_upload(self, request):
 
     def partial_update(self, request, *args, **kwargs):
-        if '_mutable' in request.data:
-            if not request.data._mutable:
-                state = request.data._mutable
-                request.data._mutable = True
-        # if '_mutable' in request.data.keys():
-        #     print('hocce')
-        #     state = request.data._mutable
-        #     request.data._mutable = True
-        print(kwargs['pk'])
+        # try:
+        # if '_mutable' in request.data:
+        if not request.data._mutable:
+            state = request.data._mutable
+            request.data._mutable = True
         if 'password' in request.data:
             request.data['password'] = make_password(request.data['password'])
 
@@ -86,8 +85,15 @@ class UserViewSet(viewsets.ModelViewSet):
         # if '_mutable' in request.data:
         #     request.data._mutable = state
 
-        if '_mutable' in request.data:
-            if not request.data._mutable:
-                request.data._mutable = state
-
+        # if '_mutable' in request.data:
+        if not request.data._mutable:
+            request.data._mutable = state
         return super().partial_update(request, *args, **kwargs)
+        # except Exception as e:
+        #     exc_type, exc_obj, exc_tb = sys.exc_info()
+        #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        #     log = "----------- Error: " + str(exc_obj) + ", File: " + fname + ", Line: " + str(
+        #         exc_tb.tb_lineno) + " ------------"
+        #     print(log)
+        #     return ''
+
