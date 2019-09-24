@@ -258,6 +258,18 @@ class ScoutsListProperty(models.Model):
     class Meta:
         db_table = 'scouts_list_properties'
 
+
+class AssignMemberToList(models.Model):
+    list = models.ForeignKey(UserList,on_delete=models.CASCADE)
+    member = models.ForeignKey(User,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'assign_member_to_list'
+
+
+
 admin.site.register(User)
 admin.site.register(UserSockets)
 admin.site.register(UserLocation)

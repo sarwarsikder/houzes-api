@@ -38,7 +38,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'PROD'  # PROD, DEV
+APP_ENV = 'DEV'  # PROD, DEV
 
 # Application definition
 
@@ -207,8 +207,8 @@ EMAIL_USE_TLS = True
 
 CLIENT_ID = "enKpO5OOK8AFVY2U5fuR5l3uD9UH4mGKrJXpTbGJ"
 CLIENT_SECRET = "vQgrl1HEfiUktjgXFmC3wK5t7JkU6L6mDwDKkBfb4h4F5yAslvaKXs9kKcH5g0Gcmwi67CC8Lhi1p9Bd0Roo9kexnC9VRanLp1SMmzrskfjLTJwyUALFbckI0j58QL1Q"
-try:
-    if APP_ENV is 'DEV':
-        from .dev_settings import *
-except ImportError:
-    pass
+# try:
+#     if APP_ENV is 'DEV':
+#         from .dev_settings import *
+# except ImportError:
+#     pass

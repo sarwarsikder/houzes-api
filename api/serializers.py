@@ -100,3 +100,8 @@ class ScoutsListPropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = ScoutsListProperty
         fields = '__all__'
+
+class AssignMemberToListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssignMemberToList
+        fields = '__all__'
