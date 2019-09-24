@@ -27,7 +27,6 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         return gUid
 
     def create(self, request, *args, **kwargs):
-        # if '_mutable' in request.data:
         if not request.data._mutable:
             state = request.data._mutable
             request.data._mutable = True
@@ -48,7 +47,6 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         request.data['invitation_key'] = invitation_key
         request.data['user'] = request.user.id
 
-        # if '_mutable' in request.data:
         if not request.data._mutable:
             request.data._mutable = state
 
