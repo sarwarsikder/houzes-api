@@ -1,10 +1,13 @@
 from django.db.models import Count
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
 from rest_framework import viewsets
 from rest_framework import status, pagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.utils import json
+
 from api.serializers import *
 from api.models import *
 
@@ -41,3 +44,10 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
         result_page = paginator.paginate_queryset(listProperties, request)
         serializer = ListPropertiesSerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
+    def get_list_property_by_tag(self, request, *args, **kwargs):
+        tagId = kwargs['id']
+        listProperties = ListProperties.objects.filter(tag__id = tagId)
+        listPropertiesSerializer = ListPropertiesSerializer(listProperties, many=True).data
+        return HttpResponse(content=json.dumps(listPropertiesSerializer), status=200, content_type="application/json")
