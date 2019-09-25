@@ -36,6 +36,7 @@ class PropertyTagsSerializer(serializers.ModelSerializer):
 
         representation = {
             'id' : instance.id,
+            'name' : instance.name,
             'color': identifiers,
             'user': instance.user.id,
             'created_at': instance.created_at,
