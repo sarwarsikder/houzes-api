@@ -9,20 +9,29 @@ from api.models import *
 class PropertyTagsViewSet(viewsets.ModelViewSet):
     queryset = PropertyTags.objects.all()
     serializer_class = PropertyTagsSerializer
+    filterset_fields = ["data"]
+
+
+    def list(self, request, *args, **kwargs):
+        queryset = PropertyTags.objects.all()
+        serializer = PropertyTagsSerializer(queryset, many=True)
+
+        return Response({'status': status.is_success(Response.status_code), 'data': serializer.data,
+                         'message': 'list of property tags'})
 
     def create(self, request, *args, **kwargs):
-        user_id = request.user.id
-        name = request.data['name']
-        color = request.data['color']
-        color_code = request.data['color_code']
+            user_id = request.user.id
+            name = request.data['name']
+            color = request.data['color']
+            color_code = request.data['color_code']
 
-        user = User.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
 
-        propertyTags = PropertyTags(user=user, name=name, color=color,color_code=color_code)
-        propertyTags.save()
+            propertyTags = PropertyTags(user=user, name=name, color=color,color_code=color_code)
+            propertyTags.save()
 
-        propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
-        return Response(propertyTagsSerializer.data, status=status.HTTP_201_CREATED)
+            propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
+            return Response(propertyTagsSerializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False)
     def PropertyTags_by_userId(self, request, *args, **kwargs):
