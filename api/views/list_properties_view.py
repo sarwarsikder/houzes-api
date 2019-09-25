@@ -48,6 +48,16 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
     def get_list_property_by_tag(self, request, *args, **kwargs):
         tagId = kwargs['id']
+        page_size = request.GET.get('limit')
         listProperties = ListProperties.objects.filter(tag__id = tagId)
-        listPropertiesSerializer = ListPropertiesSerializer(listProperties, many=True).data
-        return HttpResponse(content=json.dumps(listPropertiesSerializer), status=200, content_type="application/json")
+
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+
+        result_page = paginator.paginate_queryset(listProperties, request)
+
+        serializer = ListPropertiesSerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)
