@@ -27,6 +27,22 @@ class PropertyTagsSerializer(serializers.ModelSerializer):
         model = PropertyTags
         fields = '__all__'
 
+    def to_representation(self, instance):
+        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+
+        identifiers = dict()
+        identifiers['color_name'] = instance.color
+        identifiers['color_code'] = instance.color_code
+
+        representation = {
+            'id' : instance.id,
+            'color': identifiers,
+            'user': instance.user.id,
+            'created_at': instance.created_at,
+            'updated_at' : instance.updated_at
+        }
+
+        return representation
 
 class PropertyNotesSerializer(serializers.ModelSerializer):
     class Meta:

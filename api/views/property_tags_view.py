@@ -11,13 +11,14 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
     serializer_class = PropertyTagsSerializer
 
     def create(self, request, *args, **kwargs):
-        user_id = 4
-        name = request.POST.get('name')
-        color = request.POST.get('color')
+        user_id = request.user.id
+        name = request.data['name']
+        color = request.data['color']
+        color_code = request.data['color_code']
 
         user = User.objects.get(id=user_id)
 
-        propertyTags = PropertyTags(user=user, name=name, color=color)
+        propertyTags = PropertyTags(user=user, name=name, color=color,color_code=color_code)
         propertyTags.save()
 
         propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
