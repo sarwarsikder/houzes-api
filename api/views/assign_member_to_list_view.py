@@ -55,7 +55,7 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
             assignMemberToListSerializer = AssignMemberToListSerializer(assignMemberToList)
             data = assignMemberToListSerializer.data
             status = True
-        return Response({'status': True,'data': data,'message': message})
+        return Response({'status': status,'data': data,'message': message})
 
     def destroy(self, request, *args, **kwargs):
         data = None
@@ -79,4 +79,4 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
                 print(message)
                 status = True
 
-        return Response({'status': True,'data': data,'message': message})
+        return Response({'status': status,'data': data,'message': message})
