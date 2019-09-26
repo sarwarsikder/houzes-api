@@ -30,7 +30,7 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
         listId = kwargs['pk']
         page_size = request.GET.get('limit')
         list = UserList.objects.get(id=listId)
-        listProperties = ListProperties.objects.filter(user_list = list).annotate(photo_count=Count('property__propertyphotos'))
+        listProperties = ListProperties.objects.filter(user_list = list).annotate(photo_count=Count('property__propertyphotos'),note_count=Count('property__propertynotes'))
         # print(listProperties)
         # for prop in listProperties:
         #     print(prop.__dict__)

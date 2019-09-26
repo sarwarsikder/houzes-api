@@ -1,3 +1,5 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, filters
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,9 +9,10 @@ from api.serializers import *
 from api.models import *
 
 class PropertyTagsViewSet(viewsets.ModelViewSet):
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     queryset = PropertyTags.objects.all()
     serializer_class = PropertyTagsSerializer
-    filterset_fields = ["data"]
+    # filterset_fields = ["data"]
 
 
     def list(self, request, *args, **kwargs):
