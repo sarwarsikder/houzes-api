@@ -40,6 +40,7 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
 
         message= ""
         data = None
+        status = False
 
         if (AssignMemberToList.objects.filter(list=userList,member=member).count())>0 :
             message = "This member is already assigned to this list"
@@ -48,16 +49,18 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
         elif User.objects.filter(id=member_id,invited_by=request.user.id).count()==0 :
             message = "You can only assign your team member in your list"
         else:
-            message = str(request.user.first_name)+" "+str(request.user.last_name)+" is assigned to the list "+str(UserList.objects.get(id=list_id).name)
+            message = str(User.objects.get(id=member_id).first_name)+" "+str(User.objects.get(id=member_id).last_name)+" is assigned to "+str(UserList.objects.get(id=list_id).name)
             assignMemberToList = AssignMemberToList(list=userList,member=member)
             assignMemberToList.save()
             assignMemberToListSerializer = AssignMemberToListSerializer(assignMemberToList)
             data = assignMemberToListSerializer.data
-        return Response({'status': status.is_success(Response.status_code),'data': data,'message': message})
+            status = True
+        return Response({'status': True,'data': data,'message': message})
 
     def destroy(self, request, *args, **kwargs):
         data = None
         message =""
+        status = False
 
         if AssignMemberToList.objects.filter(id=int(kwargs['pk'])).count()==0:
             message = "The entry you want to delete does not exist"
@@ -74,5 +77,6 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
                 AssignMemberToList.objects.filter(id=int(kwargs['pk'])).delete()
                 message = "Member is deleted from the list"
                 print(message)
+                status = True
 
-        return Response({'status': status.is_success(Response.status_code),'data': data,'message': message})
+        return Response({'status': True,'data': data,'message': message})
