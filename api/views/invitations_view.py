@@ -27,12 +27,15 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         return gUid
 
     def create(self, request, *args, **kwargs):
-        if not request.data._mutable:
-            state = request.data._mutable
-            request.data._mutable = True
+        if '_mutable' in request.data:
+            if not request.data._mutable:
+                state = request.data._mutable
+                request.data._mutable = True
 
         receiver = request.data['email']
         request.data['status'] = 0
+
+
 
         print(receiver)
         invitation_key = generate_shortuuid()
@@ -47,8 +50,9 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         request.data['invitation_key'] = invitation_key
         request.data['user'] = request.user.id
 
-        if not request.data._mutable:
-            request.data._mutable = state
+        if '_mutable' in request.data:
+            if not request.data._mutable:
+                request.data._mutable = state
 
         return super().create(request, *args, **kwargs)
 
