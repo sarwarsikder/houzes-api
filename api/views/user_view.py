@@ -31,36 +31,49 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
-        if '_mutable' in request.data:
-            if not request.data._mutable:
-                state = request.data._mutable
-                request.data._mutable = True
+        # if '_mutable' in request.data:
+        #     if not request.data._mutable:
+        #         state = request.data._mutable
+        #         request.data._mutable = True
+        #
+        # data = request.data
+        # data['password'] = make_password(data['password'])
+        # data['is_active'] = True
 
-        data = request.data
-        data['password'] = make_password(data['password'])
-        data['is_active'] = True
+        try:
+            password = request.data['password']
+            first_name = request.data['first_name']
+            last_name = request.data['last_name']
+            email = request.data['email']
+            phone_number = request.data['phone_number']
+            invited_by = request.data['invited_by']
+            is_active = request.data['is_active']
+            is_admin = request.data['is_admin']
+        except:
+            print('noooooooooooooooooooo')
 
-        s3_url = ""
-        if 'photo' in request.FILES:
-            # data['photo'] = "in progress"
-            file = request.FILES['photo']
-            file_path = "photos/user/{}/{}".format("id", str(time.time())+'.jpg')
-            s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
-            file_upload(file, file_path)
-            data['photo'] = s3_url
-
-        if '_mutable' in request.data:
-            if not request.data._mutable:
-                request.data._mutable = state
+        try:
+            s3_url = ""
+            if 'photo' in request.FILES:
+                # data['photo'] = "in progress"
+                file = request.FILES['photo']
+                file_path = "photos/user/{}/{}".format("id", str(time.time())+'.jpg')
+                s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+                file_upload(file, file_path)
+                request.data['photo'] = s3_url
+        except:
+            print('photo invalid')
 
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         instance = serializer.save()
         instance.is_active = True
-
-        if "http" in instance.photo :
-            instance.photo = instance.photo.replace("id", str(instance.id))
+        try:
+            if "http" in instance.photo :
+                instance.photo = instance.photo.replace("id", str(instance.id))
+        except:
+            print('----------------')
 
 
     def partial_update(self, request, *args, **kwargs):
