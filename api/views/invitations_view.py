@@ -27,17 +27,11 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         return gUid
 
     def create(self, request, *args, **kwargs):
-        if '_mutable' in request.data:
-            if not request.data._mutable:
-                state = request.data._mutable
-                request.data._mutable = True
+        try:
+            receiver =request.data['email']
+        except:
+            receiver = request.body['email']
 
-        receiver = request.data['email']
-        request.data['status'] = 0
-
-
-
-        print(receiver)
         invitation_key = generate_shortuuid()
         print(invitation_key)
         send_mail(subject="Invitation",
@@ -47,14 +41,12 @@ class InvitationsViewSet(viewsets.ModelViewSet):
                   fail_silently=False
                   )
 
-        request.data['invitation_key'] = invitation_key
-        request.data['user'] = request.user.id
+        invitations = Invitations(user=User.objects.get(id=request.user.id),invitation_key = invitation_key,email=receiver,status=0)
+        invitations.save()
 
-        if '_mutable' in request.data:
-            if not request.data._mutable:
-                request.data._mutable = state
+        invitationsSerializer = InvitationsSerializer(invitations)
+        return Response(invitationsSerializer.data, status=status.HTTP_201_CREATED)
 
-        return super().create(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         users = UserSerializer(User.objects.filter(invited_by=request.user.id),many=True)

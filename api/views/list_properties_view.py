@@ -60,3 +60,38 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
 
         serializer = ListPropertiesSerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False,methods=['POST'],url_path='(?P<id>[\w-]+)/assign-tag')
+    def assign_tag_to_list_property(self,request,*args,**kwargs):
+        listPropertiesId = kwargs['id']
+        status = False
+        data = None
+        message=""
+        try:
+            property_tag = request.data['tag']
+        except :
+            property_tag = request.body['tag']
+
+        if PropertyTags.objects.filter(id=property_tag).count()==0:
+            message="Missing tag"
+        else:
+            try:
+                tagExist = False
+                listProperties = ListProperties.objects.get(id=listPropertiesId)
+                print(listProperties.property_tags)
+                for tag in listProperties.property_tags:
+                    if tag['id']==property_tag :
+                        message = 'Tag already exist'
+                        tagExist = True
+                if not tagExist :
+                    print(type(listProperties.property_tags))
+                    listProperties.property_tags.append({'id':property_tag})
+                    listProperties.save()
+                    message = 'Tag added to the property'
+                    status = True
+                    listPropertiesSerializer = ListPropertiesSerializer(listProperties)
+                    data = listPropertiesSerializer.data
+            except:
+                message = 'property does not exist'
+                status = False
+        return Response({'status': status,'data': data,'message': message})
