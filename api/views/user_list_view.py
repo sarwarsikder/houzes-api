@@ -18,14 +18,16 @@ class UserListViewSet(viewsets.ModelViewSet):
         return UserList.objects.filter(user_id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
-        if not request.data._mutable:
-            state = request.data._mutable
-            request.data._mutable = True
+        if '_mutable' in request.data :
+            if not request.data._mutable:
+                state = request.data._mutable
+                request.data._mutable = True
 
         request.data['user'] = request.user.id
 
-        if not request.data._mutable:
-            request.data._mutable = state
+        if '_mutable' in request.data :
+            if not request.data._mutable:
+                request.data._mutable = state
 
         return super().create(request, *args, **kwargs)
 

@@ -31,10 +31,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
-        # if '_mutable' in request.data:
-        if not request.data._mutable:
-            state = request.data._mutable
-            request.data._mutable = True
+        if '_mutable' in request.data:
+            if not request.data._mutable:
+                state = request.data._mutable
+                request.data._mutable = True
 
         data = request.data
         data['password'] = make_password(data['password'])
@@ -49,9 +49,9 @@ class UserViewSet(viewsets.ModelViewSet):
             file_upload(file, file_path)
             data['photo'] = s3_url
 
-        # if '_mutable' in request.data:
-        if not request.data._mutable:
-            request.data._mutable = state
+        if '_mutable' in request.data:
+            if not request.data._mutable:
+                request.data._mutable = state
 
         return super().create(request, *args, **kwargs)
 

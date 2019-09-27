@@ -18,9 +18,10 @@ class ScoutViewSet(viewsets.ModelViewSet):
         return gUid
 
     def create(self, request, *args, **kwargs):
-        if not request.data._mutable:
-            state = request.data._mutable
-            request.data._mutable = True
+        if '_mutable' in request.data :
+            if not request.data._mutable:
+                state = request.data._mutable
+                request.data._mutable = True
 
         request.data['manager_id'] = request.user.id
 
@@ -37,8 +38,9 @@ class ScoutViewSet(viewsets.ModelViewSet):
         base_url= "https://houzes.com"
         request.data['url'] = base_url+"/scout-form/"+str(user_list.id)+"/"+generate_shortuuid()
 
-        if not request.data._mutable:
-            request.data._mutable = state
+        if '_mutable' in request.data :
+            if not request.data._mutable:
+                request.data._mutable = state
         return super().create(request, *args, **kwargs)
 
 
