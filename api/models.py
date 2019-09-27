@@ -94,7 +94,7 @@ class Property(models.Model):
     google_place_id = models.CharField(max_length=255, null=True, unique=True)
     latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
     longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
-    property_tags = models.ManyToManyField(PropertyTags, blank=True)
+    property_tags = JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -171,7 +171,7 @@ class ListProperties(models.Model):
     gma_tag = models.IntegerField(null=True)
     latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
     longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
-    tag = models.ForeignKey(PropertyTags, on_delete=models.CASCADE, null=True)
+    property_tags = JSONField(default=list)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     # A property can have multiple owner
     owner_info = JSONField(default=list, null=True)
