@@ -46,9 +46,10 @@ class ListPropertiesViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
     def get_list_property_by_tag(self, request, *args, **kwargs):
         tagId = kwargs['id']
+        print(tagId)
         page_size = request.GET.get('limit')
-        listProperties = ListProperties.objects.filter(tag__id = tagId)
-
+        listProperties = ListProperties.objects.filter(property_tags__contains = [{'id' : 8 }])
+        print(listProperties)
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size

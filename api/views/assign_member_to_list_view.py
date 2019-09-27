@@ -79,4 +79,4 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
                 print(message)
                 status = True
 
-        return Response({'status': status,'data': data,'message': message})
+        return Response({'status': status   ,'data': data,'message': message})
