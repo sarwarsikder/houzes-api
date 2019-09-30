@@ -56,9 +56,9 @@ class UserViewSet(viewsets.ModelViewSet):
             email = request.data['email']
             phone_number = request.data['phone_number']
             print(request.data)
-            invited_by = request.data['invited_by']
             is_active = request.data['is_active']
             is_admin = request.data['is_admin']
+            invited_by = request.data['invited_by']
 
         except:
             print('noooooooooooooooooooo')
