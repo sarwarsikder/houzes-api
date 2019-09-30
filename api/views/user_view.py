@@ -39,16 +39,27 @@ class UserViewSet(viewsets.ModelViewSet):
         # data = request.data
         # data['password'] = make_password(data['password'])
         # data['is_active'] = True
+        password = None
+        first_name =None
+        last_name = None
+        email = None
+        phone_number = None
+        invited_by = None
+        is_active = False
+        is_admin = False
+        photo = None
 
         try:
-            password = request.data['password']
+            password = make_password(request.data['password'])
             first_name = request.data['first_name']
             last_name = request.data['last_name']
             email = request.data['email']
             phone_number = request.data['phone_number']
+            print(request.data)
             invited_by = request.data['invited_by']
             is_active = request.data['is_active']
             is_admin = request.data['is_admin']
+
         except:
             print('noooooooooooooooooooo')
 
@@ -61,19 +72,27 @@ class UserViewSet(viewsets.ModelViewSet):
                 s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
                 file_upload(file, file_path)
                 request.data['photo'] = s3_url
+                photo = s3_url
         except:
             print('photo invalid')
 
-        return super().create(request, *args, **kwargs)
+        user = User(email=email,password=password,first_name=first_name,last_name=last_name,phone_number=phone_number,invited_by=invited_by,is_active=is_active,is_admin=is_admin,photo=photo)
+        user.save()
+        if user.photo !=None:
+            if 'http' in user.photo:
+                user.photo = user.photo.replace("id",str(user.id))
+                user.save()
+        userSerializer = UserSerializer(user)
+        return Response(userSerializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        instance.is_active = True
-        try:
-            if "http" in instance.photo :
-                instance.photo = instance.photo.replace("id", str(instance.id))
-        except:
-            print('----------------')
+    # def perform_create(self, serializer):
+    #     instance = serializer.save()
+    #     instance.is_active = True
+    #     try:
+    #         if "http" in instance.photo :
+    #             instance.photo = instance.photo.replace("id", str(instance.id))
+    #     except:
+    #         print('----------------')
 
 
     def partial_update(self, request, *args, **kwargs):
@@ -101,4 +120,3 @@ class UserViewSet(viewsets.ModelViewSet):
         #         exc_tb.tb_lineno) + " ------------"
         #     print(log)
         #     return ''
-

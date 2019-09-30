@@ -71,3 +71,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
         property = Property.objects.filter(property_tags__id = tagId)
         propertySerializer = PropertySerializer(property, many=True).data
         return HttpResponse(content=json.dumps(propertySerializer), status=200, content_type="application/json")
+
+    @action(detail=False,methods=['GET'],url_path='(?P<id>[\w-]+)/note')
+    def get_note_by_property(self, request, *args, **kwargs):
+        propertyId = kwargs['id']
+        property = Property.objects.get(id=propertyId)
+        propertyNotes = PropertyNotes.objects.filter(property = property)
+        propertyNotesSerializer = PropertyNotesSerializer(propertyNotes,many=True)
+        return HttpResponse(content=json.dumps(propertyNotesSerializer.data), status=200, content_type="application/json")
