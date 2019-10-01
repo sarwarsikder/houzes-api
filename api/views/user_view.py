@@ -10,6 +10,7 @@ from django.contrib.auth.hashers import make_password
 from houzes_api import settings
 from houzes_api.util.file_upload import file_upload
 import time
+from django.core.mail import send_mail
 
 from api.serializers import *
 from api.models import *
@@ -29,6 +30,10 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(user)
         return JsonResponse(serializer.data, safe=False)
 
+    def generate_shortuuid(self):
+        shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
+        gUid = str(shortuuid.random(length=16))
+        return gUid
 
     def create(self, request, *args, **kwargs):
         # if '_mutable' in request.data:
@@ -82,6 +87,20 @@ class UserViewSet(viewsets.ModelViewSet):
             if 'http' in user.photo:
                 user.photo = user.photo.replace("id",str(user.id))
                 user.save()
+
+        #Email verification task starts here
+        code = generate_shortuuid()
+        userVerifications = UserVerifications(code=code,user=user,is_used=False,verification_type='email')
+        userVerifications.save()
+
+        send_mail(subject="HouZes emal verification",
+                  message="Dear,"+str(user.first_name)+' '+str(user.last_name)+ " please confirm your email by clicking the link "+settings.WEB_APP_URL+'/verify-email/'+str(code),
+                  from_email=settings.EMAIL_HOST_USER,
+                  recipient_list=[email],
+                  fail_silently=False
+                  )
+
+
         userSerializer = UserSerializer(user)
         return Response(userSerializer.data, status=status.HTTP_201_CREATED)
 
@@ -120,3 +139,25 @@ class UserViewSet(viewsets.ModelViewSet):
         #         exc_tb.tb_lineno) + " ------------"
         #     print(log)
         #     return ''
+
+
+    @action(detail=False,methods=['GET'],url_path='user-verification/code/(?P<code>[\w-]+)')
+    def userVericationByCode(self,requset,*args,**kwargs):
+        code = kwargs['code']
+        status = False
+        message = ""
+
+        if UserVerifications.objects.filter(code=code).count()>0:
+            userVerifications = UserVerifications.objects.get(code=code)
+            print(userVerifications)
+            print(userVerifications.user.id)
+            user = User.objects.get(id=userVerifications.user.id)
+            print(user)
+            user.is_active = True
+            user.save()
+            status = True
+            message = 'User is verified'
+        else:
+            message = 'User verification failed'
+
+        return Response({'status': status,'message': message})

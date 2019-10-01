@@ -1,6 +1,6 @@
 import time
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, pagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from api.serializers import *
@@ -8,10 +8,19 @@ from api.models import *
 from houzes_api import settings
 from houzes_api.util.file_upload import file_upload
 
+class CustomPagination(pagination.PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': self.page.paginator.count,
+            'results': data,
+        })
 
 class PropertyPhotosViewSet(viewsets.ModelViewSet):
     queryset = PropertyPhotos.objects.all()
     serializer_class = PropertyPhotosSerializer
+    filterset_fields = ["id"]
 
     def get_queryset(self):
         return PropertyPhotos.objects.filter(user_id=self.request.user.id)
@@ -51,7 +60,19 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='property/(?P<pk>[\w-]+)')
     def propertyPhotos_by_propertyId(self, request, *args, **kwargs):
         propertyId = kwargs['pk']
+        page_size = request.GET.get('limit')
+
         propertyPhotos = PropertyPhotos.objects.filter(property=propertyId)
         print(propertyPhotos)
+
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
-        return Response(propertyPhotosSerializer.data)
+
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 5
+
+        result_page = paginator.paginate_queryset(propertyPhotos, request)
+        serializer = PropertyPhotosSerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)

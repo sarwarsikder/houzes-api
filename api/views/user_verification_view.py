@@ -37,3 +37,24 @@ class UserVerificationsViewSet(viewsets.ModelViewSet):
         userVerificationsSerializer = UserVerificationsSerializer(userVerifications, many=True)
         return Response(userVerificationsSerializer.data)
 
+    @action(detail=False,methods=['GET'],url_path='code/(?P<code>[\w-]+)')
+    def userVericationByCode(self,requset,*args,**kwargs):
+        code = kwargs['code']
+        status = False
+        message = ""
+
+        if UserVerifications.objects.filter(code=code).count()>0:
+            userVerifications = UserVerifications.objects.get(code=code)
+            print(userVerifications)
+            user = User.objects.get(id=userVerifications.user)
+            print(user)
+            user.is_active = True
+            user.save()
+            status = True
+            message = 'User is verified'
+        else:
+            message = 'User verification failed'
+
+        return Response({'status': status,'message': message})
+
+

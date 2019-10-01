@@ -207,6 +207,8 @@ EMAIL_USE_TLS = True
 
 CLIENT_ID = "enKpO5OOK8AFVY2U5fuR5l3uD9UH4mGKrJXpTbGJ"
 CLIENT_SECRET = "vQgrl1HEfiUktjgXFmC3wK5t7JkU6L6mDwDKkBfb4h4F5yAslvaKXs9kKcH5g0Gcmwi67CC8Lhi1p9Bd0Roo9kexnC9VRanLp1SMmzrskfjLTJwyUALFbckI0j58QL1Q"
+
+WEB_APP_URL='houzes.com.s3-website-us-east-1.amazonaws.com'
 # try:
 #     if APP_ENV is 'DEV':
 #         from .dev_settings import *
