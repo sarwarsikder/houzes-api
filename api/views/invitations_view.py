@@ -1,6 +1,8 @@
 from oauth2_provider.models import AccessToken
 # from django.utils import simplejson
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
+
 from api.serializers import *
 from api.models import *
 from django.core.mail import send_mail
@@ -16,7 +18,6 @@ from django.core import serializers
 class InvitationsViewSet(viewsets.ModelViewSet):
     queryset = Invitations.objects.all()
     serializer_class = InvitationsSerializer
-
 
     # def get_queryset(self):
     #     return Invitations.objects.filter(user=self.request.user.id)
@@ -35,7 +36,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         invitation_key = generate_shortuuid()
         print(invitation_key)
         send_mail(subject="Invitation",
-                  message=str(request.user)+" sent you an invitation "+str(invitation_key),
+                  message=str(request.user)+" sent you an invitation click here to accept "+settings.WEB_APP_URL+'/team-invite/'+str(invitation_key),
                   from_email=settings.EMAIL_HOST_USER,
                   recipient_list=[receiver],
                   fail_silently=False

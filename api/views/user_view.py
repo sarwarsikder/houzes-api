@@ -21,6 +21,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (permissions.AllowAny,)
+    filterset_fields = ["email"]
 
     @action(detail=False, methods=['GET'], url_path='get-current-user-info')
     def get_current_userinfo(self, request):
@@ -161,3 +162,11 @@ class UserViewSet(viewsets.ModelViewSet):
             message = 'User verification failed'
 
         return Response({'status': status,'message': message})
+
+    @action(detail =False,methods=['GET'],url_path='invitation-key/(?P<key>[\w-]+)')
+    def get_unregistered_member_by_invitation_key(self,request,*args,**kwargs):
+        invitation_key = kwargs['key']
+        invitations = Invitations.objects.filter(invitation_key = invitation_key)
+        print(invitations[0])
+        invitationsSerializer = InvitationsSerializer(invitations[0])
+        return Response(invitationsSerializer.data)
