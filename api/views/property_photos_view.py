@@ -22,6 +22,7 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
     serializer_class = PropertyPhotosSerializer
     filterset_fields = ["id"]
 
+
     def get_queryset(self):
         return PropertyPhotos.objects.filter(user_id=self.request.user.id)
 
@@ -76,3 +77,22 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
         result_page = paginator.paginate_queryset(propertyPhotos, request)
         serializer = PropertyPhotosSerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False, methods=['POST'], url_path='property/(?P<pk>[\w-]+)/multiple-upload')
+    def propertyPhotos_bulk_create(self,request,*args,**kwargs):
+        property_id = kwargs['pk']
+        property = Property.objects.get(id=property_id)
+        user_id = request.user.id
+        user = User.objects.get(id=user_id)
+        images_data = request.FILES
+        propertyPhotos= []
+        for image_data in images_data.values():
+            file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '.jpg')
+            s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+            file_upload(image_data, file_path)
+            propertyPhoto = PropertyPhotos.objects.create(user=user,property=property,photo_url=s3_url)
+            print(s3_url)
+            propertyPhotos.append(propertyPhoto)
+
+        propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
+        return Response({'status':True,'data': propertyPhotosSerializer.data,'message':'Property photos uploaded'})
