@@ -146,6 +146,7 @@ class PropertyPhotos(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE,
                                  null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
     photo_url = models.CharField(max_length=255, null=True)
+    thumb_photo_url = models.CharField(max_length=255, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

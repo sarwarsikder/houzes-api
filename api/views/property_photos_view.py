@@ -7,6 +7,9 @@ from api.serializers import *
 from api.models import *
 from houzes_api import settings
 from houzes_api.util.file_upload import file_upload
+from resizeimage import resizeimage
+from PIL import Image
+from io import BytesIO
 
 class CustomPagination(pagination.PageNumberPagination):
     def get_paginated_response(self, data):
@@ -43,7 +46,15 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
             s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
             file_upload(file, file_path)
 
-        propertyPhotos = PropertyPhotos(user=user, property=property, photo_url=s3_url)
+            thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '_thumb.jpg')
+            thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, thumb_file_path)
+            with Image.open(file) as image:
+                thumb = resizeimage.resize_cover(image, [150, 150])
+                thumb_byte = BytesIO()
+                thumb.save(thumb_byte, format="jpeg")
+                thumb_image = thumb_byte.getvalue()
+                file_upload(thumb_image, thumb_file_path)
+        propertyPhotos = PropertyPhotos(user=user, property=property, photo_url=s3_url, thumb_photo_url=thumb_s3_url)
         propertyPhotos.save()
 
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos)
@@ -90,8 +101,16 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
             file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '.jpg')
             s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
             file_upload(image_data, file_path)
-            propertyPhoto = PropertyPhotos.objects.create(user=user,property=property,photo_url=s3_url)
-            print(s3_url)
+
+            thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id,str(time.time()) + '_thumb.jpg')
+            thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,thumb_file_path)
+            with Image.open(image_data) as image:
+                thumb = resizeimage.resize_cover(image, [150, 150])
+                thumb_byte = BytesIO()
+                thumb.save(thumb_byte, format="jpeg")
+                thumb_image = thumb_byte.getvalue()
+                file_upload(thumb_image, thumb_file_path)
+            propertyPhoto = PropertyPhotos.objects.create(user=user,property=property,photo_url=s3_url,thumb_photo_url = thumb_s3_url)
             propertyPhotos.append(propertyPhoto)
 
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
