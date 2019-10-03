@@ -92,6 +92,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 user.photo = user.photo.replace("id",str(user.id))
                 user.save()
 
+        Invitations.objects.filter(email=user.email).delete() #delete new user from invitation
+
         #Email verification task starts here
         code = generate_shortuuid()
         userVerifications = UserVerifications(code=code,user=user,is_used=False,verification_type='email')
@@ -103,7 +105,7 @@ class UserViewSet(viewsets.ModelViewSet):
                   recipient_list=[email],
                   fail_silently=False
                   )
-
+        #Email verification task ends here
 
         userSerializer = UserSerializer(user)
         return Response(userSerializer.data, status=status.HTTP_201_CREATED)
