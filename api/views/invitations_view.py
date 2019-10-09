@@ -33,20 +33,29 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         except:
             receiver = request.body['email']
 
+        status = False
+        data = None
+        message=""
+
         invitation_key = generate_shortuuid()
-        print(invitation_key)
-        send_mail(subject="Invitation",
-                  message=str(request.user)+" sent you an invitation click here to accept "+settings.WEB_APP_URL+'/team-invite/'+str(invitation_key),
-                  from_email=settings.EMAIL_HOST_USER,
-                  recipient_list=[receiver],
-                  fail_silently=False
-                  )
+        try:
+            send_mail(subject="Invitation",
+                      message=str(request.user)+" sent you an invitation click here to accept "+settings.WEB_APP_URL+'/team-invite/'+str(invitation_key),
+                      from_email=settings.EMAIL_HOST_USER,
+                      recipient_list=[receiver],
+                      fail_silently=False
+                      )
 
-        invitations = Invitations(user=User.objects.get(id=request.user.id),invitation_key = invitation_key,email=receiver,status=0)
-        invitations.save()
-
-        invitationsSerializer = InvitationsSerializer(invitations)
-        return Response(invitationsSerializer.data, status=status.HTTP_201_CREATED)
+            invitations = Invitations(user=User.objects.get(id=request.user.id),invitation_key = invitation_key,email=receiver,status=0)
+            invitations.save()
+            invitationsSerializer = InvitationsSerializer(invitations)
+            status = True
+            data = invitationsSerializer.data
+            message = "Invitation sent to "+receiver+" successfully"
+        except:
+            status = False
+            message = "User is not invited"
+        return Response({'status': status,'data': data,'message': message})
 
 
     def list(self, request, *args, **kwargs):
@@ -62,3 +71,17 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         # return HttpResponse(json.dumps(str(dict)))
 
         return JsonResponse(dict)
+
+    def destroy(self, request, *args, **kwargs):
+        invitationId = kwargs['pk']
+        status = False
+        message=""
+        try:
+            Invitations.objects.get(id=invitationId).delete()
+            status = True
+            message = "Invitation deleted successfully"
+        except:
+            status = False
+            message = "Invitation is not deleted"
+        return Response({'status': status,'message': message})
+

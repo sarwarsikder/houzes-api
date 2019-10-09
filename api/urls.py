@@ -11,7 +11,6 @@ from api.views.property_tags_view import PropertyTagsViewSet
 from api.views.property_notes_view import PropertyNotesViewSet
 from api.views.property_photos_view import PropertyPhotosViewSet
 from api.views.user_list_view import UserListViewSet
-from api.views.list_properties_view import ListPropertiesViewSet
 from api.views.user_driver_view import UserDriverViewSet
 from api.views.user_ownership_usage_view import UserOwnershipUsageViewSet
 from api.views.visited_properties_view import VisitedPropertiesViewSet
@@ -29,12 +28,11 @@ router.register(r'tag', PropertyTagsViewSet)
 router.register(r'note', PropertyNotesViewSet)
 router.register(r'photo', PropertyPhotosViewSet)
 router.register(r'list', UserListViewSet)
-router.register(r'list-properties', ListPropertiesViewSet)
+router.register(r'property', PropertyViewSet)
 router.register(r'user-driver', UserDriverViewSet)
 router.register(r'user-ownership-usage', UserOwnershipUsageViewSet)
 router.register(r'visited-properties', VisitedPropertiesViewSet)
 router.register(r'user-sockets', UserSocketsViewSet)
-router.register(r'property', PropertyViewSet)
 router.register(r'team', InvitationsViewSet)
 router.register(r'scout', ScoutViewSet)
 router.register(r'scouts-list-property', ScoutsListPropertyViewSet)

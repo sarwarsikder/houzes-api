@@ -38,7 +38,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'PROD'  # PROD, DEV
+APP_ENV = 'DEV'  # PROD, DEV
 
 # Application definition
 
@@ -136,16 +136,16 @@ WSGI_APPLICATION = 'houzes_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'houzes',
-        'USER': 'postgres',
-        'PASSWORD': 'wsit97480',
-        'HOST': 'houzes-db.cacdyf2lutyz.us-east-1.rds.amazonaws.com',
-        'PORT': '5432',
-    },
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'houzes',
+#         'USER': 'postgres',
+#         'PASSWORD': 'wsit97480',
+#         'HOST': 'houzes-db.cacdyf2lutyz.us-east-1.rds.amazonaws.com',
+#         'PORT': '5432',
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -209,8 +209,8 @@ CLIENT_ID = "enKpO5OOK8AFVY2U5fuR5l3uD9UH4mGKrJXpTbGJ"
 CLIENT_SECRET = "vQgrl1HEfiUktjgXFmC3wK5t7JkU6L6mDwDKkBfb4h4F5yAslvaKXs9kKcH5g0Gcmwi67CC8Lhi1p9Bd0Roo9kexnC9VRanLp1SMmzrskfjLTJwyUALFbckI0j58QL1Q"
 
 WEB_APP_URL='houzes.com.s3-website-us-east-1.amazonaws.com'
-# try:
-#     if APP_ENV is 'DEV':
-#         from .dev_settings import *
-# except ImportError:
-#     pass
+try:
+    if APP_ENV is 'DEV':
+        from .dev_settings import *
+except ImportError:
+    pass

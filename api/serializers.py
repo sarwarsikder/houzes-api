@@ -63,12 +63,12 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ListPropertiesSerializer(serializers.ModelSerializer):
+class PropertySerializer(serializers.ModelSerializer):
     # property = PrimaryKeyRelatedField(read_only=True)
     photo_count = serializers.IntegerField(read_only=True, default=0)
     note_count = serializers.IntegerField(read_only=True, default=0)
     class Meta:
-        model = ListProperties
+        model = Property
         fields = '__all__'
 
 
@@ -96,14 +96,6 @@ class UserSocketsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PropertySerializer(serializers.ModelSerializer):
-    # property_photos = PropertyPhotosSerializer(many=True,read_only=True)
-
-    class Meta:
-        model = Property
-        # fields = ['id','cad_acct','gma_tag','property_address','owner_name','owner_address','property_photos']
-        fields ='__all__'
-
 class InvitationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitations
@@ -114,9 +106,9 @@ class ScoutSerializer(serializers.ModelSerializer):
         model = Scout
         fields = '__all__'
 
-class ScoutsListPropertySerializer(serializers.ModelSerializer):
+class ScoutsPropertySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ScoutsListProperty
+        model = ScoutsProperty
         fields = '__all__'
 
 class AssignMemberToListSerializer(serializers.ModelSerializer):

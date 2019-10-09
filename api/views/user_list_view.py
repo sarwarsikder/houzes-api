@@ -1,5 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets,filters
+from rest_framework.response import Response
+
 from api.serializers import *
 from api.models import *
 
@@ -18,16 +20,28 @@ class UserListViewSet(viewsets.ModelViewSet):
         return UserList.objects.filter(user_id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
-        if '_mutable' in request.data :
-            if not request.data._mutable:
-                state = request.data._mutable
-                request.data._mutable = True
+        message= ""
+        data = None
+        status = False
 
-        request.data['user'] = request.user.id
+        try:
+            name =request.data['name']
+        except:
+            name = request.body['name']
 
-        if '_mutable' in request.data :
-            if not request.data._mutable:
-                request.data._mutable = state
+        userId = request.user.id
 
-        return super().create(request, *args, **kwargs)
+        try:
+            user = User.objects.get(id=userId)
+            userList = UserList.objects.create(user=user,name=name)
+            userList.save()
+            userListSerializer = UserListSerializer(userList)
+            data = userListSerializer.data
+            status = True
+            message = "The list '"+name+"' created successfully"
+        except:
+            status = False
+            message = "The list is not created"
+
+        return Response({'status': status,'data': data,'message': message})
 

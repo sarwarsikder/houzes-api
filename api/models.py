@@ -6,8 +6,6 @@ from django.contrib.postgres.fields.jsonb import JSONField
 import shortuuid
 
 
-
-
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None):
         user = self.model(
@@ -26,6 +24,7 @@ class UserManager(BaseUserManager):
         user.is_admin = True
         user.save(using=self._db)
         return user
+
 
 def generate_shortuuid():
     shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
@@ -80,26 +79,27 @@ class PropertyTags(models.Model):
         db_table = 'property_tags'
 
 
-class Property(models.Model):
-    cad_acct = models.CharField(max_length=255, null=True)
-    gma_tag = models.CharField(max_length=255, null=True)
-    property_address = models.CharField(max_length=255, null=True)
-    # owner_name = models.CharField(max_length=255,null=True)
-    # owner_address = models.CharField(max_length=255,null=True)
-
-    # A property can have multiple owner
-    owner_info = JSONField(default=list)
-
-    # place id must be null because user can upload property by csv import
-    google_place_id = models.CharField(max_length=255, null=True, unique=True)
-    latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
-    longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
-    property_tags = JSONField(default=list)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'properties'
+#
+# class Property(models.Model):
+#     cad_acct = models.CharField(max_length=255, null=True)
+#     gma_tag = models.CharField(max_length=255, null=True)
+#     property_address = models.CharField(max_length=255, null=True)
+#     # owner_name = models.CharField(max_length=255,null=True)
+#     # owner_address = models.CharField(max_length=255,null=True)
+#
+#     # A property can have multiple owner
+#     owner_info = JSONField(default=list)
+#
+#     # place id must be null because user can upload property by csv import
+#     google_place_id = models.CharField(max_length=255, null=True, unique=True)
+#     latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+#     longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+#     property_tags = JSONField(default=list)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#
+#     class Meta:
+#         db_table = 'properties'
 
 
 class UserLocation(models.Model):
@@ -128,11 +128,42 @@ class UserVerifications(models.Model):
         db_table = 'user_verifications'
 
 
+class UserList(models.Model):
+    name = models.CharField(max_length=255, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    leads_count = models.IntegerField(default=0, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_lists'
+
+
+class Property(models.Model):
+    user_list = models.ForeignKey(UserList, on_delete=models.CASCADE)
+    street = models.CharField(max_length=255, null=True)
+    city = models.CharField(max_length=255, null=True)
+    state = models.CharField(max_length=255, null=True)
+    zip = models.CharField(max_length=255, null=True)
+    cad_acct = models.CharField(max_length=255, null=True)
+    gma_tag = models.IntegerField(null=True)
+    latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    property_tags = JSONField(default=list)
+    # A property can have multiple owner
+    owner_info = JSONField(default=list, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'properties'
+
+
 class PropertyNotes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     property = models.ForeignKey(Property, on_delete=models.CASCADE,
                                  null=True)  # models.ForeignKey(, unique=True, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255,null=True)
+    title = models.CharField(max_length=255, null=True)
     notes = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -152,35 +183,6 @@ class PropertyPhotos(models.Model):
 
     class Meta:
         db_table = 'property_photos'
-
-
-class UserList(models.Model):
-    name = models.CharField(max_length=255, null=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
-    leads_count = models.IntegerField(default=0, null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'user_lists'
-
-
-class ListProperties(models.Model):
-    user_list = models.ForeignKey(UserList, on_delete=models.CASCADE)
-    property_address = models.CharField(max_length=255, null=True)
-    cad_acct = models.CharField(max_length=255, null=True)
-    gma_tag = models.IntegerField(null=True)
-    latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
-    longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
-    property_tags = JSONField(default=list)
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
-    # A property can have multiple owner
-    owner_info = JSONField(default=list, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'list_properties'
 
 
 class UserDriver(models.Model):
@@ -227,49 +229,51 @@ class UserSockets(models.Model):
     class Meta:
         db_table = 'user_sockets'
 
+
 class Invitations(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     email = models.CharField(max_length=255, null=False)
-    status = models.IntegerField(null=True) # invited => 0,in progress =>1,done =>3
+    status = models.IntegerField(null=True)  # invited => 0,in progress =>1,done =>3
     invitation_key = models.CharField(max_length=200, unique=True, default=generate_shortuuid)
-    first_name = models.CharField(max_length=255,null=True)
-    last_name = models.CharField(max_length=255,null=True)
+    first_name = models.CharField(max_length=255, null=True)
+    last_name = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'invitations'
 
+
 class Scout(models.Model):
-    first_name = models.CharField(max_length=255,null=True)
-    last_name = models.CharField(max_length=255,null=True)
-    url = models.CharField(max_length=255,null=True)
-    manager_id = models.ForeignKey(User,on_delete=models.CASCADE, null = True)
+    first_name = models.CharField(max_length=255, null=True)
+    last_name = models.CharField(max_length=255, null=True)
+    url = models.CharField(max_length=255, null=True)
+    manager_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'scouts'
 
-class ScoutsListProperty(models.Model):
-    scout = models.ForeignKey(Scout,on_delete=models.CASCADE)
-    list_properties = models.ForeignKey(ListProperties,on_delete=models.CASCADE)
+
+class ScoutsProperty(models.Model):
+    scouts = models.ForeignKey(Scout, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'scouts_list_properties'
+        db_table = 'scouts_properties'
 
 
 class AssignMemberToList(models.Model):
-    list = models.ForeignKey(UserList,on_delete=models.CASCADE)
-    member = models.ForeignKey(User,on_delete=models.CASCADE)
+    list = models.ForeignKey(UserList, on_delete=models.CASCADE)
+    member = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'assign_member_to_list'
-
 
 
 admin.site.register(User)

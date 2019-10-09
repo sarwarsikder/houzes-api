@@ -3,6 +3,6 @@ from api.serializers import *
 from api.models import *
 
 class ScoutsListPropertyViewSet(viewsets.ModelViewSet):
-    queryset = ScoutsListProperty.objects.all()
-    serializer_class = ScoutsListPropertySerializer
+    queryset = ScoutsProperty.objects.all()
+    serializer_class = ScoutsPropertySerializer
 
