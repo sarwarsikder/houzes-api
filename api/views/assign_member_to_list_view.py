@@ -12,12 +12,6 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
     serializer_class = AssignMemberToListSerializer
     ordering = ['-id']
 
-    def list(self, request, *args, **kwargs):
-        queryset = AssignMemberToList.objects.all()
-        serializer = AssignMemberToListSerializer(queryset, many=True)
-
-        return Response({'status': status.is_success(Response.status_code),'data': serializer.data,'message': 'List of member assigned to list'})
-
     def create(self, request, *args, **kwargs):
         try:
             list_id = request.data['list']

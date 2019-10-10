@@ -20,6 +20,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     serializer_class = PropertySerializer
     filterset_fields = ["street"]
 
+
     @action(detail=False, url_path='info/(?P<pk>[\w-]+)')
     def get_details_by_google_place_id(self, request, *args, **kwargs):
         property_id = kwargs['pk']
@@ -163,3 +164,4 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 message = 'property does not exist'
                 status = False
         return Response({'status': status,'data': data,'message': message})
+

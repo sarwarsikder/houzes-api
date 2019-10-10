@@ -10,6 +10,7 @@ from authorization import views
 
 urlpatterns = [
     path('log-in/', views.login, name='log-in'),
+    path('sign-in-with-facebook/', views.facebook_login, name='sign-in-with-facebook'),
 
 ]
 

@@ -37,14 +37,10 @@ class UserViewSet(viewsets.ModelViewSet):
         return gUid
 
     def create(self, request, *args, **kwargs):
-        # if '_mutable' in request.data:
-        #     if not request.data._mutable:
-        #         state = request.data._mutable
-        #         request.data._mutable = True
-        #
-        # data = request.data
-        # data['password'] = make_password(data['password'])
-        # data['is_active'] = True
+        status = False
+        data = None
+        message=""
+
         password = None
         first_name =None
         last_name = None
@@ -60,17 +56,27 @@ class UserViewSet(viewsets.ModelViewSet):
             first_name = request.data['first_name']
             last_name = request.data['last_name']
             email = request.data['email']
+
+            if User.objects.filter(email=email).count()>0:
+                status = False
+                data = None
+                message = "Email already exist"
+                return Response({'status': status, 'data': data, 'message': message})
+
             phone_number = request.data['phone_number']
             print(request.data)
-            if 'is_active' in request.data:
-                is_active = request.data['is_active']
+            # if 'is_active' in request.data:
+            #     is_active = request.data['is_active']
             if 'invited_by' in request.data:
                 invited_by = request.data['invited_by']
             if 'is_admin' in request.data:
                 is_admin = request.data['is_admin']
 
         except:
-            print('noooooooooooooooooooo')
+            status = False
+            message = "Please provide all the required fields correctly"
+            data = None
+            return Response({'status': status,'data': data, 'message': message})
 
         try:
             s3_url = ""
@@ -83,41 +89,44 @@ class UserViewSet(viewsets.ModelViewSet):
                 request.data['photo'] = s3_url
                 photo = s3_url
         except:
-            print('photo invalid')
+            status = False
+            message = "Error uploading photo"
+            data = None
+            return Response({'status': status,'data': data, 'message': message})
 
-        user = User(email=email,password=password,first_name=first_name,last_name=last_name,phone_number=phone_number,invited_by=invited_by,is_active=is_active,is_admin=is_admin,photo=photo)
-        user.save()
-        if user.photo !=None:
-            if 'http' in user.photo:
-                user.photo = user.photo.replace("id",str(user.id))
-                user.save()
+        try:
+            user = User(email=email,password=password,first_name=first_name,last_name=last_name,phone_number=phone_number,invited_by=invited_by,is_active=is_active,is_admin=is_admin,photo=photo)
+            user.save()
+            if user.photo !=None:
+                if 'http' in user.photo:
+                    user.photo = user.photo.replace("id",str(user.id))
+                    user.save()
 
-        Invitations.objects.filter(email=user.email).delete() #delete new user from invitation
+            Invitations.objects.filter(email=user.email).delete() #delete new user from invitation
 
-        #Email verification task starts here
-        code = generate_shortuuid()
-        userVerifications = UserVerifications(code=code,user=user,is_used=False,verification_type='email')
-        userVerifications.save()
+            #Email verification task starts here
+            code = generate_shortuuid()
+            userVerifications = UserVerifications(code=code,user=user,is_used=False,verification_type='email')
+            userVerifications.save()
 
-        send_mail(subject="HouZes emal verification",
-                  message="Dear,"+str(user.first_name)+' '+str(user.last_name)+ " please confirm your email by clicking the link "+settings.WEB_APP_URL+'/verify-email/'+str(code),
-                  from_email=settings.EMAIL_HOST_USER,
-                  recipient_list=[email],
-                  fail_silently=False
-                  )
-        #Email verification task ends here
+            send_mail(subject="HouZes emal verification",
+                      message="Dear,"+str(user.first_name)+' '+str(user.last_name)+ " please confirm your email by clicking the link "+settings.WEB_APP_URL+'/verify-email/'+str(code),
+                      from_email=settings.EMAIL_HOST_USER,
+                      recipient_list=[email],
+                      fail_silently=False
+                      )
+            #Email verification task ends here
 
-        userSerializer = UserSerializer(user)
-        return Response(userSerializer.data, status=status.HTTP_201_CREATED)
+            userSerializer = UserSerializer(user)
+            status= True
+            data = userSerializer.data
+            message = "A email has been sent to '"+email+"' for verification.Please verify before you log in."
+        except:
+            status = False
+            data = None
+            message = "Error registering new account"
 
-    # def perform_create(self, serializer):
-    #     instance = serializer.save()
-    #     instance.is_active = True
-    #     try:
-    #         if "http" in instance.photo :
-    #             instance.photo = instance.photo.replace("id", str(instance.id))
-    #     except:
-    #         print('----------------')
+        return Response({'status': status, 'data': data, 'message': message})
 
 
     def partial_update(self, request, *args, **kwargs):
@@ -138,14 +147,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if not request.data._mutable:
             request.data._mutable = state
         return super().partial_update(request, *args, **kwargs)
-        # except Exception as e:
-        #     exc_type, exc_obj, exc_tb = sys.exc_info()
-        #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        #     log = "----------- Error: " + str(exc_obj) + ", File: " + fname + ", Line: " + str(
-        #         exc_tb.tb_lineno) + " ------------"
-        #     print(log)
-        #     return ''
-
 
     @action(detail=False,methods=['GET'],url_path='user-verification/code/(?P<code>[\w-]+)')
     def userVericationByCode(self,requset,*args,**kwargs):

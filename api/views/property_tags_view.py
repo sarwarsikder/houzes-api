@@ -23,18 +23,30 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                          'message': 'list of property tags'})
 
     def create(self, request, *args, **kwargs):
+            try:
+                name = request.data['name']
+                color = request.data['color']
+                color_code = request.data['color_code']
+            except:
+                name = request.body['name']
+                color = request.body['color']
+                color_code = request.body['color_code']
+
             user_id = request.user.id
-            name = request.data['name']
-            color = request.data['color']
-            color_code = request.data['color_code']
-
             user = User.objects.get(id=user_id)
+            try:
+                propertyTags = PropertyTags(user=user, name=name, color=color,color_code=color_code)
+                propertyTags.save()
 
-            propertyTags = PropertyTags(user=user, name=name, color=color,color_code=color_code)
-            propertyTags.save()
-
-            propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
-            return Response(propertyTagsSerializer.data, status=status.HTTP_201_CREATED)
+                propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
+                status = True
+                data = propertyTagsSerializer.data
+                message = name+" tag created"
+            except:
+                status = False
+                data = None
+                message = "Error creating property tag"
+            return Response({'status': status, 'data': data, 'message': message})
 
     @action(detail=False)
     def PropertyTags_by_userId(self, request, *args, **kwargs):

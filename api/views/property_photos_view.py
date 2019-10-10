@@ -34,31 +34,64 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
     #     return super().create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        status = False
+        data = None
+        message=""
+
         user_id = request.user.id
         user = User.objects.get(id=user_id)
         property_id = request.POST.get('property')
         property = Property.objects.get(id=property_id)
+
         s3_url = ""
 
-        if 'photo_url' in request.FILES:
-            file = request.FILES['photo_url']
-            file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '.jpg')
-            s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
-            file_upload(file, file_path)
+        try:
+            if 'photo_url' in request.FILES:
+                file = request.FILES['photo_url']
+                file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '.jpg')
+                s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+                file_upload(file, file_path)
 
-            thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '_thumb.jpg')
-            thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, thumb_file_path)
-            with Image.open(file) as image:
-                thumb = resizeimage.resize_cover(image, [150, 150])
-                thumb_byte = BytesIO()
-                thumb.save(thumb_byte, format="jpeg")
-                thumb_image = thumb_byte.getvalue()
-                file_upload(thumb_image, thumb_file_path)
-        propertyPhotos = PropertyPhotos(user=user, property=property, photo_url=s3_url, thumb_photo_url=thumb_s3_url)
-        propertyPhotos.save()
+                thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '_thumb.jpg')
+                thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, thumb_file_path)
+                with Image.open(file) as image:
+                    thumb = resizeimage.resize_cover(image, [150, 150])
+                    thumb_byte = BytesIO()
+                    thumb.save(thumb_byte, format="jpeg")
+                    thumb_image = thumb_byte.getvalue()
+                    file_upload(thumb_image, thumb_file_path)
+        except:
+            status = False
+            data = None
+            message = "Error uploading photo"
+            return Response({'status': status, 'data': data, 'message': message})
 
-        propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos)
-        return Response(propertyPhotosSerializer.data, status=status.HTTP_201_CREATED)
+        try:
+            propertyPhotos = PropertyPhotos(user=user, property=property, photo_url=s3_url, thumb_photo_url=thumb_s3_url)
+            propertyPhotos.save()
+            propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos)
+
+            status = True
+            data = propertyPhotosSerializer.data
+            message = "Property photo uploaded successfully"
+        except:
+            status = False
+            data = None
+            message = "Error uploading photo"
+        return Response({'status': status, 'data': data, 'message': message})
+
+    def destroy(self, request, *args, **kwargs):
+        property_photo_id = kwargs['pk']
+
+        try:
+            PropertyPhotos.objects.get(id = property_photo_id).delete()
+            status = True
+            message = "Photo deleted"
+        except:
+            status = False
+            message = "Error deleting photo"
+        return Response({'status': status, 'message': message})
+
 
     @action(detail=False, url_path='current-user')
     def propertyPhotos_by_userId(self, request, *args, **kwargs):

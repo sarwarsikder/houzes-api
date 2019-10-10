@@ -28,46 +28,74 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
         return PropertyNotes.objects.filter(user_id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
-        if not request.data._mutable:
-            state = request.data._mutable
-            request.data._mutable = True
 
-        request.data['user'] = request.user.id
+        try:
+            propertyId =request.data['property']
+            if 'title' in request.data:
+                title = request.data['title']
+            else:
+                status = False
+                message = "Title is not given"
+                data = None
+                return Response({'status': status, 'data': data, 'message': message})
+            if 'notes' in request.data:
+                notes = request.data['notes']
+            else:
+                status = False
+                message = "Note is not given"
+                data = None
+                return Response({'status': status, 'data': data, 'message': message})
+        except:
+            propertyId = request.body['property']
+            if 'title' in request.body:
+                title = request.body['title']
+            else:
+                status = False
+                message = "Title is not given"
+                data = None
+                return Response({'status': status, 'data': data, 'message': message})
+            if 'notes' in request.body:
+                notes = request.body['notes']
+            else:
+                status = False
+                message = "Note is not given"
+                data = None
+                return Response({'status': status, 'data': data, 'message': message})
 
-        if not request.data._mutable:
-            request.data._mutable = state
+        userId = request.user.id
+        user = User.objects.get(id=userId)
+        property = Property.objects.get(id=propertyId)
 
-        return super().create(request, *args, **kwargs)
+        try:
+            propertyNotes = PropertyNotes(property=property,notes=notes,title=title,user=user)
+            propertyNotes.save()
+            data = PropertyNotesSerializer(propertyNotes).data
+            status = True
+            message = "Property note inserted"
 
-    #
-    # @action(detail=False)
-    # def propertyNotes_by_userId(self, request, *args, **kwargs):
-    #     user_id = 4
-    #     user = User.objects.get(id=user_id)
-    #     propertyNotes = PropertyNotes.objects.filter(user=user)
-    #     print(propertyNotes)
-    #     propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
-    #     return Response(propertyNotesSerializer.data)
+        except:
+            status = False
+            data = None
+            message = "Error in  property note insertion"
+
+        return Response({'status': status, 'data': data, 'message': message})
 
     @action(detail=False, url_path='property/(?P<pk>[\w-]+)')
-    def propertyNotes_by_propertyId(self, request, *args, **kwargs):
+    def get_propertyNotes_by_propertyId(self, request, *args, **kwargs):
         propertyId = kwargs['pk']
         page_size = request.GET.get('limit')
         property = Property.objects.get(id=propertyId)
         userId = request.user.id
         user = User.objects.get(id = userId)
         propertyNotes = PropertyNotes.objects.filter(property=property, user = user)
-        print(propertyNotes)
-        propertyNotesSerializer = PropertyNotesSerializer(propertyNotes, many=True)
 
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size
         else:
             paginator.page_size = 10
-        # paginator.offset = 0
+
         result_page = paginator.paginate_queryset(propertyNotes, request)
         serializer = PropertyNotesSerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
 
-        # return Response(propertyNotesSerializer.data)
