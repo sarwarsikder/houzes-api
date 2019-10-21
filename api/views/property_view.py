@@ -1,4 +1,6 @@
 import json
+
+from django.db.models import Count
 from rest_framework import viewsets, pagination
 from rest_framework.decorators import action
 from django.http import HttpResponse, JsonResponse
@@ -20,6 +22,83 @@ class PropertyViewSet(viewsets.ModelViewSet):
     serializer_class = PropertySerializer
     filterset_fields = ["street"]
 
+    def create(self, request, *args, **kwargs):
+        street = ""
+        city = ""
+        state = ""
+        zip = ""
+        cad_acct = ""
+        gma_tag = None
+        latitude = None
+        longitude = None
+        property_tags = []
+        owner_info =  []
+        user_list = None
+
+        status = False
+        data = {}
+        message =""
+
+        try:
+            if 'street' in request.data:
+                street = request.data['street']
+            if 'city' in request.data:
+                city = request.data['city']
+            if 'state' in request.data:
+                state = request.data['state']
+            if 'zip' in request.data:
+                zip = request.data['zip']
+            if 'cad_acct' in request.data:
+                cad_acct = request.data['cad_acct']
+            if 'gma_tag' in request.data:
+                gma_tag = request.data['gma_tag']
+            if 'latitude' in request.data:
+                latitude = request.data['latitude']
+            if 'longitude' in request.data:
+                longitude = request.data['longitude']
+            if 'property_tags' in request.data:
+                property_tags = request.data['property_tags']
+            if 'owner_info' in request.data:
+                owner_info = request.data['owner_info']
+            if 'user_list' in request.data:
+                user_list = request.data['user_list']
+
+        except:
+            if 'street' in request.body:
+                street = request.body['street']
+            if 'city' in request.body:
+                city = request.body['city']
+            if 'state' in request.body:
+                state = request.body['state']
+            if 'zip' in request.body:
+                zip = request.body['zip']
+            if 'cad_acct' in request.body:
+                cad_acct = request.body['cad_acct']
+            if 'gma_tag' in request.body:
+                gma_tag = request.body['gma_tag']
+            if 'latitude' in request.body:
+                latitude = request.body['latitude']
+            if 'longitude' in request.body:
+                longitude = request.body['longitude']
+            if 'property_tags' in request.body:
+                property_tags = request.body['property_tags']
+            if 'owner_info' in request.body:
+                owner_info = request.body['owner_info']
+            if 'user_list' in request.body:
+                user_list = request.body['user_list']
+        try:
+            user_list = UserList.objects.get(id=user_list)
+            property = Property(street=street,city=city,state=state,zip=zip,cad_acct=cad_acct,gma_tag=gma_tag,latitude=latitude,longitude=longitude,property_tags=property_tags,owner_info=owner_info,user_list=user_list)
+            property.save()
+
+            status = True
+            data = PropertySerializer(property).data
+            message = "Successfully created property"
+        except:
+            status = False
+            data = {}
+            message = "Failed to create property"
+        return Response({'status': status, 'data' : data, 'message' : message})
 
     @action(detail=False, url_path='info/(?P<pk>[\w-]+)')
     def get_details_by_google_place_id(self, request, *args, **kwargs):
@@ -79,12 +158,12 @@ class PropertyViewSet(viewsets.ModelViewSet):
     #
     #     return JsonResponse({'response': 'success'})
 
-    @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
-    def get_property_by_tag(self, request, *args, **kwargs):
-        tagId = kwargs['id']
-        property = Property.objects.filter(property_tags__id = tagId)
-        propertySerializer = PropertySerializer(property, many=True).data
-        return HttpResponse(content=json.dumps(propertySerializer), status=200, content_type="application/json")
+    # @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
+    # def get_property_by_tag(self, request, *args, **kwargs):
+    #     tagId = kwargs['id']
+    #     property = Property.objects.filter(property_tags__id = tagId)
+    #     propertySerializer = PropertySerializer(property, many=True).data
+    #     return HttpResponse(content=json.dumps(propertySerializer), status=200, content_type="application/json")
 
     @action(detail=False,methods=['GET'],url_path='(?P<id>[\w-]+)/note')
     def get_note_by_property(self, request, *args, **kwargs):
@@ -95,11 +174,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
         return HttpResponse(content=json.dumps(propertyNotesSerializer.data), status=200, content_type="application/json")
 
     @action(detail=False, url_path='list/(?P<pk>[\w-]+)')
-    def list_propertiesByUserList(self, request, *args, **kwargs):
+    def get_properties_by_user_list(self, request, *args, **kwargs):
         listId = kwargs['pk']
         page_size = request.GET.get('limit')
         list = UserList.objects.get(id=listId)
-        property = Property.objects.filter(user_list = list).annotate(photo_count=Count('property__propertyphotos'),note_count=Count('property__propertynotes'))
+        property = Property.objects.filter(user_list = list).annotate(photo_count=Count('propertyphotos'),note_count=Count('propertynotes'))
 
 
         paginator = CustomPagination()
@@ -113,7 +192,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         return paginator.get_paginated_response(data=serializer.data)
 
     @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
-    def get_list_property_by_tag(self, request, *args, **kwargs):
+    def get_property_by_tag(self, request, *args, **kwargs):
         tagId = kwargs['id']
         print(type(tagId))
         page_size = request.GET.get('limit')
