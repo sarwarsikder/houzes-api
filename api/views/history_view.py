@@ -217,7 +217,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
     def get_property_list_by_user(self,request,*args,**kwargs):
         page_size = request.GET.get('limit')
         user = User.objects.get(id = request.user.id)
-        history = History.objects.filter(user = user)
+        history = History.objects.filter(user = user).order_by('-id')
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size

@@ -12,6 +12,7 @@ django-filter==2.2.0
 django-oauth-toolkit==1.2.0
 django-oauth2-provider==0.2.6.1
 djangorestframework==3.9.0
+djangorestframework-stubs==1.0.0
 docutils==0.14
 idna==2.8
 itypes==1.1.0
