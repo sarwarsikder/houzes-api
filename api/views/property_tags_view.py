@@ -16,11 +16,10 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
 
 
     def list(self, request, *args, **kwargs):
-        queryset = PropertyTags.objects.all()
+        queryset = PropertyTags.objects.all().order_by('-id')
         serializer = PropertyTagsSerializer(queryset, many=True)
 
-        return Response({'status': status.is_success(Response.status_code), 'data': serializer.data,
-                         'message': 'list of property tags'})
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
             try:
@@ -56,3 +55,36 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
         print(propertyTags)
         propertyTagsSerializer = PropertyTagsSerializer(propertyTags, many=True)
         return Response(propertyTagsSerializer.data)
+
+    @action(detail=False,methods=['POST'],url_path='property/(?P<id>[\w-]+)/assign-tag')
+    def assign_tag_to_property(self,request,*args,**kwargs):
+        propertyId = kwargs['id']
+        status = False
+        data = None
+        message=""
+        try:
+            property_tag = request.data['tag']
+        except :
+            property_tag = request.body['tag']
+
+        if PropertyTags.objects.filter(id=property_tag).count()==0:
+            message="Missing tag"
+        else:
+            try:
+                tagExist = False
+                property = Property.objects.get(id=propertyId)
+                for tag in property.property_tags:
+                    if tag['id']==property_tag :
+                        message = 'Tag already exist'
+                        tagExist = True
+                if not tagExist :
+                    property.property_tags.append({'id':property_tag})
+                    property.save()
+                    message = 'Tag added to the property'
+                    status = True
+                    propertySerializer = PropertySerializer(property)
+                    data = propertySerializer.data
+            except:
+                message = 'property does not exist'
+                status = False
+        return Response({'status': status,'data': data,'message': message})

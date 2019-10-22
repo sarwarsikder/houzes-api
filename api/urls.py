@@ -4,6 +4,8 @@ from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 # from.views import *
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
+from api.views.history_view import HistoryViewSet
+from api.views.history_detail_view import HistoryDetailViewSet
 from api.views.user_view import UserViewSet
 from api.views.user_location_view import UserLocationViewSet
 from api.views.user_verification_view import UserVerificationsViewSet
@@ -37,6 +39,9 @@ router.register(r'team', InvitationsViewSet)
 router.register(r'scout', ScoutViewSet)
 router.register(r'scouts-list-property', ScoutsListPropertyViewSet)
 router.register(r'assign-member-to-list', AssignMemberToListViewSet)
+router.register(r'history',HistoryViewSet)
+router.register(r'history-detail', HistoryDetailViewSet)
+
 
 
 urlpatterns = [

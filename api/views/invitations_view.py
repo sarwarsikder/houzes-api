@@ -19,9 +19,6 @@ class InvitationsViewSet(viewsets.ModelViewSet):
     queryset = Invitations.objects.all()
     serializer_class = InvitationsSerializer
 
-    # def get_queryset(self):
-    #     return Invitations.objects.filter(user=self.request.user.id)
-
     def generate_shortuuid(self):
         shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
         gUid = str(shortuuid.random(length=16))
@@ -64,7 +61,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(status=0, user_id=request.user.id),many=True)
         dict = {
             # 'users': list(),
-            'users': users.data,
+            'user': users.data,
             'unregistered_invitations': unregistered_invitations.data,
         }
         print(dict)

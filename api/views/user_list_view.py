@@ -45,3 +45,22 @@ class UserListViewSet(viewsets.ModelViewSet):
 
         return Response({'status': status,'data': data,'message': message})
 
+    def destroy(self, request, *args, **kwargs):
+        user_list_id = kwargs['pk']
+
+        status = False
+        message = ""
+
+        if UserList.objects.filter(id=user_list_id).count()==0:
+            status = False
+            message = "List does not exist"
+        else:
+            try:
+                UserList.objects.get(id=user_list_id).delete()
+                status = True
+                message = "List is deleted"
+            except:
+                status = False
+                message = "Error deleting list"
+
+        return Response({'status': status,'message': message})

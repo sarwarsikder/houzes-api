@@ -1,7 +1,8 @@
 import json
 
 from django.db.models import Count
-from rest_framework import viewsets, pagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, pagination,filters
 from rest_framework.decorators import action
 from django.http import HttpResponse, JsonResponse
 from api.serializers import *
@@ -20,7 +21,43 @@ class CustomPagination(pagination.PageNumberPagination):
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     filterset_fields = ["street"]
+    ordering = ['-id']
+
+    def retrieve(self, request, *args, **kwargs):
+        property_id = kwargs['pk']
+        property = Property.objects.get(id=property_id)
+        tags = []
+        try:
+            user_list_id = property.user_list.id
+        except:
+            user_list_id = None
+
+        for tag in property.property_tags:
+            property_tags = PropertyTags.objects.get(id=tag['id'])
+            print(PropertyTagsSerializer(property_tags).data)
+            tags.append(PropertyTagsSerializer(property_tags).data)
+
+        property_representation = {
+            'id' : property.id,
+            'user_list' : user_list_id,
+            'street': property.street,
+            'city': property.city,
+            'state': property.state,
+            'zip': property.zip,
+            'cad_acct': property.cad_acct,
+            'gma_tag': property.gma_tag,
+            'latitude' : property.latitude,
+            'longitude' : property.longitude,
+            'property_tags' : tags,
+            'owner_info' : property.owner_info,
+            'photos' : PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property),many=True).data,
+            'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property),many=True).data,
+            'created_at': property.created_at,
+            'updated_at' : property.updated_at
+        }
+        return Response(property_representation)
 
     def create(self, request, *args, **kwargs):
         street = ""
@@ -62,6 +99,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 owner_info = request.data['owner_info']
             if 'user_list' in request.data:
                 user_list = request.data['user_list']
+                user_list = UserList.objects.get(id=user_list)
 
         except:
             if 'street' in request.body:
@@ -86,8 +124,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 owner_info = request.body['owner_info']
             if 'user_list' in request.body:
                 user_list = request.body['user_list']
+                user_list = UserList.objects.get(id=user_list)
         try:
-            user_list = UserList.objects.get(id=user_list)
             property = Property(street=street,city=city,state=state,zip=zip,cad_acct=cad_acct,gma_tag=gma_tag,latitude=latitude,longitude=longitude,property_tags=property_tags,owner_info=owner_info,user_list=user_list)
             property.save()
 
@@ -165,20 +203,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
     #     propertySerializer = PropertySerializer(property, many=True).data
     #     return HttpResponse(content=json.dumps(propertySerializer), status=200, content_type="application/json")
 
-    @action(detail=False,methods=['GET'],url_path='(?P<id>[\w-]+)/note')
-    def get_note_by_property(self, request, *args, **kwargs):
-        propertyId = kwargs['id']
-        property = Property.objects.get(id=propertyId)
-        propertyNotes = PropertyNotes.objects.filter(property = property)
-        propertyNotesSerializer = PropertyNotesSerializer(propertyNotes,many=True)
-        return HttpResponse(content=json.dumps(propertyNotesSerializer.data), status=200, content_type="application/json")
 
     @action(detail=False, url_path='list/(?P<pk>[\w-]+)')
     def get_properties_by_user_list(self, request, *args, **kwargs):
         listId = kwargs['pk']
         page_size = request.GET.get('limit')
         list = UserList.objects.get(id=listId)
-        property = Property.objects.filter(user_list = list).annotate(photo_count=Count('propertyphotos'),note_count=Count('propertynotes'))
+        property = Property.objects.filter(user_list = list).annotate(photo_count=Count('propertyphotos'),note_count=Count('propertynotes')).order_by('-id')
 
 
         paginator = CustomPagination()
@@ -194,10 +225,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
     def get_property_by_tag(self, request, *args, **kwargs):
         tagId = kwargs['id']
-        print(type(tagId))
         page_size = request.GET.get('limit')
-        property = Property.objects.filter(property_tags__contains = [{'id' : int(tagId,10) }])
-        print(property)
+        property = Property.objects.filter(property_tags__contains = [{'id': int(tagId,10) }])
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size
@@ -209,38 +238,73 @@ class PropertyViewSet(viewsets.ModelViewSet):
         serializer = PropertySerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
 
-    @action(detail=False,methods=['POST'],url_path='(?P<id>[\w-]+)/assign-tag')
-    def assign_tag_to_list_property(self,request,*args,**kwargs):
-        propertyId = kwargs['id']
-        status = False
-        data = None
-        message=""
+    def destroy(self, request, *args, **kwargs):
+        property_id = kwargs['pk']
         try:
-            property_tag = request.data['tag']
-        except :
-            property_tag = request.body['tag']
+            Property.objects.get(id = property_id).delete()
+            status = True
+            message = "Property deleted"
+        except:
+            status = False
+            message = "Error deleting property or property does not exist"
+        return Response({'status': status, 'message': message})
 
-        if PropertyTags.objects.filter(id=property_tag).count()==0:
-            message="Missing tag"
-        else:
-            try:
-                tagExist = False
-                property = Property.objects.get(id=propertyId)
-                print(property.property_tags)
-                for tag in property.property_tags:
-                    if tag['id']==property_tag :
-                        message = 'Tag already exist'
-                        tagExist = True
-                if not tagExist :
-                    print(type(property.property_tags))
-                    property.property_tags.append({'id':property_tag})
-                    property.save()
-                    message = 'Tag added to the property'
-                    status = True
-                    propertySerializer = PropertySerializer(property)
-                    data = PropertySerializer.data
-            except:
-                message = 'property does not exist'
-                status = False
-        return Response({'status': status,'data': data,'message': message})
+    def partial_update(self, request, *args, **kwargs):
+        status = False
+        data ={}
+        message = ""
 
+        # res = super().partial_update(request, *args, **kwargs)
+        property = Property.objects.get(id=kwargs['pk'])
+        try:
+            if 'street' in request.data:
+                property.street = request.data['street']
+            if 'city' in request.data:
+                property.city = request.data['city']
+            if 'state' in request.data:
+                property.state = request.data['state']
+            if 'zip' in request.data:
+                property.zip = request.data['zip']
+            if 'cad_acct' in request.data:
+                property.cad_acct = request.data['cad_acct']
+            if 'gma_tag' in request.data:
+                property.gma_tag = request.data['gma_tag']
+            if 'latitude' in request.data:
+                property.latitude = request.data['latitude']
+            if 'longitude' in request.data:
+                property.longitude = request.data['longitude']
+            if 'property_tags' in request.data:
+                property.property_tags = request.data['property_tags']
+            if 'owner_info' in request.data:
+                property.owner_info = request.data['owner_info']
+        except:
+            if 'street' in request.body:
+                property.street = request.body['street']
+            if 'city' in request.body:
+                property.city = request.body['city']
+            if 'state' in request.body:
+                property.state = request.body['state']
+            if 'zip' in request.body:
+                property.zip = request.body['zip']
+            if 'cad_acct' in request.body:
+                property.cad_acct = request.body['cad_acct']
+            if 'gma_tag' in request.body:
+                property.gma_tag = request.body['gma_tag']
+            if 'latitude' in request.body:
+                property.latitude = request.body['latitude']
+            if 'longitude' in request.body:
+                property.longitude = request.body['longitude']
+            if 'property_tags' in request.body:
+                property.property_tags = request.body['property_tags']
+            if 'owner_info' in request.body:
+                property.owner_info = request.body['owner_info']
+        try:
+            property.save()
+            status = True
+            data = PropertySerializer(property).data
+            message = "Property updated successfully"
+        except:
+            status = False
+            data = {}
+            message = "Please provide all the field correctly"
+        return Response({'status': status, 'data' : data, 'message' : message})

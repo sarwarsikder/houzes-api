@@ -1,4 +1,5 @@
-from rest_framework import viewsets, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, status,filters
 from rest_framework.response import Response
 from rest_framework.utils import json
 
@@ -10,13 +11,13 @@ from api.models import *
 class AssignMemberToListViewSet(viewsets.ModelViewSet):
     queryset = AssignMemberToList.objects.all()
     serializer_class = AssignMemberToListSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     ordering = ['-id']
 
     def create(self, request, *args, **kwargs):
         try:
             list_id = request.data['list']
             member_id = request.data['member']
-            print('try works')
 
         except:
             body_unicode = request.body.decode('utf-8')
@@ -24,13 +25,9 @@ class AssignMemberToListViewSet(viewsets.ModelViewSet):
 
             list_id = body['list']
             member_id = body['member']
-            print('catch works')
 
         userList = UserList.objects.get(id=list_id)
         member = User.objects.get(id=member_id)
-
-        print(userList)
-        print(member)
 
         message= ""
         data = None

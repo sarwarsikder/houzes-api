@@ -1,4 +1,5 @@
-from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets,filters
 from oauth2_provider.models import AccessToken
 from rest_framework.response import Response
 
@@ -13,7 +14,8 @@ from houzes_api.settings import WEB_APP_URL
 class ScoutViewSet(viewsets.ModelViewSet):
     queryset = Scout.objects.all()
     serializer_class = ScoutSerializer
-
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    ordering = ['-id']
     def get_queryset(self):
         return Scout.objects.filter(manager_id=self.request.user.id)
 
@@ -73,5 +75,24 @@ class ScoutViewSet(viewsets.ModelViewSet):
             message = "Error creating scout"
 
         return Response({'status': status, 'data': data, 'message': message})
+
+    def destroy(self, request, *args, **kwargs):
+        scout_id = kwargs['pk']
+        status = False
+        message=""
+        if Scout.objects.filter(id=scout_id).count()==0:
+            status = False
+            message = "Scout not found"
+        else:
+            try:
+                Scout.objects.get(id=scout_id).delete()
+                status = True
+                message = "Scout deleted"
+            except:
+                status = False
+                message = "Error deleting scout"
+
+        return Response({'status': status, 'message': message})
+
 
 

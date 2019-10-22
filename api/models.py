@@ -275,6 +275,31 @@ class AssignMemberToList(models.Model):
     class Meta:
         db_table = 'assign_member_to_list'
 
+class History(models.Model):
+    start_point_latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    start_point_longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    end_point_latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    end_point_longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    image = models.CharField(max_length=255, null=True)
+    start_time = models.DateTimeField(blank=True,null=True)
+    end_time =  models.DateTimeField(blank=True,null=True)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    polylines = models.TextField(null=True)
+    length = models.DecimalField(max_digits=50,decimal_places=20,null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'history'
+
+class HistoryDetail(models.Model):
+    history = models.ForeignKey(History,on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'history_details'
 
 admin.site.register(User)
 admin.site.register(UserSockets)

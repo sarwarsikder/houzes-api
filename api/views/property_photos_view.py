@@ -1,6 +1,7 @@
 import time
 
-from rest_framework import viewsets, status, pagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, status, pagination, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from api.serializers import *
@@ -23,15 +24,13 @@ class CustomPagination(pagination.PageNumberPagination):
 class PropertyPhotosViewSet(viewsets.ModelViewSet):
     queryset = PropertyPhotos.objects.all()
     serializer_class = PropertyPhotosSerializer
-    filterset_fields = ["id"]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    filterset_fields = ["-id"]
 
 
     def get_queryset(self):
         return PropertyPhotos.objects.filter(user_id=self.request.user.id)
 
-    # def create(self, request, *args, **kwargs):
-    #     request.data['user'] = request.user.id
-    #     return super().create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         status = False
@@ -97,7 +96,7 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
     def propertyPhotos_by_userId(self, request, *args, **kwargs):
         user_id = request.user.id
         user = User.objects.get(id=user_id)
-        propertyPhotos = PropertyPhotos.objects.filter(user=user)
+        propertyPhotos = PropertyPhotos.objects.filter(user=user).order_by('-id')
         print(propertyPhotos)
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
         return Response(propertyPhotosSerializer.data)
@@ -106,11 +105,7 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
     def propertyPhotos_by_propertyId(self, request, *args, **kwargs):
         propertyId = kwargs['pk']
         page_size = request.GET.get('limit')
-
-        propertyPhotos = PropertyPhotos.objects.filter(property=propertyId)
-        print(propertyPhotos)
-
-        propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
+        propertyPhotos = PropertyPhotos.objects.filter(property=propertyId).order_by('-id')
 
         paginator = CustomPagination()
         if page_size:

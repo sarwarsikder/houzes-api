@@ -87,7 +87,7 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
         property = Property.objects.get(id=propertyId)
         userId = request.user.id
         user = User.objects.get(id = userId)
-        propertyNotes = PropertyNotes.objects.filter(property=property, user = user)
+        propertyNotes = PropertyNotes.objects.filter(property=property, user = user).order_by('-id')
 
         paginator = CustomPagination()
         if page_size:
