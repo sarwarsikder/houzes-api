@@ -38,6 +38,7 @@ def login(request):
         client_secret = body['client_secret']
         grant_type = body['grant_type']
 
+    # print(User.objects.filter(email=username).count())
     if User.objects.filter(email=username).count()>0:
         user = User.objects.filter(email=username)
         if user[0].is_active == False:

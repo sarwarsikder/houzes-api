@@ -164,37 +164,30 @@ class PropertyViewSet(viewsets.ModelViewSet):
         else:
             return super().create(request, *args, **kwargs)
 
-    # @action(detail=False, methods=['post'], url_path='bulk-create')
-    # def property_bulk_create(self, request, *args, **kwargs):
-    #     requestData = request.data
-    #
-    #     objs = []
-    #     iterator=0
-    #     while iterator< len(requestData['street']):
-    #         property = Property()
-    #         property.owner_info = json.loads('[{"ownerName" : "'+requestData['ownerName'][iterator]+'","ownerAddress" : "'+requestData['ownerAddress'][iterator]+'"}]')
-    #         property.street = requestData['street'][iterator]
-    #         property.zip = requestData['zip'][iterator]
-    #         property.city = requestData['city'][iterator]
-    #         property.state = requestData['state'][iterator]
-    #
-    #
-    #         property_create = Property(owner_info= property.owner_info,street=property.street,zip = property.zip,state=property.state,city=property.city)
-    #         property_create.save()
-    #
-    #         list_property = ListProperties()
-    #         list_property.user_list_id = requestData['list']
-    #         list_property.property_id = property_create.id
-    #         list_property.property_address = requestData['propertyAddress'][iterator]
-    #         list_property.owner_info = json.loads('[{"ownerName" : "'+requestData['ownerName'][iterator]+'","ownerAddress" : "'+requestData['ownerAddress'][iterator]+'"}]')
-    #
-    #         objs.append(list_property)
-    #
-    #         iterator+=1
-    #
-    #     ListProperties.objects.bulk_create(objs, batch_size=50)
-    #
-    #     return JsonResponse({'response': 'success'})
+    @action(detail=False, methods=['post'], url_path='bulk-create')
+    def property_bulk_create(self, request, *args, **kwargs):
+        try:
+            requestData = request.data
+        except:
+            requestData = request.body
+        print(requestData)
+        objs = []
+        iterator=0
+        while iterator< len(requestData['cities']):
+            property = Property()
+            property.owner_info = json.loads('[{"ownerName" : "'+requestData['ownerName'][iterator]+'","ownerAddress" : "'+requestData['ownerAddress'][iterator]+'"}]')
+            property.street = requestData['streets'][iterator]
+            property.zip = requestData['zips'][iterator]
+            property.city = requestData['cities'][iterator]
+            property.state = requestData['states'][iterator]
+            property.user_list_id = requestData['user_list']
+
+            objs.append(property)
+
+            iterator+=1
+
+        Property.objects.bulk_create(objs, batch_size=50)
+        return JsonResponse({'status': True, 'message' : 'Properties created'})
 
     # @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
     # def get_property_by_tag(self, request, *args, **kwargs):
