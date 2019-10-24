@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from api.serializers import *
 from api.models import *
 from rest_framework import status, pagination
+from django.http import HttpResponse, JsonResponse
 
 class CustomPagination(pagination.PageNumberPagination):
     def get_paginated_response(self, data):
@@ -99,3 +100,26 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
         serializer = PropertyNotesSerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
 
+    @action(detail=False, methods=['post'], url_path='property/(?P<id>[\w-]+)/multiple-upload')
+    def property_notes_bulk_create(self, request, *args, **kwargs):
+        property_id = kwargs['id']
+        property = Property.objects.get(id=property_id)
+        try:
+            requestData = request.data
+        except:
+            requestData = request.body
+        print(requestData)
+        objs = []
+
+        for it in requestData:
+            property_note = PropertyNotes()
+            property_note.title = it['title']
+            property_note.title = it['title']
+            property_note.notes = it['notes']
+            property_note.user = User.objects.get(id = request.user.id)
+            property_note.property = property
+
+            objs.append(property_note)
+
+        PropertyNotes.objects.bulk_create(objs, batch_size=50)
+        return JsonResponse({'status': True, 'message' : 'Property notes created'})
