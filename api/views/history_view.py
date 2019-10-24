@@ -214,10 +214,24 @@ class HistoryViewSet(viewsets.ModelViewSet):
         return paginator.get_paginated_response(data=serializer.data)
 
     @action(detail=False,methods=['GET'],url_path='user')
-    def get_property_list_by_user(self,request,*args,**kwargs):
+    def get_history_list_by_user(self,request,*args,**kwargs):
         page_size = request.GET.get('limit')
         user = User.objects.get(id = request.user.id)
-        history = History.objects.filter(user = user).order_by('-id')
+        history = History.objects.filter(~Q(end_time=None),user = user).order_by('-id')
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+        result_page = paginator.paginate_queryset(history, request)
+        serializer = HistorySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False,methods=['GET'],url_path='team')
+    def get_history_by_team(self,request,*args,**kwargs):
+        page_size = request.GET.get('limit')
+        users = User.objects.filter(invited_by = request.user.id)
+        history = History.objects.filter(~Q(end_time=None),user__in = users).order_by('-id')
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size

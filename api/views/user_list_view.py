@@ -64,3 +64,30 @@ class UserListViewSet(viewsets.ModelViewSet):
                 message = "Error deleting list"
 
         return Response({'status': status,'message': message})
+
+    def partial_update(self, request, *args, **kwargs):
+        name = None
+        user = User.objects.get(id=request.user.id)
+
+        status = False
+        data = {}
+        message = ""
+
+        try:
+            name = request.data['name']
+        except:
+            name = request.body['name']
+
+        try:
+            user_list = UserList(name=name,user=user,leads_count=0)
+            user_list.save()
+            status = True
+            data = UserListSerializer(user_list).data
+            message = 'List updated'
+        except:
+            status = False
+            data = {}
+            message = 'Error updating list'
+
+        return Response({'status': status,'message': message})
+
