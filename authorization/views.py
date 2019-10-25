@@ -46,17 +46,26 @@ def login(request):
             return JsonResponse({"status": status, "data": None, "message": message})
 
     current_url = request.scheme + '://' + request.META['HTTP_HOST']
-    print(current_url)
-    r = requests.post(
-        current_url + '/o/token/',
-        data={
-            'grant_type': grant_type,
-            'username': username,
-            'password': password,
-            'client_id': client_id,
-            'client_secret': client_secret,
-        },
-    )
+    print(current_url + '/o/token/')
+    print(grant_type)
+    print(username)
+    print(password)
+    print(client_secret)
+    print(client_id)
+
+    try:
+        r = requests.post(
+            current_url + '/o/token/',
+            data={
+                'grant_type': grant_type,
+                'username': username,
+                'password': password,
+                'client_id': client_id,
+                'client_secret': client_secret,
+            },
+        )
+    except:
+        print("Something Went Wrong")
 
     print(r.json())
     # response = redirect(REDIRECT_URL)
