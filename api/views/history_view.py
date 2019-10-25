@@ -240,3 +240,11 @@ class HistoryViewSet(viewsets.ModelViewSet):
         result_page = paginator.paginate_queryset(history, request)
         serializer = HistorySerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
+
+
+    # @action(detail=False,methods=['GET'],url_path='team/visited-properties')
+    # def get_team_visited_properties(self,request,*args,**kwargs):
+    #     users = User.objects.filter(invited_by=request.user.id)
+    #     histories = History.objects.filter(~Q(end_time=None), user__in=users).order_by('-id')
+    #     history_details = HistoryDetail.objects.filter(history__in=histories)
+    #     properties Property.objects.
