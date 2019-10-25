@@ -53,18 +53,16 @@ def login(request):
     print(client_secret)
     print(client_id)
 
-    try:
-        r = requests.post(
-            current_url + '/o/token/',
-            data={
-                'grant_type': grant_type,
-                'username': username,
-                'password': password,
-                'client_id': client_id,
-                'client_secret': client_secret,
-            }, verify=True)
-    except:
-        print("Something Went Wrong")
+
+    r = requests.post(
+        current_url + '/o/token/',
+        data={
+            'grant_type': grant_type,
+            'username': username,
+            'password': password,
+            'client_id': client_id,
+            'client_secret': client_secret,
+        }, verify=True)
 
     print(r.json())
     # response = redirect(REDIRECT_URL)
