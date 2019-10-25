@@ -7,11 +7,13 @@ from rest_framework.decorators import action
 from oauth2_provider.models import AccessToken
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
+from rest_framework.utils import json
+
 from houzes_api import settings
 from houzes_api.util.file_upload import file_upload
 import time
 from django.core.mail import send_mail
-
+import requests
 from api.serializers import *
 from api.models import *
 
@@ -176,3 +178,59 @@ class UserViewSet(viewsets.ModelViewSet):
         print(invitations[0])
         invitationsSerializer = InvitationsSerializer(invitations[0])
         return Response(invitationsSerializer.data)
+
+    @action(detail =False,methods=['POST'],url_path='sign-in')
+    def user_sign_in(self,request,*args,**kwargs):
+        status = False
+        message = ""
+        try:
+            username = request.POST['email']
+            password = request.POST['password']
+            client_id = request.POST['client_id']
+            client_secret = request.POST['client_secret']
+            grant_type = request.POST['grant_type']
+        except:
+            body_unicode = request.body.decode('utf-8')
+            body = json.loads(body_unicode)
+            username = body['email']
+            password = body['password']
+            client_id = body['client_id']
+            client_secret = body['client_secret']
+            grant_type = body['grant_type']
+
+        # print(User.objects.filter(email=username).count())
+        if User.objects.filter(email=username).count() > 0:
+            user = User.objects.filter(email=username)
+            if user[0].is_active == False:
+                message = "Please verify your email before sign in"
+                return JsonResponse({"status": status, "data": None, "message": message})
+
+        current_url = request.scheme + '://' + request.META['HTTP_HOST']
+        print(current_url + '/o/token/')
+        print(grant_type)
+        print(username)
+        print(password)
+        print(client_secret)
+        print(client_id)
+
+        try:
+            r = requests.post(
+                current_url + '/o/token/',
+                data={
+                    'grant_type': grant_type,
+                    'username': username,
+                    'password': password,
+                    'client_id': client_id,
+                    'client_secret': client_secret,
+                }, verify=True)
+        except:
+            print("Something Went Wrong")
+
+        print(r.json())
+        if 'error' in r.json():
+            message = "Email or password incorrect"
+            return JsonResponse({"status": status, "data": r.json(), "message": message})
+
+        status = True
+        message = "Successful log in"
+        return JsonResponse({"status": status, "data": r.json(), "message": message})
