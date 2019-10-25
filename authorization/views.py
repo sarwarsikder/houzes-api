@@ -39,13 +39,14 @@ def login(request):
         grant_type = body['grant_type']
 
     # print(User.objects.filter(email=username).count())
-    if User.objects.filter(email=username).count()>0:
+    if User.objects.filter(email=username).count() > 0:
         user = User.objects.filter(email=username)
         if user[0].is_active == False:
             message = "Please verify your email before sign in"
             return JsonResponse({"status": status, "data": None, "message": message})
 
     current_url = request.scheme + '://' + request.META['HTTP_HOST']
+    print(current_url)
     r = requests.post(
         current_url + '/o/token/',
         data={
@@ -68,7 +69,8 @@ def login(request):
 
     status = True
     message = "Successful log in"
-    return JsonResponse({ "status" : status,"data" : r.json(),"message" : message})
+    return JsonResponse({"status": status, "data": r.json(), "message": message})
+
 
 @csrf_exempt
 def facebook_login(request):
