@@ -98,6 +98,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         try:
             user = User(email=email,password=password,first_name=first_name,last_name=last_name,phone_number=phone_number,invited_by=invited_by,is_active=is_active,is_admin=is_admin,photo=photo)
+            print(user)
             user.save()
             if user.photo !=None:
                 if 'http' in user.photo:
@@ -123,7 +124,8 @@ class UserViewSet(viewsets.ModelViewSet):
             status= True
             data = userSerializer.data
             message = "A email has been sent to '"+email+"' for verification.Please verify before you log in."
-        except:
+        except Exception as exc:
+            print(exc)
             status = False
             data = None
             message = "Error registering new account"
