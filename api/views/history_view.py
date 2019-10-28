@@ -242,9 +242,37 @@ class HistoryViewSet(viewsets.ModelViewSet):
         return paginator.get_paginated_response(data=serializer.data)
 
 
-    # @action(detail=False,methods=['GET'],url_path='team/visited-properties')
-    # def get_team_visited_properties(self,request,*args,**kwargs):
-    #     users = User.objects.filter(invited_by=request.user.id)
-    #     histories = History.objects.filter(~Q(end_time=None), user__in=users).order_by('-id')
-    #     history_details = HistoryDetail.objects.filter(history__in=histories)
-    #     properties Property.objects.
+    @action(detail=False,methods=['GET'],url_path='team/visited-properties')
+    def get_team_visited_properties(self,request,*args,**kwargs):
+        page_size = request.GET.get('limit')
+        users = User.objects.filter(invited_by=request.user.id)
+        histories = History.objects.filter(~Q(end_time=None), user__in=users).order_by('-id')
+        history_details = HistoryDetail.objects.filter(history__in=histories).values('property_id')
+        properties = Property.objects.filter(id__in=history_details)
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+        result_page = paginator.paginate_queryset(properties, request)
+        serializer = PropertySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False,methods=['GET'],url_path='user/visited-properties')
+    def get_user_visited_properties(self,request,*args,**kwargs):
+        page_size = request.GET.get('limit')
+        user = User.objects.get(id=request.user.id)
+        histories = History.objects.filter(~Q(end_time=None), user=user).order_by('-id')
+        print(histories)
+        history_details = HistoryDetail.objects.filter(history__in=histories).values('property_id')
+        print(history_details)
+        properties = Property.objects.filter(id__in=history_details)
+        print(properties)
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+        result_page = paginator.paginate_queryset(properties, request)
+        serializer = PropertySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)
