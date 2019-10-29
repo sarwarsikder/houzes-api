@@ -61,7 +61,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(status=0, user_id=request.user.id),many=True)
         dict = {
             # 'users': list(),
-            'user': users.data,
+            'users': users.data,
             'unregistered_invitations': unregistered_invitations.data,
         }
         print(dict)

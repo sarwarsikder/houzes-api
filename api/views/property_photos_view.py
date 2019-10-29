@@ -126,6 +126,8 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
         images_data = request.FILES
         propertyPhotos= []
         for image_data in images_data.values():
+            print(image_data)
+            print(image_data.__dict__)
             file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '.jpg')
             s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
             file_upload(image_data, file_path)
@@ -135,7 +137,7 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
             with Image.open(image_data) as image:
                 thumb = resizeimage.resize_cover(image, [150, 150])
                 thumb_byte = BytesIO()
-                thumb.save(thumb_byte, format="jpeg")
+                thumb.save(thumb_byte, format=thumb.format)
                 thumb_image = thumb_byte.getvalue()
                 file_upload(thumb_image, thumb_file_path)
             propertyPhoto = PropertyPhotos.objects.create(user=user,property=property,photo_url=s3_url,thumb_photo_url = thumb_s3_url)
