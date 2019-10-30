@@ -28,5 +28,5 @@ urlpatterns = [
     url('admin-panel/', include(('admin_panel.urls','admin_panel'), namespace = 'admin_panel')),
     url('recurring-bill/', include(('recurring_bill.urls', 'recurring_bill'), namespace='recurring_bill')),
     url('authorization/', include(('authorization.urls', 'authorization'), namespace='authorization')),
-
+    url('auth/',include('rest_framework_social_oauth2.urls')),
 ]
