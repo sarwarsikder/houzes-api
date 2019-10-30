@@ -79,7 +79,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     return Response({'status': status, 'data': data, 'message': message})
             if 'last_name' in request.data:
                 last_name = request.data['last_name']
-                if first_name == "":
+                if last_name == "":
                     status = False
                     data = None
                     message = "Last Name is required"
@@ -283,3 +283,16 @@ class UserViewSet(viewsets.ModelViewSet):
         status = True
         message = "Successful log in"
         return JsonResponse({"status": status, "data": r.json(), "message": message})
+
+    def destroy(self, request, *args, **kwargs):
+        user_id = kwargs['pk']
+        status = False
+        message = ""
+        try:
+            User.objects.get(id = user_id).delete()
+        except:
+            message = "Error deleting member"
+            return Response({'status': status, 'message': message})
+        status = True
+        message = 'Member deleted successfully'
+        return Response({'status': status, 'message': message})
