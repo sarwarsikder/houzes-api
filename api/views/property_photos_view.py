@@ -128,11 +128,11 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
         for image_data in images_data.values():
             print(image_data)
             print(image_data.__dict__)
-            file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()) + '.jpg')
+            file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id, str(time.time()).replace('.','_') + '.jpg')
             s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
             file_upload(image_data, file_path)
 
-            thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id,str(time.time()) + '_thumb.jpg')
+            thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id,str(time.time()).replace('.','_') + '_thumb.jpg')
             thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,thumb_file_path)
             with Image.open(image_data) as image:
                 thumb = resizeimage.resize_cover(image, [150, 150])

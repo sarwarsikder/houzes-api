@@ -219,7 +219,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
     def get_property_by_tag(self, request, *args, **kwargs):
         tagId = kwargs['id']
         page_size = request.GET.get('limit')
-        property = Property.objects.filter(property_tags__contains = [{'id': int(tagId,10) }])
+        user = User.objects.get(id=request.user.id)
+        property = Property.objects.filter(property_tags__contains = [{'id': int(tagId,10) }],user_list__user = user)
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size

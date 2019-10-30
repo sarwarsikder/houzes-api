@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 
 from django.http import JsonResponse
@@ -38,6 +39,13 @@ class UserViewSet(viewsets.ModelViewSet):
         gUid = str(shortuuid.random(length=16))
         return gUid
 
+    # def check(email):
+    #     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    #     if re.search(regex, email):
+    #         return True
+    #     else:
+    #         return False
+
     def create(self, request, *args, **kwargs):
         status = False
         data = None
@@ -54,18 +62,48 @@ class UserViewSet(viewsets.ModelViewSet):
         photo = None
 
         try:
-            password = make_password(request.data['password'])
-            first_name = request.data['first_name']
-            last_name = request.data['last_name']
-            email = request.data['email']
-
+            if 'password' in request.data:
+                password = request.data['password']
+                if password == "":
+                    status = False
+                    data = None
+                    message = "Password is required"
+                    return Response({'status': status, 'data': data, 'message': message})
+                password = make_password(request.data['password'])
+            if 'first_name' in request.data:
+                first_name = request.data['first_name']
+                if first_name == "":
+                    status = False
+                    data = None
+                    message = "First Name is required"
+                    return Response({'status': status, 'data': data, 'message': message})
+            if 'last_name' in request.data:
+                last_name = request.data['last_name']
+                if first_name == "":
+                    status = False
+                    data = None
+                    message = "Last Name is required"
+                    return Response({'status': status, 'data': data, 'message': message})
+            if 'email' in request.data:
+                email = request.data['email']
+                if email == "":
+                    status = False
+                    data = None
+                    message = "Email is required"
+                    return Response({'status': status, 'data': data, 'message': message})
             if User.objects.filter(email=email).count()>0:
                 status = False
                 data = None
                 message = "Email already exist"
                 return Response({'status': status, 'data': data, 'message': message})
 
-            phone_number = request.data['phone_number']
+            if 'phone_number' in request.data:
+                phone_number = request.data['phone_number']
+                if phone_number == "":
+                    status = False
+                    data = None
+                    message = "Phone Number is required"
+                    return Response({'status': status, 'data': data, 'message': message})
             print(request.data)
             # if 'is_active' in request.data:
             #     is_active = request.data['is_active']
@@ -73,6 +111,16 @@ class UserViewSet(viewsets.ModelViewSet):
                 invited_by = request.data['invited_by']
             if 'is_admin' in request.data:
                 is_admin = request.data['is_admin']
+            print(email)
+            print(password)
+            print(first_name)
+            print(last_name)
+            print(phone_number)
+            if email==None or password==None or first_name==None or last_name==None or phone_number==None:
+                status = False
+                message = "Please provide all the required fields correctly"
+                data = None
+                return Response({'status': status, 'data': data, 'message': message})
 
         except:
             status = False
@@ -112,7 +160,7 @@ class UserViewSet(viewsets.ModelViewSet):
             userVerifications = UserVerifications(code=code,user=user,is_used=False,verification_type='email')
             userVerifications.save()
 
-            send_mail(subject="HouZes emal verification",
+            send_mail(subject="HouZes email verification",
                       message="Dear,"+str(user.first_name)+' '+str(user.last_name)+ " please confirm your email by clicking the link "+settings.WEB_APP_URL+'/verify-email/'+str(code),
                       from_email=settings.EMAIL_HOST_USER,
                       recipient_list=[email],
