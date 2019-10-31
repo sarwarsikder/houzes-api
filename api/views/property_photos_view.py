@@ -28,8 +28,8 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
     filterset_fields = ["-id"]
 
 
-    def get_queryset(self):
-        return PropertyPhotos.objects.filter(user_id=self.request.user.id)
+    # def get_queryset(self):
+    #     return PropertyPhotos.objects.filter(user_id=self.request.user.id)
 
 
     def create(self, request, *args, **kwargs):
@@ -145,3 +145,16 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
 
         propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
         return Response({'status':True,'data': propertyPhotosSerializer.data,'message':'Property photos uploaded'})
+
+    def destroy(self, request, *args, **kwargs):
+        photo_id = kwargs['pk']
+        status = False
+        message = ""
+        try:
+            PropertyPhotos.objects.get(id=photo_id).delete()
+        except:
+            message = "Error deleting photo"
+            return Response({'status': status, 'message': message})
+        status = True
+        message = 'Photo deleted successfully'
+        return Response({'status': status, 'message': message})

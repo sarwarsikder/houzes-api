@@ -25,8 +25,8 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'notes']
     ordering = ['-id']
 
-    def get_queryset(self):
-        return PropertyNotes.objects.filter(user_id=self.request.user.id)
+    # def get_queryset(self):
+    #     return PropertyNotes.objects.filter(user_id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
 
@@ -123,3 +123,55 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
 
         PropertyNotes.objects.bulk_create(objs, batch_size=50)
         return JsonResponse({'status': True, 'message' : 'Property notes created'})
+
+    def destroy(self, request, *args, **kwargs):
+        note_id = kwargs['pk']
+        status = False
+        message = ""
+        try:
+            PropertyNotes.objects.get(id = note_id).delete()
+        except:
+            message = "Error deleting note"
+            return Response({'status': status, 'message': message})
+        status = True
+        message = 'Note deleted successfully'
+        return Response({'status': status, 'message': message})
+
+    def partial_update(self, request, *args, **kwargs):
+        note_id = kwargs['pk']
+        propertyNote = PropertyNotes.objects.get(id=note_id)
+
+        status = False
+        data = {}
+        message = None
+
+        title = None
+        notes = None
+        if 'title' in request.data:
+            title = request.data['title']
+            if title == "":
+                message = "Title is required"
+                return Response({'status': status, 'data': data, 'message': message})
+            else:
+                propertyNote.title = title
+        if 'notes' in request.data:
+            notes = request.data['notes']
+            if notes == "":
+                message = "Note is required"
+                return Response({'status': status, 'data': data, 'message': message})
+            else:
+                propertyNote.notes = notes
+
+        try:
+            propertyNote.save()
+
+            propertyNoteSerializer = PropertyNotesSerializer(propertyNote)
+            status = True
+            data = propertyNoteSerializer.data
+            message = 'Note updated successfully'
+        except:
+            status = False
+            data = {}
+            message = 'Error updating note'
+
+        return Response({'status': status, 'data': data, 'message': message})
