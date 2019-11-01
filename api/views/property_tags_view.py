@@ -82,9 +82,30 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                     property.save()
                     message = 'Tag added to the property'
                     status = True
-                    propertySerializer = PropertySerializer(property)
-                    data = propertySerializer.data
+                    # propertySerializer = PropertySerializer(property)
+                    # data = propertySerializer.data
+                    tags= []
+                    for tag in property.property_tags:
+                        property_tags = PropertyTags.objects.get(id=tag['id'])
+                        print(PropertyTagsSerializer(property_tags).data)
+                        tags.append(PropertyTagsSerializer(property_tags).data)
+                    property_representation = {
+                        'id': property.id,
+                        'user_list': property.user_list_id,
+                        'street': property.street,
+                        'city': property.city,
+                        'state': property.state,
+                        'zip': property.zip,
+                        'cad_acct': property.cad_acct,
+                        'gma_tag': property.gma_tag,
+                        'latitude': property.latitude,
+                        'longitude': property.longitude,
+                        'property_tags': tags,
+                        'owner_info': property.owner_info,
+                        'created_at': property.created_at,
+                        'updated_at': property.updated_at
+                    }
             except:
                 message = 'property does not exist'
                 status = False
-        return Response({'status': status,'data': data,'message': message})
+        return Response({'status': status,'data': property_representation,'message': message})
