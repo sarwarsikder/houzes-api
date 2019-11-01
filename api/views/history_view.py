@@ -276,3 +276,88 @@ class HistoryViewSet(viewsets.ModelViewSet):
         result_page = paginator.paginate_queryset(properties, request)
         serializer = PropertySerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False, methods=['POST'], url_path='(?P<id>[\w-]+)/add-property')
+    def history_add_property(self, request, *args, **kwargs):
+        history_id = kwargs['id']
+        history = History.objects.get(id = history_id)
+        street = ""
+        city = ""
+        state = ""
+        zip = ""
+        cad_acct = ""
+        gma_tag = None
+        latitude = None
+        longitude = None
+        property_tags = []
+        owner_info =  []
+        user_list = None
+
+        status = False
+        data = {}
+        message =""
+
+        try:
+            if 'street' in request.data:
+                street = request.data['street']
+            if 'city' in request.data:
+                city = request.data['city']
+            if 'state' in request.data:
+                state = request.data['state']
+            if 'zip' in request.data:
+                zip = request.data['zip']
+            if 'cad_acct' in request.data:
+                cad_acct = request.data['cad_acct']
+            if 'gma_tag' in request.data:
+                gma_tag = request.data['gma_tag']
+            if 'latitude' in request.data:
+                latitude = request.data['latitude']
+            if 'longitude' in request.data:
+                longitude = request.data['longitude']
+            if 'property_tags' in request.data:
+                property_tags = request.data['property_tags']
+            if 'owner_info' in request.data:
+                owner_info = request.data['owner_info']
+            if 'user_list' in request.data:
+                user_list = request.data['user_list']
+                user_list = UserList.objects.get(id=user_list)
+
+        except:
+            if 'street' in request.body:
+                street = request.body['street']
+            if 'city' in request.body:
+                city = request.body['city']
+            if 'state' in request.body:
+                state = request.body['state']
+            if 'zip' in request.body:
+                zip = request.body['zip']
+            if 'cad_acct' in request.body:
+                cad_acct = request.body['cad_acct']
+            if 'gma_tag' in request.body:
+                gma_tag = request.body['gma_tag']
+            if 'latitude' in request.body:
+                latitude = request.body['latitude']
+            if 'longitude' in request.body:
+                longitude = request.body['longitude']
+            if 'property_tags' in request.body:
+                property_tags = request.body['property_tags']
+            if 'owner_info' in request.body:
+                owner_info = request.body['owner_info']
+            if 'user_list' in request.body:
+                user_list = request.body['user_list']
+                user_list = UserList.objects.get(id=user_list)
+        try:
+            property = Property(street=street,city=city,state=state,zip=zip,cad_acct=cad_acct,gma_tag=gma_tag,latitude=latitude,longitude=longitude,property_tags=property_tags,owner_info=owner_info,user_list=user_list)
+            property.save()
+
+            historyDetails = HistoryDetail.objects.create(history=history,property=property)
+            historyDetails.save()
+
+            status = True
+            data = PropertySerializer(property).data
+            message = "Successfully added property to this drive"
+        except:
+            status = False
+            data = {}
+            message = "Failed to create property"
+        return Response({'status': status, 'data' : data, 'message' : message})
