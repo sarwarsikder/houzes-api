@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'oauth2_provider',
+    'social_django',
+    'rest_framework_social_oauth2',
     'corsheaders',
     'admin_panel',
 ]
@@ -94,6 +96,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -107,6 +111,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_social_oauth2.authentication.SocialAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -118,6 +123,14 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'oauth2_provider.backends.OAuth2Backend',
+    # Facebook OAuth2
+    'social_core.backends.facebook.FacebookAppOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    # Google OAuth2
+    'social_core.backends.google.GoogleOAuth2',
+
+    # django-rest-framework-social-oauth2
+    'rest_framework_social_oauth2.backends.DjangoOAuth2',
 )
 
 OAUTH2_PROVIDER = {
@@ -189,6 +202,29 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR, "admin_panel/static"),
 ]
+
+
+
+# Facebook configuration
+SOCIAL_AUTH_FACEBOOK_KEY = '931483470524585'
+SOCIAL_AUTH_FACEBOOK_SECRET = '4c86f1286740afc5917189caed4a221f'
+
+# Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from facebook. Email is not sent by default, to get it, you must request the email permission:
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'id, name, email'
+}
+
+
+# Google configuration
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '1SHT_DbIoJODMssT1rnbIBGn'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '468965753089-g34blpbr5huekl0r0sohp9ocj2pa9dsk.apps.googleusercontent.com'
+
+# Define SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE to get extra permissions from Google.
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+'https://www.googleapis.com/auth/userinfo.email',
+'https://www.googleapis.com/auth/userinfo.profile',
+    ]
 
 
 AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"
