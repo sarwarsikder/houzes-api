@@ -71,6 +71,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         property_tags = []
         owner_info =  []
         user_list = None
+        history = None
 
         status = False
         data = {}
@@ -100,6 +101,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if 'user_list' in request.data:
                 user_list = request.data['user_list']
                 user_list = UserList.objects.get(id=user_list)
+            if 'history' in request.data:
+                history_id = request.data['history']
+                history = History.objects.get(id=history_id)
 
         except:
             if 'street' in request.body:
@@ -125,9 +129,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if 'user_list' in request.body:
                 user_list = request.body['user_list']
                 user_list = UserList.objects.get(id=user_list)
+            if 'history' in request.body:
+                history_id = request.body['history']
+                history = History.objects.get(id=history_id)
         try:
             property = Property(street=street,city=city,state=state,zip=zip,cad_acct=cad_acct,gma_tag=gma_tag,latitude=latitude,longitude=longitude,property_tags=property_tags,owner_info=owner_info,user_list=user_list)
             property.save()
+
+            if history!=None:
+                historyDetail = HistoryDetail(history=history,property=property)
+                historyDetail.save()
 
             status = True
             data = PropertySerializer(property).data
