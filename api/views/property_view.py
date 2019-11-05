@@ -118,10 +118,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 cad_acct = request.body['cad_acct']
             if 'gma_tag' in request.body:
                 gma_tag = request.body['gma_tag']
+                if gma_tag == '':
+                    gma_tag = None
             if 'latitude' in request.body:
                 latitude = request.body['latitude']
+                if latitude == '':
+                    latitude = None
             if 'longitude' in request.body:
                 longitude = request.body['longitude']
+                if longitude == '':
+                    longitude = None
             if 'property_tags' in request.body:
                 property_tags = request.body['property_tags']
             if 'owner_info' in request.body:

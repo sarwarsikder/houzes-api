@@ -37,7 +37,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
         history = History.objects.get(id=history_id)
         historyDetails = HistoryDetail.objects.filter(history=history)
         ids = list(historyDetails.values_list('property', flat=True))
-        property = list(Property.objects.filter(id__in=ids)[:10])
+        property = list(Property.objects.filter(id__in=ids))
         listPropertiesSerializer = PropertySerializer(property,many=True)
 
         data = {

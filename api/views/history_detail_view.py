@@ -1,6 +1,8 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
-from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework import viewsets,filters
+
 
 from api.serializers import *
 from api.models import *
@@ -10,6 +12,7 @@ from api.models import *
 class HistoryDetailViewSet(viewsets.ModelViewSet):
     queryset = HistoryDetail.objects.all()
     serializer_class = HistoryDetailSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     ordering = ['-id']
 
     @action(detail=False, url_path='history/(?P<id>[\w-]+)')
