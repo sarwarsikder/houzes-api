@@ -229,60 +229,27 @@ class UserViewSet(viewsets.ModelViewSet):
         invitationsSerializer = InvitationsSerializer(invitations[0])
         return Response(invitationsSerializer.data)
 
-    @action(detail =False,methods=['POST'],url_path='sign-in')
-    def user_sign_in(self,request,*args,**kwargs):
-        status = False
-        message = ""
+    @action(detail =False,methods=['POST'],url_path='pending-check')
+    def user_pending_check(self,request,*args,**kwargs):
+        status =False
+        message=""
         try:
-            username = request.POST['email']
-            password = request.POST['password']
-            client_id = request.POST['client_id']
-            client_secret = request.POST['client_secret']
-            grant_type = request.POST['grant_type']
+            email = request.data['username']
         except:
-            body_unicode = request.body.decode('utf-8')
-            body = json.loads(body_unicode)
-            username = body['email']
-            password = body['password']
-            client_id = body['client_id']
-            client_secret = body['client_secret']
-            grant_type = body['grant_type']
-
-        # print(User.objects.filter(email=username).count())
-        if User.objects.filter(email=username).count() > 0:
-            user = User.objects.filter(email=username)
+            email = request.data['username']
+        if User.objects.filter(email=email).count() > 0:
+            user = User.objects.filter(email=email)
             if user[0].is_active == False:
                 message = "Please verify your email before sign in"
-                return JsonResponse({"status": status, "data": None, "message": message})
-
-        current_url = request.scheme + '://' + request.META['HTTP_HOST']
-        print(current_url + '/o/token/')
-        print(grant_type)
-        print(username)
-        print(password)
-        print(client_secret)
-        print(client_id)
-
-        r = requests.post(
-            current_url + '/o/token/',
-            data={
-                'grant_type': grant_type,
-                'username': username,
-                'password': password,
-                'client_id': client_id,
-                'client_secret': client_secret,
-            }, verify=True)
-
-
-
-        print(r.json())
-        if 'error' in r.json():
-            message = "Email or password incorrect"
-            return JsonResponse({"status": status, "data": r.json(), "message": message})
-
-        status = True
-        message = "Successful log in"
-        return JsonResponse({"status": status, "data": r.json(), "message": message})
+                return JsonResponse({"status": status, "message": message})
+            else:
+                status = True
+                message = "Ready to log in"
+                return JsonResponse({"status": status, "message": message})
+        else:
+            status = False
+            message = 'User does not exist'
+            return JsonResponse({"status": status, "message": message})
 
     def destroy(self, request, *args, **kwargs):
         user_id = kwargs['pk']
