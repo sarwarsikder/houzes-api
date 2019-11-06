@@ -25,7 +25,8 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
     queryset = PropertyPhotos.objects.all()
     serializer_class = PropertyPhotosSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
-    filterset_fields = ["-id"]
+    filterset_fields = "__all__"
+
 
 
     # def get_queryset(self):
