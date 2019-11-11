@@ -37,7 +37,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         invitation_key = generate_shortuuid()
         try:
             send_mail(subject="Invitation",
-                      message=str(request.user)+" sent you an invitation click here to accept "+settings.WEB_APP_URL+'/team-invite/'+str(invitation_key),
+                      message=str(request.user)+" sent you an invitation click here to accept https://"+settings.WEB_APP_URL+'/team-invite/'+str(invitation_key),
                       from_email=settings.EMAIL_HOST_USER,
                       recipient_list=[receiver],
                       fail_silently=False

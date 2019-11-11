@@ -161,7 +161,7 @@ class UserViewSet(viewsets.ModelViewSet):
             userVerifications.save()
 
             send_mail(subject="HouZes email verification",
-                      message="Dear,"+str(user.first_name)+' '+str(user.last_name)+ " please confirm your email by clicking the link "+settings.WEB_APP_URL+'/verify-email/'+str(code),
+                      message="Dear,"+str(user.first_name)+' '+str(user.last_name)+ " please confirm your email by clicking the link https://"+settings.WEB_APP_URL+'/verify-email/'+str(code),
                       from_email=settings.EMAIL_HOST_USER,
                       recipient_list=[email],
                       fail_silently=False
