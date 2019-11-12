@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 import requests
 
 from api.models import Property
-from api.serializers import PropertySerializer
 
 
 @api_view(['GET'])
@@ -47,12 +46,19 @@ def create(request):
         ## Powertrace request
         power_trace_request_res = requests.post(power_trace_request_url, data=power_trace_request_pload, headers=headers)
         if power_trace_request_res.json()['code'] == 200:
-            power_trace_start_by_data_pload['trace_request_id'] = power_trace_request_res.json()['data']['id']
+            power_trace_request_id = int(power_trace_request_res.json()['data']['id'])
+            power_trace_start_by_data_pload['trace_request_id'] = power_trace_request_id
             power_trace_start_by_data_pload['count_id'] = request.data['countId']
 
             power_trace_start_by_data_res = requests.post(power_trace_start_by_data_url, data=power_trace_start_by_data_pload, headers=headers)
             print(power_trace_start_by_data_res.json())
             if power_trace_start_by_data_res.json()['code'] == 200:
+                try:
+                    if 'property_id' in request.data:
+                        property_id = int(request.data['property_id'])
+                        Property.objects.filter(id=property_id).update(power_trace_request_id=power_trace_request_id)
+                except:
+                    traceback.print_exc()
                 return Response(power_trace_request_res.json())
             else:
                 return Response({'code': 400, 'message': 'PowerTrace Failed due to Information parsing failure!', 'data': power_trace_start_by_data_res.json()})

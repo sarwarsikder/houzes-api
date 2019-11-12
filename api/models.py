@@ -150,6 +150,7 @@ class Property(models.Model):
     latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
     longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
     property_tags = JSONField(default=list)
+    power_trace_request_id = models.IntegerField(null=True)
     # A property can have multiple owner
     owner_info = JSONField(default=list, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
