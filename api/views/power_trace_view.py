@@ -23,11 +23,11 @@ def create(request):
 
         if 'trace_name' not in request.data or request.data['trace_name'] is None or request.data['trace_name'].__eq__(''):
             return Response({'code': 400, 'message': 'Trace name is required!'})
-        if 'package_type' not in request.data or request.data['package_type'] is None or request.data['package_type'].__eq__(''):
+        if 'package_type' not in request.data or request.data['package_type'] is None:
             return Response({'code': 400, 'message': 'Package Type is required!'})
-        if 'user_id' not in request.data or request.data['user_id'] is None or request.data['user_id'].__eq__(''):
+        if 'user_id' not in request.data or request.data['user_id'] is None:
             return Response({'code': 400, 'message': 'User id is required!'})
-        if 'countId' not in request.data or request.data['countId'] is None or request.data['countId'].__eq__(''):
+        if 'countId' not in request.data or request.data['countId'] is None:
             return Response({'code': 400, 'message': 'Count Id is required!'})
 
         power_trace_request_pload = {'trace_name': request.data['trace_name'],
@@ -63,7 +63,7 @@ def create(request):
             else:
                 return Response({'code': 400, 'message': 'PowerTrace Failed due to Information parsing failure!', 'data': power_trace_start_by_data_res.json()})
         else:
-            return Response({'code': 400, 'message': 'Trace name already exists!', 'data': power_trace_request_res.json()})
+            return Response({'code': 400, 'message': 'Trace name is already exists!', 'data': power_trace_request_res.json()})
     except:
         traceback.print_exc()
         return Response({'code': 500, 'message': 'Failed to create request! Server Error!'})
