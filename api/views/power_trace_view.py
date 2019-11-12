@@ -16,8 +16,8 @@ def start(request):
 @api_view(['POST'])
 def create(request):
     try:
-        power_trace_request_url = 'http://powertrace-service.ratoolkit.com:8080/api/powertrace/createRequest'
-        power_trace_start_by_data_url = 'http://powertrace-service.ratoolkit.com:8080/api/powertrace/save-powertrace-info-by-data'
+        power_trace_request_url = 'http://powertrace-service.ratoolkit.com:8080/ra-powertrace/api/powertrace/createRequest'
+        power_trace_start_by_data_url = 'http://powertrace-service.ratoolkit.com:8080/ra-powertrace/api/powertrace/save-powertrace-info-by-data'
         headers = {'client_id': 'HQARK3QZDPLLBWSMVY0X2C5UJ2B15YQJSIY',
                    'client_secret': 'URBVBVBDDJ2E2JEBJEO84594T546VJVBKJGB'}
 
@@ -53,7 +53,7 @@ def create(request):
             power_trace_start_by_data_res = requests.post(power_trace_start_by_data_url, data=power_trace_start_by_data_pload, headers=headers)
             print(power_trace_start_by_data_res.json())
             if power_trace_start_by_data_res.json()['code'] == 200:
-                return Response(power_trace_start_by_data_res.json())
+                return Response(power_trace_request_res.json())
             else:
                 return Response({'code': 400, 'message': 'PowerTrace Failed due to Information parsing failure!', 'data': power_trace_start_by_data_res.json()})
         else:
