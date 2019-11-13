@@ -55,7 +55,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'photos' : PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property),many=True).data,
             'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property),many=True).data,
             'created_at': property.created_at,
-            'updated_at' : property.updated_at
+            'updated_at' : property.updated_at,
+            'power_trace_request_id': property.power_trace_request_id
         }
         return Response(property_representation)
 
