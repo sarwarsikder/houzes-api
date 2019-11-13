@@ -3,11 +3,10 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 # from.views import *
-import api
+from api.views import power_trace_view
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
 from api.views.history_view import HistoryViewSet
 from api.views.history_detail_view import HistoryDetailViewSet
-from api.views.power_trace_view import PowerTraceView
 from api.views.user_view import UserViewSet
 from api.views.user_location_view import UserLocationViewSet
 from api.views.user_verification_view import UserVerificationsViewSet
@@ -47,8 +46,9 @@ router.register(r'history-detail', HistoryDetailViewSet)
 
 
 urlpatterns = [
-    url('power-trace/start/', api.views.power_trace_view.start),
-    url('power-trace/create/', api.views.power_trace_view.create),
+    path('power-trace/create/', power_trace_view.create),
+    path('power-trace/getAllRequestByUserId/<int:user_id>/', power_trace_view.get_all_request_by_user_id),
+    path('power-trace/getResultById/<int:trace_id>/', power_trace_view.get_result_by_id),
 ]
 
 urlpatterns += router.urls
