@@ -89,6 +89,7 @@ class PropertySerializer(serializers.ModelSerializer):
             'longitude' : instance.longitude,
             'property_tags' : instance.property_tags,
             'owner_info' : instance.owner_info,
+            'power_trace_request_id' : instance.power_trace_request_id,
             'photo_count' : PropertyPhotos.objects.filter(property=instance).count(),
             'note_count': PropertyNotes.objects.filter(property=instance).count(),
             'created_at': instance.created_at,

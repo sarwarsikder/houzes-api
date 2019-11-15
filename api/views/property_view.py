@@ -51,6 +51,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'latitude' : property.latitude,
             'longitude' : property.longitude,
             'property_tags' : tags,
+            'power_trace_request_id' : property.power_trace_request_id,
             'owner_info' : property.owner_info,
             'photos' : PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property),many=True).data,
             'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property),many=True).data,
