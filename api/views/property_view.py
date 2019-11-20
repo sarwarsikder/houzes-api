@@ -1,6 +1,6 @@
 import json
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, pagination,filters
 from rest_framework.decorators import action
@@ -320,3 +320,32 @@ class PropertyViewSet(viewsets.ModelViewSet):
             data = {}
             message = "Please provide all the field correctly"
         return Response({'status': status, 'data' : data, 'message' : message})
+
+    @action(detail=False, methods=['GET'], url_path='filter/user/(?P<id>[\w-]+)')
+    def get_property_filtered_by_tag_team_member_list(self, request, *args, **kwargs):
+        tagId = None
+        listId = None
+
+        user = User.objects.get(id=kwargs['id'])
+        property = Property.objects.filter(user_list__user=user)
+        tagId = request.GET.get('tag')
+        listId = request.GET.get('list')
+
+        print(user)
+
+        print('working')
+        page_size = request.GET.get('limit')
+        if tagId!=None :
+            property = property.filter(Q(property_tags__contains = [{'id': tagId}]) | Q(property_tags__contains = [{'id': int(tagId,10)}]))
+        if listId!=None :
+            property = property.filter(user_list__id=listId)
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+
+        result_page = paginator.paginate_queryset(property, request)
+
+        serializer = PropertySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)

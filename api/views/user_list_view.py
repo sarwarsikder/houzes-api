@@ -1,5 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets,filters
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.serializers import *
@@ -91,3 +92,8 @@ class UserListViewSet(viewsets.ModelViewSet):
 
         return Response({'status': status,'message': message})
 
+    @action(detail=False, methods=['GET'], url_path='user/(?P<id>[\w-]+)')
+    def get_user_list_by_user(self, request, *args, **kwargs):
+        userList = UserList.objects.filter(user__id = kwargs['id'])
+        userListSerializer = UserListSerializer(userList,many=True)
+        return Response(userListSerializer.data)
