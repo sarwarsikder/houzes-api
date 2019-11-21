@@ -323,20 +323,21 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path='filter/user/(?P<id>[\w-]+)')
     def get_property_filtered_by_tag_team_member_list(self, request, *args, **kwargs):
-        tagId = None
+        tagIds = None
         listId = None
 
         user = User.objects.get(id=kwargs['id'])
         property = Property.objects.filter(user_list__user=user)
-        tagId = request.GET.get('tag')
+        tagIds = request.GET.getlist('tag')
         listId = request.GET.get('list')
 
-        print(user)
+        print(tagIds)
 
         print('working')
         page_size = request.GET.get('limit')
-        if tagId!=None :
-            property = property.filter(Q(property_tags__contains = [{'id': tagId}]) | Q(property_tags__contains = [{'id': int(tagId,10)}]))
+        if tagIds!=None :
+            for tagId in tagIds:
+                property = property.filter(Q(property_tags__contains = [{'id': tagId}]) | Q(property_tags__contains = [{'id': int(tagId,10)}]))
         if listId!=None :
             property = property.filter(user_list__id=listId)
         paginator = CustomPagination()
