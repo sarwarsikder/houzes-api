@@ -302,6 +302,15 @@ class HistoryDetail(models.Model):
     class Meta:
         db_table = 'history_details'
 
+class ForgetPassword(models.Model):
+    user = models.ForeignKey(User, on_delete= models.CASCADE)
+    link_key = models.CharField(max_length=200, unique=True, default=generate_shortuuid)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'forget_password'
+
 admin.site.register(User)
 admin.site.register(UserSockets)
 admin.site.register(UserLocation)

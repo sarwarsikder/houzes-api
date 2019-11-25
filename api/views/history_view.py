@@ -155,18 +155,18 @@ class HistoryViewSet(viewsets.ModelViewSet):
         #     for objString in polylines:
         #         obj.append(json.loads(objString))
         #     polylines = obj
+        history = History.objects.get(id=history_id)
         if 'image' in request.FILES:
             file = request.FILES['image']
             file_path = "photos/history/{}/{}".format(str(user_id), str(time.time()) + '.jpg')
             s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
             file_upload(file, file_path)
+            history.image = s3_url
 
-        history = History.objects.get(id = history_id)
         history.end_point_latitude = end_point_latitude
         history.end_point_longitude = end_point_longitude
         history.end_time = end_time
         history.polylines = polylines
-        history.image = s3_url
         history.length = length
         try:
             history.save()
@@ -177,6 +177,31 @@ class HistoryViewSet(viewsets.ModelViewSet):
         status = True
         data = historySerializer.data
         message = "Driving ended"
+        return Response({'status': status, 'data': data, 'message': message})
+
+    @action(detail=False,methods=['POST'],url_path='(?P<pk>[\w-]+)/upload-driving-image')
+    def upload_driving_image(self,request,*args,**kwargs):
+        history = History.objects.get(id = kwargs['pk'])
+        user_id = request.user.id
+        try:
+            if 'image' in request.FILES:
+                file = request.FILES['image']
+                file_path = "photos/history/{}/{}".format(str(user_id), str(time.time()) + '.jpg')
+                s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+                file_upload(file, file_path)
+                history.image = s3_url
+                history.save()
+                status = True
+                data = HistorySerializer(history).data
+                message = 'History image upload successfull'
+            else:
+                status = False
+                data = {}
+                message = 'Please upload a image'
+        except:
+            status = False
+            data = {}
+            message = 'Error uploading image'
         return Response({'status': status, 'data': data, 'message': message})
 
     @action(detail=False,methods=['GET'],url_path='complete-drives')

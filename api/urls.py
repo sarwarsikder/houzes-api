@@ -3,8 +3,9 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 # from.views import *
-from api.views import power_trace_view
+from api.views import power_trace_view, photos_view
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
+from api.views.forget_password_view import ForgetPasswordViewSet
 from api.views.history_view import HistoryViewSet
 from api.views.history_detail_view import HistoryDetailViewSet
 from api.views.user_view import UserViewSet
@@ -42,13 +43,15 @@ router.register(r'scouts-list-property', ScoutsListPropertyViewSet)
 router.register(r'assign-member-to-list', AssignMemberToListViewSet)
 router.register(r'history',HistoryViewSet)
 router.register(r'history-detail', HistoryDetailViewSet)
-
+router.register(r'forget-password', ForgetPasswordViewSet)
 
 
 urlpatterns = [
     path('power-trace/create/', power_trace_view.create),
     path('power-trace/getAllRequestByUserId/<int:user_id>/', power_trace_view.get_all_request_by_user_id),
     path('power-trace/getResultById/<int:trace_id>/', power_trace_view.get_result_by_id),
+    path('photos/property/<int:id>/original/', photos_view.original_single_property_photo_by_propertyId,  name='original-photo-by-property'),
+    path('photos/property/<int:id>/thumb/', photos_view.thumb_single_property_photo_by_propertyId,  name='original-photo-by-property'),
 ]
 
 urlpatterns += router.urls

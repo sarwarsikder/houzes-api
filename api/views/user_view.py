@@ -263,3 +263,28 @@ class UserViewSet(viewsets.ModelViewSet):
         status = True
         message = 'Member deleted successfully'
         return Response({'status': status, 'message': message})
+
+    @action(detail =False,methods=['POST'],url_path='fix-password/(?P<key>[\w-]+)')
+    def fix_password(self,request,*args,**kwargs):
+        link_key = kwargs['key']
+        status = False
+        data = {}
+        message = ''
+        try :
+            password = request.data['password']
+        except :
+            password = request.body['password']
+        if ForgetPassword.objects.filter(link_key=link_key):
+            user = ForgetPassword.objects.filter(link_key=link_key)[0].user
+            password = make_password(password)
+            user.password = password
+            user.save()
+            ForgetPassword.objects.filter(user = user).delete()
+            status = True
+            data = UserSerializer(user).data
+            message = 'User passsword is fixed'
+        else:
+            status = False
+            data = {}
+            message = 'Error'
+        return Response({'status': status, 'message': message})

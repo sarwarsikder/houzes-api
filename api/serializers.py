@@ -183,3 +183,17 @@ class HistoryDetailSerializer(serializers.ModelSerializer):
         }
 
         return representation
+
+class ForgetPasswordSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = ForgetPassword
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = {
+            'id': instance.id,
+            'email': User.objects.get(id= instance.user.id).email,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at
+        }
+        return representation
