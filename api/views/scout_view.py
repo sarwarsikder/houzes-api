@@ -66,6 +66,8 @@ class ScoutViewSet(viewsets.ModelViewSet):
             scout = Scout(first_name=first_name,last_name=last_name,url=url,manager_id=manager)
             scout.save()
             scoutSerializer = ScoutSerializer(scout)
+            scoutUserList = ScoutUserList(scout=scout, user_list=user_list)
+            scoutUserList.save()
             status = True
             data = scoutSerializer.data
             message = "Scout is created"

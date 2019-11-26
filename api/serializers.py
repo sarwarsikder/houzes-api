@@ -130,9 +130,9 @@ class ScoutSerializer(serializers.ModelSerializer):
         model = Scout
         fields = '__all__'
 
-class ScoutsPropertySerializer(serializers.ModelSerializer):
+class ScoutUserListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ScoutsProperty
+        model = ScoutUserList
         fields = '__all__'
 
 class AssignMemberToListSerializer(serializers.ModelSerializer):

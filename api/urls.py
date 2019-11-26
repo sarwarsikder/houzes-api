@@ -22,7 +22,7 @@ from api.views.user_socket_view import UserSocketsViewSet
 from api.views.property_view import PropertyViewSet
 from api.views.invitations_view import InvitationsViewSet
 from api.views.scout_view import ScoutViewSet
-from api.views.scouts_list_property_view import ScoutsListPropertyViewSet
+from api.views.scout_user_list_view import ScoutUserListViewSet
 
 router = routers.DefaultRouter()
 router.register(r'user', UserViewSet)
@@ -39,7 +39,7 @@ router.register(r'visited-properties', VisitedPropertiesViewSet)
 router.register(r'user-sockets', UserSocketsViewSet)
 router.register(r'team', InvitationsViewSet)
 router.register(r'scout', ScoutViewSet)
-router.register(r'scouts-list-property', ScoutsListPropertyViewSet)
+router.register(r'scout-user-list', ScoutUserListViewSet)
 router.register(r'assign-member-to-list', AssignMemberToListViewSet)
 router.register(r'history',HistoryViewSet)
 router.register(r'history-detail', HistoryDetailViewSet)

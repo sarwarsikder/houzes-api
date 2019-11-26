@@ -257,14 +257,14 @@ class Scout(models.Model):
         db_table = 'scouts'
 
 
-class ScoutsProperty(models.Model):
-    scouts = models.ForeignKey(Scout, on_delete=models.CASCADE)
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+class ScoutUserList(models.Model):
+    scout = models.ForeignKey(Scout, on_delete=models.CASCADE)
+    user_list = models.ForeignKey(UserList, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'scouts_properties'
+        db_table = 'scouts_user_lists'
 
 
 class AssignMemberToList(models.Model):

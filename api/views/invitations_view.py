@@ -56,16 +56,23 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
 
     def list(self, request, *args, **kwargs):
-        users = UserSerializer(User.objects.filter(invited_by=request.user.id),many=True)
-        # user = User.objects.get(id = re)
-        unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(status=0, user_id=request.user.id),many=True)
-        dict = {
-            # 'users': list(),
-            'users': users.data,
-            'unregistered_invitations': unregistered_invitations.data,
-        }
-        print(dict)
-        # return HttpResponse(json.dumps(str(dict)))
+        if User.objects.get(id=request.user.id).is_admin :
+            users = UserSerializer(User.objects.filter(invited_by=request.user.id),many=True)
+            unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=request.user.id),many=True)
+            dict = {
+                'users': users.data,
+                'unregistered_invitations': unregistered_invitations.data,
+            }
+        else :
+            user = User.objects.get(id=request.user.id)
+            users = UserSerializer(User.objects.filter(invited_by=user.invited_by), many= True)
+            unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=user.invited_by),many=True)
+            team_manager = UserSerializer(User.objects.get(id=user.invited_by))
+            dict = {
+                'users': users.data,
+                'unregistered_invitations': unregistered_invitations.data,
+                'team_manager' : team_manager.data
+            }
 
         return JsonResponse(dict)
 
