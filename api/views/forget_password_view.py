@@ -55,3 +55,12 @@ class ForgetPasswordViewSet(viewsets.ModelViewSet):
             message = 'User does not exist'
 
         return Response({'status': status, 'data' : data, 'message' : message})
+
+    @action(detail=False, url_path='link-key/(?P<key>[\w-]+)')
+    def get_forget_password_by_link_key(self, request, *args, **kwargs):
+        forgetPassword = ForgetPassword.objects.filter(link_key=kwargs['key'])
+        if forgetPassword.count():
+            forgetPassword = forgetPassword[0]
+            print(forgetPassword)
+            forgetPasswordSerializer = ForgetPasswordSerializer(forgetPassword)
+            return Response(forgetPasswordSerializer.data)
