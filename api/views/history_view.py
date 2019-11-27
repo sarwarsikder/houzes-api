@@ -389,7 +389,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
 
 
     @action(detail=False,methods=['GET'],url_path='member')
-    def get_history_list_by_user(self,request,*args,**kwargs):
+    def get_history_list_by_member(self,request,*args,**kwargs):
         try :
             members = [int(x) for x in request.GET.get('members').split(',')]
         except:
