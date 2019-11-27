@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets,filters
+from rest_framework import viewsets, filters, pagination
 from oauth2_provider.models import AccessToken
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.serializers import *
@@ -10,6 +11,15 @@ from django.http import JsonResponse
 
 from houzes_api.settings import WEB_APP_URL
 
+
+class CustomPagination(pagination.PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': self.page.paginator.count,
+            'results': data,
+        })
 
 class ScoutViewSet(viewsets.ModelViewSet):
     queryset = Scout.objects.all()
@@ -97,4 +107,33 @@ class ScoutViewSet(viewsets.ModelViewSet):
         return Response({'status': status, 'message': message})
 
 
+    @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/properties')
+    def get_user_list_by_user(self, request, *args, **kwargs):
+        scout = Scout.objects.get(id = kwargs['pk'])
+        scoutUserList = ScoutUserList.objects.filter(scout=scout)
+        if scoutUserList.count():
+            userList = scoutUserList[0].user_list
+            property = Property.objects.filter(user_list=userList)
+        else:
+            property = Property.objects.none()
+        page_size = request.GET.get('limit')
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
 
+        result_page = paginator.paginate_queryset(property, request)
+
+        serializer = PropertySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False, methods=['GET'], url_path='member/(?P<id>[\w-]+)')
+    def get_scout_by_member(self, request, *args, **kwargs):
+        user = User.objects.get(id=kwargs['id'])
+        if user.invited_by == request.user.id :
+            scout = Scout.objects.filter(manager_id=user.id)
+        else :
+            scout = Scout.objects.none()
+        scoutSerializer = ScoutSerializer(scout,many=True)
+        return Response(scoutSerializer.data)

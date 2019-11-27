@@ -386,3 +386,21 @@ class HistoryViewSet(viewsets.ModelViewSet):
             data = {}
             message = "Failed to create property"
         return Response({'status': status, 'data' : data, 'message' : message})
+
+
+    @action(detail=False,methods=['GET'],url_path='member')
+    def get_history_list_by_user(self,request,*args,**kwargs):
+        try :
+            members = [int(x) for x in request.GET.get('members').split(',')]
+        except:
+            return Response({'status': False,'message': 'Please provide a valid data'})
+        page_size = request.GET.get('limit')
+        history = History.objects.filter(~Q(end_time=None),user__in = members).order_by('-id')
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+        result_page = paginator.paginate_queryset(history, request)
+        serializer = HistorySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)
