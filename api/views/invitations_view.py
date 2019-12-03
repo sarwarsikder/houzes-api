@@ -1,3 +1,6 @@
+import decimal
+
+from django.db.models.expressions import RawSQL, F, ExpressionWrapper
 from oauth2_provider.models import AccessToken
 # from django.utils import simplejson
 from rest_framework import viewsets, status
@@ -13,6 +16,8 @@ from django.http import HttpResponse, JsonResponse
 import json
 import datetime
 from django.core import serializers
+from django.db.models import Sum, DurationField, Count, IntegerField
+from django.utils.dateparse import parse_duration
 
 
 class InvitationsViewSet(viewsets.ModelViewSet):
@@ -89,3 +94,52 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             message = "Invitation is not deleted"
         return Response({'status': status,'message': message})
 
+    @action(detail=False, url_path='activity')
+    def team_activity(self, request, *args, **kwargs):
+        if User.objects.get(id=request.user.id).is_admin :
+            users = User.objects.filter(invited_by=request.user.id)
+            activities = []
+            for user in users :
+                userLists = UserList.objects.filter(user = user)
+                houzes_count = Property.objects.filter(user_list__in=userLists).count()
+                properties = Property.objects.filter(user_list__in=userLists)
+                tagged_houzes_count = 0
+                for property in properties:
+                    if len(property.property_tags)>0 :
+                        tagged_houzes_count = tagged_houzes_count+1
+
+                length_count = History.objects.filter(user=user).aggregate(Sum('length'))['length__sum']
+                if(length_count == None):
+                    length_count = 0
+
+                length_count = length_count*decimal.Decimal(0.621371)
+                durations = History.objects.annotate(diff=ExpressionWrapper(F('end_time') - F('start_time'), output_field=DurationField())).filter(user=user)
+                duration_count = InvitationsViewSet.datetime_parse(durations.aggregate(Sum('diff')))
+
+                productivity = 0
+                try:
+                    productivity = tagged_houzes_count/duration_count
+                except:
+                    productivity = 0
+                activity = {
+                    'user_id' : user.id,
+                    'user_first_name' : user.first_name,
+                    'user_last_name ' : user.last_name,
+                    'total_houzes' : houzes_count,
+                    'total_miles' : length_count,
+                    'total_duration' : duration_count,
+                    'total_tagged_houzes' : tagged_houzes_count,
+                    'productivity' : productivity
+                }
+                activities.append(activity)
+
+            return Response(activities)
+
+    def datetime_parse(value):
+        data = value['diff__sum']
+        if data:
+            days, seconds = data.days, data.seconds
+            hours = days * 24 + seconds/3600
+            return hours
+        else:
+            return 0
