@@ -311,6 +311,18 @@ class ForgetPassword(models.Model):
     class Meta:
         db_table = 'forget_password'
 
+class ActivityLog(models.Model):
+    user = models.ForeignKey(User, on_delete= models.CASCADE)
+    activity = models.CharField(max_length=255, null=True)
+    activity_id = models.IntegerField(null=True)
+    message = models.CharField(max_length=255, null=True)
+    type = models.CharField(max_length=255, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'activity_logs'
+
 admin.site.register(User)
 admin.site.register(UserSockets)
 admin.site.register(UserLocation)

@@ -89,6 +89,7 @@ class PropertySerializer(serializers.ModelSerializer):
             'longitude' : instance.longitude,
             'property_tags' : instance.property_tags,
             'owner_info' : instance.owner_info,
+            'power_trace_request_id' : instance.power_trace_request_id,
             'photo_count' : PropertyPhotos.objects.filter(property=instance).count(),
             'note_count': PropertyNotes.objects.filter(property=instance).count(),
             'created_at': instance.created_at,
@@ -193,6 +194,25 @@ class ForgetPasswordSerializer(serializers.ModelSerializer):
         representation = {
             'id': instance.id,
             'email': User.objects.get(id= instance.user.id).email,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at
+        }
+        return representation
+
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = ActivityLog
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = {
+            'id': instance.id,
+            'user': UserSerializer(User.objects.get(id= instance.user.id)).data,
+            'activity' : instance.activity,
+            'activity_id' : instance.activity_id,
+            'message' : instance.message,
+            'type' : instance.type,
             'created_at': instance.created_at,
             'updated_at': instance.updated_at
         }

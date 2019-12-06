@@ -4,6 +4,7 @@ from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 # from.views import *
 from api.views import power_trace_view, photos_view, scout_form_view
+from api.views.activity_log_view import ActivityLogViewSet
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
 from api.views.forget_password_view import ForgetPasswordViewSet
 from api.views.history_view import HistoryViewSet
@@ -23,6 +24,7 @@ from api.views.property_view import PropertyViewSet
 from api.views.invitations_view import InvitationsViewSet
 from api.views.scout_view import ScoutViewSet
 from api.views.scout_user_list_view import ScoutUserListViewSet
+from api.views import  ownership_info_view
 
 router = routers.DefaultRouter()
 router.register(r'user', UserViewSet)
@@ -44,6 +46,7 @@ router.register(r'assign-member-to-list', AssignMemberToListViewSet)
 router.register(r'history',HistoryViewSet)
 router.register(r'history-detail', HistoryDetailViewSet)
 router.register(r'forget-password', ForgetPasswordViewSet)
+router.register(r'activity-log', ActivityLogViewSet)
 
 
 urlpatterns = [
@@ -57,6 +60,7 @@ urlpatterns = [
     path('scout-form/create-property/', scout_form_view.create_property, name='create-property'),
     path('scout-form/property/<int:id>/photo/multiple-upload/', scout_form_view.photo_multiple_upload, name='photo-multiple-upload'),
     path('scout-form/property/<int:id>/note/multiple-upload/', scout_form_view.note_multiple_upload, name='note-multiple-upload'),
+    path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,name='get-ownership-info-by-address'),
 
 ]
 
