@@ -44,7 +44,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
             user_list_id = property.user_list.id
         except:
             user_list_id = None
-
+        try:
+            history = HistoryDetail.objects.filter(property__id=property.id)[0].history.id
+        except:
+            history =None
         for tag in property.property_tags:
             property_tags = PropertyTags.objects.get(id=tag['id'])
             print(PropertyTagsSerializer(property_tags).data)
@@ -65,6 +68,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'owner_info': property.owner_info,
             'photos': PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property), many=True).data,
             'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property), many=True).data,
+            'history' : history,
             'created_at': property.created_at,
             'updated_at': property.updated_at,
             'power_trace_request_id': property.power_trace_request_id

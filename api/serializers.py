@@ -76,6 +76,10 @@ class PropertySerializer(serializers.ModelSerializer):
             user_list_id = instance.user_list.id
         except:
             user_list_id = None
+        try:
+            history = HistoryDetail.objects.filter(property__id=instance.id)[0].history.id
+        except:
+            history =None
         representation = {
             'id' : instance.id,
             'user_list' : user_list_id,
@@ -92,6 +96,7 @@ class PropertySerializer(serializers.ModelSerializer):
             'power_trace_request_id' : instance.power_trace_request_id,
             'photo_count' : PropertyPhotos.objects.filter(property=instance).count(),
             'note_count': PropertyNotes.objects.filter(property=instance).count(),
+            'history' : history,
             'created_at': instance.created_at,
             'updated_at' : instance.updated_at
         }
