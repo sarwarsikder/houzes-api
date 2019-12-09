@@ -347,10 +347,12 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         try :
             members = [int(x) for x in request.GET.get('members').split(',')]
-            tagIds =  [int(x) for x in request.GET.get('tags').split(',')]
         except:
             return Response({'status': False,'message': 'Please provide a valid data'})
-
+        try:
+            tagIds = [int(x) for x in request.GET.get('tags').split(',')]
+        except:
+            print('invalid tag format')
 
         property = Property.objects.filter(user_list__user__in = members)
         listId = request.GET.get('list')
