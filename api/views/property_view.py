@@ -446,7 +446,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 create_power_trace_response = json.loads(PropertyViewSet.create_power_trace(self, package_type, request.user.id, property.id))
                 print("f2")
                 if create_power_trace_response['status']:
-                    power_trace_response = json.loads(PropertyViewSet.get_power_trace_result_by_id(self, property))
+                    power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
                     print("f2")
                 else :
                     power_trace_response = {'status': False, 'data': {}, 'message': create_power_trace_response['message']}
@@ -548,12 +548,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
             print('GET POWER TRACE BY ID')
             print(power_trace_result_by_id_res.json())
             if power_trace_result_by_id_res.json()['code'] == 200 :
-                return json.dumps({'status' : True, 'data' : power_trace_result_by_id_res.json()['data'][0], 'message' : power_trace_result_by_id_res.json()['message']})
+                return {'status' : True, 'data' : power_trace_result_by_id_res.json()['data'][0], 'message' : power_trace_result_by_id_res.json()['message']}
+                # return json.dumps({'status' : True, 'data' : power_trace_result_by_id_res.json()['data'][0], 'message' : power_trace_result_by_id_res.json()['message']})
             else :
-                return json.dumps({'status' : False, 'data' : {}, 'message' : power_trace_result_by_id_res.json()['message']})
+                return {'status' : False, 'data' : {}, 'message' : power_trace_result_by_id_res.json()['message']}
         except:
             traceback.print_exc()
-            return json.dumps({'status': False, 'data': {}, 'message': 'Server Error!'})
+            return {'status': False, 'data': {}, 'message': 'Server Error!'}
 
     def generate_shortuuid(self):
         shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
