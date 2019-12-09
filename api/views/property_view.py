@@ -548,6 +548,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
             print('GET POWER TRACE BY ID')
             print(power_trace_result_by_id_res.json())
             if power_trace_result_by_id_res.json()['code'] == 200 :
+                print('--------------')
+                print(power_trace_result_by_id_res.json())
+                print('--------------')
                 return {'status' : True, 'data' : power_trace_result_by_id_res.json()['data'][0], 'message' : power_trace_result_by_id_res.json()['message']}
                 # return json.dumps({'status' : True, 'data' : power_trace_result_by_id_res.json()['data'][0], 'message' : power_trace_result_by_id_res.json()['message']})
             else :
