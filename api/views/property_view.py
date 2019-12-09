@@ -410,11 +410,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
         print(type(fetch_owner_info))
         print(power_trace)
         if fetch_owner_info:
-            fetch_ownership_info_response = json.loads(PropertyViewSet.fetch_ownership_info(self, property))
+            fetch_ownership_info_response = PropertyViewSet.fetch_ownership_info(self, property)
             print("f1")
         if power_trace:
             if len(property.owner_info)>0 :
-                create_power_trace_response = json.loads(PropertyViewSet.create_power_trace(self, package_type, request.user.id, property.id))
+                create_power_trace_response = PropertyViewSet.create_power_trace(self, package_type, request.user.id, property.id)
                 print("f2")
                 if create_power_trace_response['status']:
                     power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
@@ -443,8 +443,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         try:
             r = requests.post(url=url, data=PARAMS, headers=headers)
             jsonResponse = r.json()
-            objectResponse = json.loads(json.dumps(jsonResponse))
-
+            # objectResponse = json.loads(json.dumps(jsonResponse))
+            objectResponse = jsonResponse
         except:
             status = False
             message = 'Fetch owner info micro service error'
@@ -453,7 +453,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         if 'error' in r.json():
             message = 'Error in fetch ownership'
             status = False
-            return json.dumps({"status": status,'data' : [], 'message': message})
+            return {"status": status,'data' : [], 'message': message}
         if objectResponse['status'] == 200:
             status = True
             print(objectResponse['owner_info'])
@@ -464,7 +464,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             status = False
             data = []
         message = objectResponse['message']
-        return json.dumps({"status": status,'data' : data, 'message': message})
+        return {"status": status,'data' : data, 'message': message}
 
     def create_power_trace(self, package_type, user_id, property_id):
         trace_name = generate_shortuuid()
@@ -501,15 +501,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     info_list = power_trace_start_by_data_res.json()['data']
                     update_property_power_trace_info(info_list)
 
-                    return json.dumps({'status': True, 'data' : power_trace_request_res.json()['data'], 'message' : power_trace_request_res.json()['message']})
+                    return {'status': True, 'data' : power_trace_request_res.json()['data'], 'message' : power_trace_request_res.json()['message']}
                 else:
-                    return json.dumps({'status': False, 'data': {},'message': 'PowerTrace Failed due to Information parsing failure!'})
+                    return {'status': False, 'data': {},'message': 'PowerTrace Failed due to Information parsing failure!'}
             else:
-                return json.dumps(
-                    {'status': False, 'data' : {}, 'message': 'Trace name is already exists!'})
+                return {'status': False, 'data' : {}, 'message': 'Trace name is already exists!'}
         except:
             traceback.print_exc()
-            return json.dumps({'status': False, 'data': {}, 'message': 'Failed to create request! Server Error!'})
+            return {'status': False, 'data': {}, 'message': 'Failed to create request! Server Error!'}
 
     def get_power_trace_result_by_id(self,property):
         trace_id = Property.objects.get(id = property.id).power_trace_request_id
