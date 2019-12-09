@@ -419,11 +419,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
         fetch_owner_info = 0
         power_trace = 0
         try:
+            print("try")
             if 'fetch_owner_info' in request.body:
                 fetch_owner_info = int(request.body['fetch_owner_info'])
             if 'power_trace' in request.body:
                 power_trace = int(request.body['power_trace'])
         except:
+            print("ex")
             if 'fetch_owner_info' in request.data:
                 fetch_owner_info = int(request.data['fetch_owner_info'])
             if 'power_trace' in request.data:
@@ -438,11 +440,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
         print(power_trace)
         if fetch_owner_info:
             fetch_ownership_info_response = json.loads(PropertyViewSet.fetch_ownership_info(self, property))
+            print("f1")
         if power_trace:
             if len(property.owner_info)>0 :
                 create_power_trace_response = json.loads(PropertyViewSet.create_power_trace(self, package_type, request.user.id, property.id))
+                print("f2")
                 if create_power_trace_response['status']:
                     power_trace_response = json.loads(PropertyViewSet.get_power_trace_result_by_id(self, property))
+                    print("f2")
                 else :
                     power_trace_response = {'status': False, 'data': {}, 'message': create_power_trace_response['message']}
             else:

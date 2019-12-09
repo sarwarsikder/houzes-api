@@ -1,5 +1,5 @@
 import decimal
-
+from django.db.models import Q
 from django.db.models.expressions import RawSQL, F, ExpressionWrapper
 from oauth2_provider.models import AccessToken
 # from django.utils import simplejson
@@ -31,52 +31,56 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            receiver =request.data['email']
+            receiver = request.data['email']
         except:
             receiver = request.body['email']
 
         status = False
         data = None
-        message=""
+        message = ""
 
         invitation_key = generate_shortuuid()
         try:
             send_mail(subject="Invitation",
-                      message=str(request.user)+" sent you an invitation click here to accept https://"+settings.WEB_APP_URL+'/team-invite/'+str(invitation_key),
+                      message=str(
+                          request.user) + " sent you an invitation click here to accept https://" + settings.WEB_APP_URL + '/team-invite/' + str(
+                          invitation_key),
                       from_email=settings.EMAIL_HOST_USER,
                       recipient_list=[receiver],
                       fail_silently=False
                       )
 
-            invitations = Invitations(user=User.objects.get(id=request.user.id),invitation_key = invitation_key,email=receiver,status=0)
+            invitations = Invitations(user=User.objects.get(id=request.user.id), invitation_key=invitation_key,
+                                      email=receiver, status=0)
             invitations.save()
             invitationsSerializer = InvitationsSerializer(invitations)
             status = True
             data = invitationsSerializer.data
-            message = "Invitation sent to "+receiver+" successfully"
+            message = "Invitation sent to " + receiver + " successfully"
         except:
             status = False
             message = "User is not invited"
-        return Response({'status': status,'data': data,'message': message})
-
+        return Response({'status': status, 'data': data, 'message': message})
 
     def list(self, request, *args, **kwargs):
-        if User.objects.get(id=request.user.id).is_admin :
-            users = UserSerializer(User.objects.filter(invited_by=request.user.id),many=True)
-            unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=request.user.id),many=True)
+        if User.objects.get(id=request.user.id).is_admin:
+            users = UserSerializer(User.objects.filter(invited_by=request.user.id), many=True)
+            unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=request.user.id),
+                                                             many=True)
             dict = {
                 'users': users.data,
                 'unregistered_invitations': unregistered_invitations.data,
             }
-        else :
+        else:
             user = User.objects.get(id=request.user.id)
-            users = UserSerializer(User.objects.filter(invited_by=user.invited_by), many= True)
-            unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=user.invited_by),many=True)
+            users = UserSerializer(User.objects.filter(invited_by=user.invited_by), many=True)
+            unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=user.invited_by),
+                                                             many=True)
             team_manager = UserSerializer(User.objects.get(id=user.invited_by))
             dict = {
                 'users': users.data,
                 'unregistered_invitations': unregistered_invitations.data,
-                'team_manager' : team_manager.data
+                'team_manager': team_manager.data
             }
 
         return JsonResponse(dict)
@@ -84,7 +88,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         invitationId = kwargs['pk']
         status = False
-        message=""
+        message = ""
         try:
             Invitations.objects.get(id=invitationId).delete()
             status = True
@@ -92,44 +96,42 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         except:
             status = False
             message = "Invitation is not deleted"
-        return Response({'status': status,'message': message})
+        return Response({'status': status, 'message': message})
 
     @action(detail=False, url_path='activity')
     def team_activity(self, request, *args, **kwargs):
-        if User.objects.get(id=request.user.id).is_admin :
+        if User.objects.get(id=request.user.id).is_admin:
             users = User.objects.filter(invited_by=request.user.id)
             activities = []
-            for user in users :
-                userLists = UserList.objects.filter(user = user)
+            for user in users:
+                userLists = UserList.objects.filter(user=user)
                 houzes_count = Property.objects.filter(user_list__in=userLists).count()
-                properties = Property.objects.filter(user_list__in=userLists)
-                tagged_houzes_count = 0
-                for property in properties:
-                    if len(property.property_tags)>0 :
-                        tagged_houzes_count = tagged_houzes_count+1
-
+                properties = Property.objects.filter(Q(user_list__in=userLists), ~Q(property_tags=[]))
+                tagged_houzes_count = properties.count()
                 length_count = History.objects.filter(user=user).aggregate(Sum('length'))['length__sum']
-                if(length_count == None):
+                if (length_count == None):
                     length_count = 0
 
-                length_count = length_count*decimal.Decimal(0.621371)
-                durations = History.objects.annotate(diff=ExpressionWrapper(F('end_time') - F('start_time'), output_field=DurationField())).filter(user=user)
+                length_count = length_count * decimal.Decimal(0.621371)
+                durations = History.objects.annotate(
+                    diff=ExpressionWrapper(F('end_time') - F('start_time'), output_field=DurationField())).filter(
+                    user=user)
                 duration_count = InvitationsViewSet.datetime_parse(durations.aggregate(Sum('diff')))
 
                 productivity = 0
                 try:
-                    productivity = tagged_houzes_count/duration_count
+                    productivity = tagged_houzes_count / duration_count
                 except:
                     productivity = 0
                 activity = {
-                    'user_id' : user.id,
-                    'user_first_name' : user.first_name,
-                    'user_last_name ' : user.last_name,
-                    'total_houzes' : houzes_count,
-                    'total_miles' : length_count,
-                    'total_duration' : duration_count,
-                    'total_tagged_houzes' : tagged_houzes_count,
-                    'productivity' : productivity
+                    'user_id': user.id,
+                    'user_first_name': user.first_name,
+                    'user_last_name': user.last_name,
+                    'total_houzes': houzes_count,
+                    'total_miles': length_count,
+                    'total_duration': duration_count,
+                    'total_tagged_houzes': tagged_houzes_count,
+                    'productivity': productivity
                 }
                 activities.append(activity)
 
@@ -139,7 +141,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         data = value['diff__sum']
         if data:
             days, seconds = data.days, data.seconds
-            hours = days * 24 + seconds/3600
+            hours = days * 24 + seconds / 3600
             return hours
         else:
             return 0
