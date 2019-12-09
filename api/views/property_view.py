@@ -416,20 +416,20 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='(?P<id>[\w-]+)/payment')
     def property_payment(self, request, *args, **kwargs):
-        fetch_owner_info = 0
-        power_trace = 0
-        try:
-            print("try")
-            if 'fetch_owner_info' in request.body:
-                fetch_owner_info = int(request.body['fetch_owner_info'])
-            if 'power_trace' in request.body:
-                power_trace = int(request.body['power_trace'])
-        except:
-            print("ex")
-            if 'fetch_owner_info' in request.data:
-                fetch_owner_info = int(request.data['fetch_owner_info'])
-            if 'power_trace' in request.data:
-                power_trace = int(request.data['power_trace'])
+        fetch_owner_info = 1
+        power_trace = 1
+        # try:
+        #     print("try")
+        #     if 'fetch_owner_info' in request.body:
+        #         fetch_owner_info = request.body['fetch_owner_info']=="true"
+        #     if 'power_trace' in request.body:
+        #         power_trace = int(request.body['power_trace'])
+        # except:
+        #     print("ex")
+        #     if 'fetch_owner_info' in request.data:
+        #         fetch_owner_info = int(request.data['fetch_owner_info'])
+        #     if 'power_trace' in request.data:
+        #         power_trace = int(request.data['power_trace'])
 
         package_type = 2
         property = Property.objects.get(id=kwargs['id'])
