@@ -339,24 +339,31 @@ class PropertyViewSet(viewsets.ModelViewSet):
             message = "Please provide all the field correctly"
         return Response({'status': status, 'data': data, 'message': message})
 
-    @action(detail=False, methods=['GET'], url_path='filter/user/(?P<id>[\w-]+)')
+    @action(detail=False, methods=['GET'], url_path='filter')
     def get_property_filtered_by_tag_team_member_list(self, request, *args, **kwargs):
         tagIds = None
+        members = None
         listId = None
 
-        user = User.objects.get(id=kwargs['id'])
-        property = Property.objects.filter(user_list__user=user)
-        tagIds = request.GET.getlist('tag')
+        try :
+            members = [int(x) for x in request.GET.get('members').split(',')]
+            tagIds =  [int(x) for x in request.GET.get('tags').split(',')]
+        except:
+            return Response({'status': False,'message': 'Please provide a valid data'})
+
+
+        property = Property.objects.filter(user_list__user__in = members)
         listId = request.GET.get('list')
 
         print(tagIds)
+        print(members)
+        print(property)
 
         print('working')
         page_size = request.GET.get('limit')
         if tagIds != None:
             for tagId in tagIds:
-                property = property.filter(
-                    Q(property_tags__contains=[{'id': tagId}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
+                property = property.filter(Q(property_tags__contains=[{'id': str(tagId)}]) | Q(property_tags__contains=[{'id': tagId}]))
         if listId != None:
             property = property.filter(user_list__id=listId)
         paginator = CustomPagination()
@@ -370,49 +377,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
         serializer = PropertySerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
 
-    @action(detail=False, methods=['GET'], url_path='(?P<id>[\w-]+)/fetch-owner-info')
-    def fetch_owner_info(self, request, *args, **kwargs):
-        property = Property.objects.get(id=kwargs['id'])
-        address = property.street + ', ' + property.city + ', ' + property.state + ' ' + property.zip
-        print(address)
-
-        objectResponse = None
-        message = ""
-        data = []
-        status = False
-        url = 'http://172.18.1.11:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address'
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
-            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
-        }
-        PARAMS = {'address': address}
-
-        try:
-            r = requests.post(url=url, data=PARAMS, headers=headers)
-            jsonResponse = r.json()
-            objectResponse = json.loads(json.dumps(jsonResponse))
-
-        except:
-            status = False
-            message = 'Micro Service Error'
-            data = {}
-            return JsonResponse({"status": status, 'data': data, 'message': message})
-
-        if 'error' in r.json():
-            message = 'Error'
-            data = {}
-            status = False
-            return JsonResponse({"status": status, 'data': data, 'message': message})
-        if objectResponse['status'] == 200:
-            status = True
-            property.owner_info = objectResponse['owner_info']
-            property.save()
-            data = PropertySerializer(property).data
-        if objectResponse['status'] != 200:
-            status = False
-        message = objectResponse['message']
-        return JsonResponse({"status": status, 'data': data, 'message': message})
+    @action(detail=False, methods=['GET'], url_path='(?P<id>[\w-]+)/get-existing-power-trace')
+    def get_existing_power_trace_by_property_id(self, request, *args, **kwargs):
+        property = Property.objects.get(id = kwargs['id'])
+        power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
+        return JsonResponse(power_trace_response)
 
     @action(detail=False, methods=['POST'], url_path='(?P<id>[\w-]+)/payment')
     def property_payment(self, request, *args, **kwargs):
