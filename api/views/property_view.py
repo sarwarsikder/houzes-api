@@ -505,7 +505,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             power_trace_request_pload = {'trace_name': trace_name,
                                          'package_type': package_type,
                                          'user_id': user_id,
-                                         'countId' : owner_counter}
+                                         'countId' : 1}
             power_trace_start_by_data_pload = {}
             property = Property.objects.get(id=property_id)
             owner_info = property.owner_info[0]
