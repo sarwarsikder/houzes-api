@@ -521,6 +521,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 power_trace_start_by_data_pload['trace_request_id'] = power_trace_request_id
                 power_trace_start_by_data_pload['count_id'] = 1
                 power_trace_start_by_data_pload['property_id0'] = property_id
+                power_trace_start_by_data_pload['async'] = 'false'
                 power_trace_start_by_data_res = requests.post(power_trace_start_by_data_url,
                                                               data=power_trace_start_by_data_pload,
                                                               headers=power_trace_headers)
