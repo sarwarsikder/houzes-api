@@ -418,18 +418,18 @@ class PropertyViewSet(viewsets.ModelViewSet):
     def property_payment(self, request, *args, **kwargs):
         fetch_owner_info = 1
         power_trace = 1
-        # try:
-        #     print("try")
-        #     if 'fetch_owner_info' in request.body:
-        #         fetch_owner_info = request.body['fetch_owner_info']=="true"
-        #     if 'power_trace' in request.body:
-        #         power_trace = int(request.body['power_trace'])
-        # except:
-        #     print("ex")
-        #     if 'fetch_owner_info' in request.data:
-        #         fetch_owner_info = int(request.data['fetch_owner_info'])
-        #     if 'power_trace' in request.data:
-        #         power_trace = int(request.data['power_trace'])
+        try:
+            print("try")
+            if 'fetch_owner_info' in request.body:
+                fetch_owner_info = int(request.body['fetch_owner_info'])
+            if 'power_trace' in request.body:
+                power_trace = int(request.body['power_trace'])
+        except:
+            print("ex")
+            if 'fetch_owner_info' in request.data:
+                fetch_owner_info = int(request.data['fetch_owner_info'])
+            if 'power_trace' in request.data:
+                power_trace = int(request.data['power_trace'])
 
         package_type = 2
         property = Property.objects.get(id=kwargs['id'])
@@ -461,7 +461,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         message = ""
         status = False
         data = []
-        url = 'http://172.18.1.11:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address'
+        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address'
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
