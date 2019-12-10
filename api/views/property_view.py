@@ -385,6 +385,37 @@ class PropertyViewSet(viewsets.ModelViewSet):
         power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
         return JsonResponse(power_trace_response)
 
+    @action(detail=False, methods=['GET'], url_path='filter/user/(?P<id>[\w-]+)')
+    def get_property_filtered(self, request, *args, **kwargs):
+        tagIds = None
+        listId = None
+
+        user = User.objects.get(id=kwargs['id'])
+        property = Property.objects.filter(user_list__user=user)
+        tagIds = request.GET.getlist('tag')
+        listId = request.GET.get('list')
+
+        print(tagIds)
+
+        print('working')
+        page_size = request.GET.get('limit')
+        if tagIds != None:
+            for tagId in tagIds:
+                property = property.filter(
+                    Q(property_tags__contains=[{'id': tagId}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
+        if listId != None:
+            property = property.filter(user_list__id=listId)
+        paginator = CustomPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+
+        result_page = paginator.paginate_queryset(property, request)
+
+        serializer = PropertySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)
+
     @action(detail=False, methods=['POST'], url_path='(?P<id>[\w-]+)/payment')
     def property_payment(self, request, *args, **kwargs):
         fetch_owner_info = 1
@@ -544,4 +575,3 @@ def update_property_power_trace_info(info_list):
                 power_trace_request_id=info_id)
         except:
             traceback.print_exc()
-
