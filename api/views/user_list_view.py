@@ -97,3 +97,48 @@ class UserListViewSet(viewsets.ModelViewSet):
         userList = UserList.objects.filter(user__id = kwargs['id'])
         userListSerializer = UserListSerializer(userList,many=True)
         return Response(userListSerializer.data)
+
+    @action(detail=False, methods=['POST'], url_path='(?P<pk>[\w-]+)/push')
+    def push_list_to_member(self, request, *args, **kwargs):
+        status = False
+        data = {}
+        message = ""
+        try:
+            memberId = request.data['member']
+        except:
+            memberId = request.body['member']
+        try:
+            member = User.objects.get(id=memberId)
+            if member.invited_by!=request.user.id :
+                status = False
+                data = {}
+                message = 'Invalid team member'
+                return Response({'status': status, 'data': data, 'message': message})
+        except:
+            status = False
+            data = {}
+            message = 'Invalid team member'
+            return Response({'status': status, 'data': data, 'message': message})
+        try:
+            userList = UserList.objects.get(id = kwargs['pk'])
+            if userList.user.id != request.user.id:
+                status = False
+                data = {}
+                message = 'Invalid list'
+                return Response({'status': status, 'data': data, 'message': message})
+        except:
+            status = False
+            data = {}
+            message = 'Invalid list'
+            return Response({'status': status, 'data': data, 'message': message})
+        try:
+            userList.user = member
+            userList.save()
+            status = True
+            data = UserListSerializer(userList).data
+            message = 'Successfully pushed list to '+member.first_name+' '+member.last_name
+        except:
+            status = False
+            data = {}
+            message = 'Error pushing list to team member'
+        return Response({'status': status,'data' : data,'message': message})
