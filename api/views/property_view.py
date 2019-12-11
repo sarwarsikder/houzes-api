@@ -566,6 +566,49 @@ class PropertyViewSet(viewsets.ModelViewSet):
         gUid = str(shortuuid.random(length=16))
         return gUid
 
+    @action(detail=False,methods=['POST'],url_path='(?P<id>[\w-]+)/assign-multiple-tags')
+    def assign_multiple_tags_to_property(self,request,*args,**kwargs):
+        status = False
+        data = {}
+        message=""
+        try:
+            property = Property.objects.get(id = kwargs['id'])
+        except:
+            status = False
+            data = {}
+            message = 'Property does not exist'
+        try:
+            requestData = request.data['tags']
+        except:
+            requestData = request.body['tags']
+
+        print(requestData)
+
+        tags = [int(x) for x in requestData.split(',')]
+        property_tags = []
+        for tag in tags:
+            property_tags.append({'id' : tag})
+            try:
+                propertyTag = PropertyTags.objects.get(id=tag)
+
+            except:
+                status = False
+                data = {}
+                message = 'Invalid tag given'
+                return Response({'status': status, 'data': data, 'message': message})
+        try:
+            property.property_tags = property_tags
+            property.save()
+            propertySerializer = PropertySerializer(property)
+            status = True
+            data = propertySerializer.data
+            message = 'Successfully added tags to property'
+        except:
+            status = False
+            data = {}
+            message = 'Failed to update Property'
+        return Response({'status': status,'data': data,'message': message})
+
 def update_property_power_trace_info(info_list):
     for info in info_list:
         try:
