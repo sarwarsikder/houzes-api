@@ -435,6 +435,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         package_type = 2
         property = Property.objects.get(id=kwargs['id'])
+        property_address = ' '.join([property.street, property.city, property.state, property.zip])
         fetch_ownership_info_response = {}
         create_power_trace_response = {}
         power_trace_response = {}
@@ -445,7 +446,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             print("f1")
         if power_trace:
             if len(property.owner_info)>0 :
-                create_power_trace_response = PropertyViewSet.create_power_trace(self, package_type, request.user.id, property.id)
+                create_power_trace_response = PropertyViewSet.create_power_trace(self, package_type, request.user.id, property.id, property_address)
                 print("f2")
                 if create_power_trace_response['status']:
                     power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
@@ -497,7 +498,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         message = objectResponse['message']
         return {"status": status,'data' : data, 'message': message}
 
-    def create_power_trace(self, package_type, user_id, property_id):
+    def create_power_trace(self, package_type, user_id, property_id, property_address):
         trace_name = generate_shortuuid()
         try:
             power_trace_request_url = POWER_TRACE_HOST + 'api/powertrace/createRequest'
@@ -512,7 +513,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property = Property.objects.get(id=property_id)
             owner_info = property.owner_info[0]
             power_trace_start_by_data_pload['owner_name' + str(owner_counter)] = owner_info['full_name']
-            power_trace_start_by_data_pload['owner_address' + str(owner_counter)] = owner_info['full_address']
+            power_trace_start_by_data_pload['owner_address' + str(owner_counter)] = property_address
             power_trace_start_by_data_pload['property_id' + str(owner_counter)] = property_id
 
             ## Powertrace request
