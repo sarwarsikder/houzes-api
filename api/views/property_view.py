@@ -405,6 +405,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     Q(property_tags__contains=[{'id': tagId}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
         if listId != None:
             property = property.filter(user_list__id=listId)
+        property = property.order_by('-created_at')
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size
