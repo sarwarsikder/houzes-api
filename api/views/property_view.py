@@ -3,13 +3,13 @@ import traceback
 
 import requests
 from django.db.models import Count, Q
+from django.http import HttpResponse, JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, pagination, filters
 from rest_framework.decorators import action
-from django.http import HttpResponse, JsonResponse
-from api.serializers import *
-from api.models import *
 from rest_framework.response import Response
+
+from api.serializers import *
 from houzes_api import settings
 
 POWER_TRACE_HOST = getattr(settings, "POWER_TRACE_HOST", None)
@@ -17,6 +17,14 @@ POWER_TRACE_CLIENT_ID = getattr(settings, "POWER_TRACE_CLIENT_ID", None)
 POWER_TRACE_CLIENT_SECRET = getattr(settings, "POWER_TRACE_CLIENT_SECRET", None)
 power_trace_headers = {'client_id': POWER_TRACE_CLIENT_ID,
                        'client_secret': POWER_TRACE_CLIENT_SECRET}
+
+
+class doubleQuoteDict(dict):
+    def __str__(self):
+        return json.dumps(self)
+
+    def __repr__(self):
+        return json.dumps(self)
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -47,7 +55,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         try:
             history = HistoryDetail.objects.filter(property__id=property.id)[0].history.id
         except:
-            history =None
+            history = None
         for tag in property.property_tags:
             property_tags = PropertyTags.objects.get(id=tag['id'])
             print(PropertyTagsSerializer(property_tags).data)
@@ -68,7 +76,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'owner_info': property.owner_info,
             'photos': PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property), many=True).data,
             'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property), many=True).data,
-            'history' : history,
+            'history': history,
             'created_at': property.created_at,
             'updated_at': property.updated_at,
             'power_trace_request_id': property.power_trace_request_id
@@ -345,16 +353,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
         members = None
         listId = None
 
-        try :
+        try:
             members = [int(x) for x in request.GET.get('members').split(',')]
         except:
-            return Response({'status': False,'message': 'Please provide a valid data'})
+            return Response({'status': False, 'message': 'Please provide a valid data'})
         try:
             tagIds = [int(x) for x in request.GET.get('tags').split(',')]
         except:
             print('invalid tag format')
 
-        property = Property.objects.filter(user_list__user__in = members)
+        property = Property.objects.filter(user_list__user__in=members)
         listId = request.GET.get('list')
 
         print(tagIds)
@@ -365,7 +373,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         page_size = request.GET.get('limit')
         if tagIds != None:
             for tagId in tagIds:
-                property = property.filter(Q(property_tags__contains=[{'id': str(tagId)}]) | Q(property_tags__contains=[{'id': tagId}]))
+                property = property.filter(
+                    Q(property_tags__contains=[{'id': str(tagId)}]) | Q(property_tags__contains=[{'id': tagId}]))
         if listId != None:
             property = property.filter(user_list__id=listId)
         paginator = CustomPagination()
@@ -381,7 +390,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path='(?P<id>[\w-]+)/get-existing-power-trace')
     def get_existing_power_trace_by_property_id(self, request, *args, **kwargs):
-        property = Property.objects.get(id = kwargs['id'])
+        property = Property.objects.get(id=kwargs['id'])
         power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
         return JsonResponse(power_trace_response)
 
@@ -421,6 +430,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     def property_payment(self, request, *args, **kwargs):
         fetch_owner_info = 1
         power_trace = 1
+        property_payment_message = []
         try:
             print("try")
             if 'fetch_owner_info' in request.body:
@@ -428,7 +438,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if 'power_trace' in request.body:
                 power_trace = int(request.body['power_trace'])
         except:
-            print("ex")
             if 'fetch_owner_info' in request.data:
                 fetch_owner_info = int(request.data['fetch_owner_info'])
             if 'power_trace' in request.data:
@@ -437,48 +446,59 @@ class PropertyViewSet(viewsets.ModelViewSet):
         package_type = 2
         property = Property.objects.get(id=kwargs['id'])
         property_address = ' '.join([property.street, property.city, property.state, property.zip])
-        fetch_ownership_info_response = {}
-        create_power_trace_response = {}
-        power_trace_response = {}
-        print(type(fetch_owner_info))
-        print(power_trace)
+        fetch_ownership_info_response = {"status" : False}
+        power_trace_response =  {"status" : False}
         if fetch_owner_info:
             fetch_ownership_info_response = PropertyViewSet.fetch_ownership_info(self, property)
-            print("f1")
+            if fetch_ownership_info_response['status']:
+                property_payment_message.append('Ownership data is collected')
+            else :
+                property_payment_message.append(fetch_ownership_info_response['message'])
         if power_trace:
-            if len(property.owner_info)>0 :
-                create_power_trace_response = PropertyViewSet.create_power_trace(self, package_type, request.user.id, property.id, property_address)
-                print("f2")
+            if len(property.owner_info) > 0:
+                create_power_trace_response = PropertyViewSet.create_power_trace(self, package_type, request.user.id,
+                                                                                 property.id, property_address)
                 if create_power_trace_response['status']:
                     power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
-                    print("f2")
-                else :
-                    power_trace_response = {'status': False, 'data': {}, 'message': create_power_trace_response['message']}
+                else:
+                    power_trace_response = {'status': False, 'data': {},
+                                            'message': create_power_trace_response['message']}
             else:
-                power_trace_response = {'status' : False, 'data' : {}, 'message' : 'Ownership info is not fetched'}
-        return JsonResponse({"fetch_ownership_info": fetch_ownership_info_response,'power_trace' : power_trace_response})
+                power_trace_response = {'status': False, 'data': {}, 'message': 'Power trace data is not collected'}
 
-    def fetch_ownership_info(self,property):
+            property_payment_message.append(power_trace_response['message'])
+        return JsonResponse({"status": fetch_ownership_info_response['status'] or power_trace_response['status'],
+                             "data": {"fetch_ownership_info": fetch_ownership_info_response,
+                                      'power_trace': power_trace_response},
+                             'message': json.dumps(property_payment_message)})
+
+    def fetch_ownership_info(self, property):
         address = property.street + ', ' + property.city + ', ' + property.state + ' ' + property.zip
-        print('property address --> '+address )
+        print('property address --> ' + address)
         objectResponse = None
         message = ""
         status = False
         data = []
         url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address'
         headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
             'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
         }
-        PARAMS = {'address': address}
-
+        PARAMS = {
+            "address": address,
+            "latitude": str(property.latitude) if property.latitude else "",
+            "longitude": str(property.longitude) if property.longitude else "",
+            "property_id": property.id
+        }
         try:
-            r = requests.post(url=url, data=PARAMS, headers=headers)
+            r = requests.post(url=url, json=PARAMS, headers=headers)
             jsonResponse = r.json()
             # objectResponse = json.loads(json.dumps(jsonResponse))
             objectResponse = jsonResponse
+            print(objectResponse)
         except:
+            print('ex')
             status = False
             message = 'Fetch owner info micro service error'
             return JsonResponse({"status": status, "data": [], 'message': message})
@@ -486,18 +506,19 @@ class PropertyViewSet(viewsets.ModelViewSet):
         if 'error' in r.json():
             message = 'Error in fetch ownership'
             status = False
-            return {"status": status,'data' : [], 'message': message}
+            return {"status": status, 'data': [], 'message': message}
         if objectResponse['status'] == 200:
             status = True
-            print(objectResponse['owner_info'])
-            data = objectResponse['owner_info']
-            property.owner_info = objectResponse['owner_info']
+            print('---------------------')
+            print(objectResponse['data']['owner_info'])
+            data.append(objectResponse['data']['owner_info'])
+            property.owner_info = data
             property.save()
         if objectResponse['status'] != 200:
             status = False
             data = []
         message = objectResponse['message']
-        return {"status": status,'data' : data, 'message': message}
+        return {"status": status, 'data': data, 'message': message}
 
     def create_power_trace(self, package_type, user_id, property_id, property_address):
         trace_name = generate_shortuuid()
@@ -509,7 +530,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             power_trace_request_pload = {'trace_name': trace_name,
                                          'package_type': package_type,
                                          'user_id': user_id,
-                                         'countId' : 1}
+                                         'countId': 1}
             power_trace_start_by_data_pload = {}
             property = Property.objects.get(id=property_id)
             owner_info = property.owner_info[0]
@@ -534,31 +555,33 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     info_list = power_trace_start_by_data_res.json()['data']
                     update_property_power_trace_info(info_list)
 
-                    return {'status': True, 'data' : power_trace_request_res.json()['data'], 'message' : power_trace_request_res.json()['message']}
+                    return {'status': True, 'data': power_trace_request_res.json()['data'],
+                            'message': power_trace_request_res.json()['message']}
                 else:
-                    return {'status': False, 'data': {},'message': 'PowerTrace Failed due to Information parsing failure!'}
+                    return {'status': False, 'data': {},
+                            'message': 'PowerTrace Failed due to Information parsing failure!'}
             else:
-                return {'status': False, 'data' : {}, 'message': 'Trace name is already exists!'}
+                return {'status': False, 'data': {}, 'message': 'Trace name is already exists!'}
         except:
             traceback.print_exc()
             return {'status': False, 'data': {}, 'message': 'Failed to create request! Server Error!'}
 
-    def get_power_trace_result_by_id(self,property):
-        trace_id = Property.objects.get(id = property.id).power_trace_request_id
+    def get_power_trace_result_by_id(self, property):
+        trace_id = Property.objects.get(id=property.id).power_trace_request_id
         print(trace_id)
         try:
             url = POWER_TRACE_HOST + 'api/powertrace/trace-result-by-info-id?request_info_id=' + str(trace_id)
             power_trace_result_by_id_res = requests.post(url, headers=power_trace_headers)
             print('GET POWER TRACE BY ID')
             print(power_trace_result_by_id_res.json())
-            if power_trace_result_by_id_res.json()['code'] == 200 :
+            if power_trace_result_by_id_res.json()['code'] == 200:
                 print('--------------')
                 print(power_trace_result_by_id_res.json())
                 print('--------------')
-                return {'status' : True, 'data' : power_trace_result_by_id_res.json()['data'][0], 'message' : power_trace_result_by_id_res.json()['message']}
-                # return json.dumps({'status' : True, 'data' : power_trace_result_by_id_res.json()['data'][0], 'message' : power_trace_result_by_id_res.json()['message']})
-            else :
-                return {'status' : False, 'data' : {}, 'message' : power_trace_result_by_id_res.json()['message']}
+                return {'status': True, 'data': power_trace_result_by_id_res.json()['data'][0],
+                        'message': 'Power trace data is collected'}
+            else:
+                return {'status': False, 'data': {}, 'message': power_trace_result_by_id_res.json()['message']}
         except:
             traceback.print_exc()
             return {'status': False, 'data': {}, 'message': 'Server Error!'}
@@ -568,13 +591,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
         gUid = str(shortuuid.random(length=16))
         return gUid
 
-    @action(detail=False,methods=['POST'],url_path='(?P<id>[\w-]+)/assign-multiple-tags')
-    def assign_multiple_tags_to_property(self,request,*args,**kwargs):
+    @action(detail=False, methods=['POST'], url_path='(?P<id>[\w-]+)/assign-multiple-tags')
+    def assign_multiple_tags_to_property(self, request, *args, **kwargs):
         status = False
         data = {}
-        message=""
+        message = ""
         try:
-            property = Property.objects.get(id = kwargs['id'])
+            property = Property.objects.get(id=kwargs['id'])
         except:
             status = False
             data = {}
@@ -589,7 +612,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         tags = [int(x) for x in requestData.split(',')]
         property_tags = []
         for tag in tags:
-            property_tags.append({'id' : tag})
+            property_tags.append({'id': tag})
             try:
                 propertyTag = PropertyTags.objects.get(id=tag)
 
@@ -609,7 +632,77 @@ class PropertyViewSet(viewsets.ModelViewSet):
             status = False
             data = {}
             message = 'Failed to update Property'
-        return Response({'status': status,'data': data,'message': message})
+        return Response({'status': status, 'data': data, 'message': message})
+
+    @action(detail=False, methods=['POST'], url_path='get-neighborhood/request')
+    def request_neighborhood(self, request, *args, **kwargs):
+        status = False
+        data = {}
+        message = ''
+        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
+        headers = {
+            'Content-Type': 'application/json',
+            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
+            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+        }
+        try :
+            print('try')
+            requestData = request.data
+        except:
+            print('exc')
+            requestData = request.body
+        print(requestData)
+        try:
+            r = requests.post(url=url, json=requestData, headers=headers)
+            objectResponse = r.json()
+            print(objectResponse)
+        except:
+            print('ex')
+            status = False
+            message = 'Request neighborhood micro service error'
+            return Response({"status": status, "data": {}, 'message': message})
+        if(objectResponse['status'])==200:
+            status = True
+            message = objectResponse['message']
+            data = objectResponse['request_id']
+        else :
+            status = False
+            message = objectResponse['message']
+            data = {}
+        return Response({'status': status, 'data' : data, 'message' : message})
+
+    @action(detail=False, methods=['GET'], url_path='get-neighborhood/request/(?P<id>[\w-]+)')
+    def get_neighborhood_by_request_id(self, request, *args, **kwargs):
+        request_id = kwargs['id']
+        status = False
+        data = {}
+        message = ''
+        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
+        headers = {
+            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
+            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+        }
+        PARAMS = {
+            "id" : request_id
+        }
+        try:
+            r = requests.post(url=url, data=PARAMS, headers=headers)
+            objectResponse = r.json()
+            print(objectResponse)
+        except:
+            print('ex')
+            status = False
+            message = 'Get neighborhood micro service error'
+            return Response({"status": status, "data": {}, 'message': message})
+        if(objectResponse['status'])==200:
+            status = True
+            message = objectResponse['message']
+            data = objectResponse['data']
+        else:
+            status = False
+            message = objectResponse['message']
+            data = {}
+        return Response({'status': status, 'data' : data, 'message' : message})
 
 def update_property_power_trace_info(info_list):
     for info in info_list:

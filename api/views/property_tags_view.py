@@ -109,3 +109,11 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                 message = 'property does not exist'
                 status = False
         return Response({'status': status,'data': property_representation,'message': message})
+
+    def destroy(self, request, *args, **kwargs):
+        print(kwargs['pk'])
+        tag_id = kwargs['pk']
+        status = False
+        message = ''
+
+        return Response({'status': status,'data': ''+tag_id,'message': message})
