@@ -7,6 +7,7 @@ from api.views import power_trace_view, photos_view, scout_form_view
 from api.views.activity_log_view import ActivityLogViewSet
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
 from api.views.forget_password_view import ForgetPasswordViewSet
+from api.views.get_neighborhood_view import GetNeighborhoodViewSet
 from api.views.history_view import HistoryViewSet
 from api.views.history_detail_view import HistoryDetailViewSet
 from api.views.user_view import UserViewSet
@@ -47,6 +48,8 @@ router.register(r'history',HistoryViewSet)
 router.register(r'history-detail', HistoryDetailViewSet)
 router.register(r'forget-password', ForgetPasswordViewSet)
 router.register(r'activity-log', ActivityLogViewSet)
+router.register(r'get-neighborhood', GetNeighborhoodViewSet)
+
 
 
 urlpatterns = [

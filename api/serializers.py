@@ -222,3 +222,9 @@ class ActivityLogSerializer(serializers.ModelSerializer):
             'updated_at': instance.updated_at
         }
         return representation
+
+
+class GetNeighborhoodSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = GetNeighborhood
+        fields = '__all__'

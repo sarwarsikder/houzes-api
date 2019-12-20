@@ -446,13 +446,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
         package_type = 2
         property = Property.objects.get(id=kwargs['id'])
         property_address = ' '.join([property.street, property.city, property.state, property.zip])
-        fetch_ownership_info_response = {"status" : False}
-        power_trace_response =  {"status" : False}
+        fetch_ownership_info_response = {"status": False}
+        power_trace_response = {"status": False}
         if fetch_owner_info:
             fetch_ownership_info_response = PropertyViewSet.fetch_ownership_info(self, property)
             if fetch_ownership_info_response['status']:
                 property_payment_message.append('Ownership data is collected')
-            else :
+            else:
                 property_payment_message.append(fetch_ownership_info_response['message'])
         if power_trace:
             if len(property.owner_info) > 0:
@@ -634,8 +634,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
             message = 'Failed to update Property'
         return Response({'status': status, 'data': data, 'message': message})
 
-    @action(detail=False, methods=['POST'], url_path='get-neighborhood/request')
+    @action(detail=False, methods=['POST'], url_path='(?P<pk>[\w-]+)/get-neighborhood/request')
     def request_neighborhood(self, request, *args, **kwargs):
+        property = Property.objects.get(id=kwargs['pk'])
         status = False
         data = {}
         message = ''
@@ -645,7 +646,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
             'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
         }
-        try :
+        try:
             print('try')
             requestData = request.data
         except:
@@ -661,15 +662,17 @@ class PropertyViewSet(viewsets.ModelViewSet):
             status = False
             message = 'Request neighborhood micro service error'
             return Response({"status": status, "data": {}, 'message': message})
-        if(objectResponse['status'])==200:
+        if (objectResponse['status']) == 200:
             status = True
             message = objectResponse['message']
             data = objectResponse['request_id']
-        else :
+            get_neighborhood = GetNeighborhood(property=property, request_id=objectResponse['request_id'])
+            get_neighborhood.save()
+        else:
             status = False
             message = objectResponse['message']
             data = {}
-        return Response({'status': status, 'data' : data, 'message' : message})
+        return Response({'status': status, 'data': data, 'message': message})
 
     @action(detail=False, methods=['GET'], url_path='get-neighborhood/request/(?P<id>[\w-]+)')
     def get_neighborhood_by_request_id(self, request, *args, **kwargs):
@@ -683,7 +686,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
         }
         PARAMS = {
-            "id" : request_id
+            "id": request_id
         }
         try:
             r = requests.post(url=url, data=PARAMS, headers=headers)
@@ -694,15 +697,112 @@ class PropertyViewSet(viewsets.ModelViewSet):
             status = False
             message = 'Get neighborhood micro service error'
             return Response({"status": status, "data": {}, 'message': message})
-        if(objectResponse['status'])==200:
+        if (objectResponse['status']) == 200:
             status = True
             message = objectResponse['message']
             data = objectResponse['data']
+            get_neighborhood = GetNeighborhood.objects.filter(request_id=request_id)[0]
+            get_neighborhood.neighborhood = objectResponse['data']
+            get_neighborhood.save()
         else:
             status = False
             message = objectResponse['message']
             data = {}
-        return Response({'status': status, 'data' : data, 'message' : message})
+        return Response({'status': status, 'data': data, 'message': message})
+
+    @action(detail=False, methods=['POST'], url_path='(?P<pk>[\w-]+)/get-neighborhood')
+    def get_neighborhood_in_one_call(self, request, *args, **kwargs):
+        respone_data = {"status": True, "message": "", "data": None}
+        request_body = request.data
+        property_data = Property.objects.get(id=kwargs['pk'])
+        get_neighborhood = GetNeighborhood.objects.filter(property = property_data).first()
+        if request.data == {}:
+            if get_neighborhood :
+                if get_neighborhood.owner_status == "complete":
+                    respone_data['data'] = get_neighborhood.neighborhood
+                    respone_data['message'] = "Collected Data Successfully"
+                else:
+                    respone_data = PropertyViewSet.get_neighborhood_by_request_id_method(self, get_neighborhood.request_id)
+                    # get_neighborhood.owner_status = "complete"
+                    # get_neighborhood.save()
+            else:
+                respone_data = {"status": False, "message": "Neighborhood info not requested", "data": None}
+
+        else:
+            if not get_neighborhood:
+                get_neighborhood = GetNeighborhood()
+            respone_data = PropertyViewSet.request_neighborhood_method(self, request_body, property_data)
+            get_neighborhood.property= property_data
+            get_neighborhood.owner_status = "fetching"
+            get_neighborhood.request_id = respone_data['data']
+            get_neighborhood.save()
+
+        return JsonResponse(respone_data)
+
+    def request_neighborhood_method(self, requestData, property):
+        status = False
+        data = {}
+        message = ''
+        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
+        headers = {
+            'Content-Type': 'application/json',
+            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
+            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+        }
+        try:
+            r = requests.post(url=url, json=requestData, headers=headers)
+            objectResponse = r.json()
+        except:
+            status = False
+            message = 'Request neighborhood micro service error'
+            return Response({"status": status, "data": {}, 'message': message})
+        if (objectResponse['status']) == 200:
+            status = True
+            message = objectResponse['message']
+            data = objectResponse['request_id']
+            # get_neighborhood = GetNeighborhood(property=property,request_id = objectResponse['request_id'])
+            # get_neighborhood.save()
+        else:
+            status = False
+            message = objectResponse['message']
+            data = {}
+        return {'status': status, 'data': data, 'message': message}
+
+    def get_neighborhood_by_request_id_method(self, request_id):
+        status = False
+        data = {}
+        message = ''
+        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
+        headers = {
+            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
+            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+        }
+        PARAMS = {
+            "id": request_id
+        }
+        try:
+            r = requests.post(url=url, data=PARAMS, headers=headers)
+            objectResponse = r.json()
+            print(objectResponse)
+        except:
+            print('ex')
+            status = False
+            message = 'Get neighborhood micro service error'
+            return Response({"status": status, "data": {}, 'message': message})
+        if (objectResponse['status']) == 200:
+            status = True
+            message = objectResponse['message']
+            data = objectResponse['data']
+            get_neighborhood =GetNeighborhood.objects.filter(request_id=request_id)[0]
+            get_neighborhood.neighborhood = objectResponse['data']
+            get_neighborhood.owner_status = "complete"
+            get_neighborhood.save()
+        else:
+            status = False
+            message = objectResponse['message']
+            data = {}
+        return {'status': status, 'data': data, 'message': message}
+
 
 def update_property_power_trace_info(info_list):
     for info in info_list:

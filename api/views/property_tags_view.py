@@ -1,19 +1,19 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters
-from rest_framework import viewsets, status
+from rest_framework import filters
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-
-from api.serializers import *
 from api.models import *
+from api.serializers import *
+
 
 class PropertyTagsViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     queryset = PropertyTags.objects.all()
     serializer_class = PropertyTagsSerializer
-    # filterset_fields = ["data"]
 
+    # filterset_fields = ["data"]
 
     def list(self, request, *args, **kwargs):
         queryset = PropertyTags.objects.all().order_by('-id')
@@ -22,30 +22,30 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-            try:
-                name = request.data['name']
-                color = request.data['color']
-                color_code = request.data['color_code']
-            except:
-                name = request.body['name']
-                color = request.body['color']
-                color_code = request.body['color_code']
+        try:
+            name = request.data['name']
+            color = request.data['color']
+            color_code = request.data['color_code']
+        except:
+            name = request.body['name']
+            color = request.body['color']
+            color_code = request.body['color_code']
 
-            user_id = request.user.id
-            user = User.objects.get(id=user_id)
-            try:
-                propertyTags = PropertyTags(user=user, name=name, color=color,color_code=color_code)
-                propertyTags.save()
+        user_id = request.user.id
+        user = User.objects.get(id=user_id)
+        try:
+            propertyTags = PropertyTags(user=user, name=name, color=color, color_code=color_code)
+            propertyTags.save()
 
-                propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
-                status = True
-                data = propertyTagsSerializer.data
-                message = name+" tag created"
-            except:
-                status = False
-                data = None
-                message = "Error creating property tag"
-            return Response({'status': status, 'data': data, 'message': message})
+            propertyTagsSerializer = PropertyTagsSerializer(propertyTags)
+            status = True
+            data = propertyTagsSerializer.data
+            message = name + " tag created"
+        except:
+            status = False
+            data = None
+            message = "Error creating property tag"
+        return Response({'status': status, 'data': data, 'message': message})
 
     @action(detail=False)
     def PropertyTags_by_userId(self, request, *args, **kwargs):
@@ -56,35 +56,35 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
         propertyTagsSerializer = PropertyTagsSerializer(propertyTags, many=True)
         return Response(propertyTagsSerializer.data)
 
-    @action(detail=False,methods=['POST'],url_path='property/(?P<id>[\w-]+)/assign-tag')
-    def assign_tag_to_property(self,request,*args,**kwargs):
+    @action(detail=False, methods=['POST'], url_path='property/(?P<id>[\w-]+)/assign-tag')
+    def assign_tag_to_property(self, request, *args, **kwargs):
         propertyId = kwargs['id']
         status = False
         data = None
-        message=""
+        message = ""
         try:
             property_tag = request.data['tag']
-        except :
+        except:
             property_tag = request.body['tag']
 
-        if PropertyTags.objects.filter(id=property_tag).count()==0:
-            message="Missing tag"
+        if PropertyTags.objects.filter(id=property_tag).count() == 0:
+            message = "Missing tag"
         else:
             try:
                 tagExist = False
                 property = Property.objects.get(id=propertyId)
                 for tag in property.property_tags:
-                    if tag['id']==property_tag :
+                    if tag['id'] == property_tag:
                         message = 'Tag already exist'
                         tagExist = True
-                if not tagExist :
-                    property.property_tags.append({'id':property_tag})
+                if not tagExist:
+                    property.property_tags.append({'id': property_tag})
                     property.save()
                     message = 'Tag added to the property'
                     status = True
                     # propertySerializer = PropertySerializer(property)
                     # data = propertySerializer.data
-                    tags= []
+                    tags = []
                     for tag in property.property_tags:
                         property_tags = PropertyTags.objects.get(id=tag['id'])
                         print(PropertyTagsSerializer(property_tags).data)
@@ -108,12 +108,27 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
             except:
                 message = 'property does not exist'
                 status = False
-        return Response({'status': status,'data': property_representation,'message': message})
+        return Response({'status': status, 'data': property_representation, 'message': message})
 
     def destroy(self, request, *args, **kwargs):
         print(kwargs['pk'])
         tag_id = kwargs['pk']
         status = False
         message = ''
+        property = Property.objects.filter(property_tags__icontains=tag_id)
+        try:
+            for p in property:
+                tag_temp = []
+                for t in p.property_tags:
+                    if str(t['id']) != tag_id:
+                        tag_temp.append(t)
+                p.property_tags = tag_temp
+                p.save()
+            property_tags = PropertyTags.objects.get(id = tag_id).delete()
+            status = True
+            message = 'Property tag is deleted'
+        except:
+            status = False
+            message = 'Error deleting property tag'
 
-        return Response({'status': status,'data': ''+tag_id,'message': message})
+        return Response({'status': status, 'message': message})
