@@ -131,7 +131,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path='member/(?P<id>[\w-]+)')
     def get_scout_by_member(self, request, *args, **kwargs):
         user = User.objects.get(id=kwargs['id'])
-        if user.invited_by == request.user.id :
+        if user.invited_by == request.user.id or user.id == request.user.id:
             scout = Scout.objects.filter(manager_id=user.id)
         else :
             scout = Scout.objects.none()
