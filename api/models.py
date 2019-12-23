@@ -331,11 +331,15 @@ class ActivityLog(models.Model):
 
 class GetNeighborhood(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
-    request_id = models.IntegerField(null=True)
-    neighborhood = JSONField(default=list)
+    ownership_info_request_id = models.IntegerField(null=True)
+    ownership_info = JSONField(default=list)
+    power_trace = JSONField(default=list)
+    power_trace_request_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     owner_status = models.CharField(max_length=50, default="fetching")
+    power_trace_status = models.CharField(max_length=50, default="fetching")
+    status = models.CharField(max_length=50, default="fetching")
 
     class Meta:
         db_table = 'get_neighborhoods'

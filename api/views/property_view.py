@@ -564,7 +564,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 return {'status': False, 'data': {}, 'message': 'Trace name is already exists!'}
         except:
             traceback.print_exc()
-            return {'status': False, 'data': {}, 'message': 'Failed to create request! Server Error!'}
+            return {'status': False, 'data': {}, 'message': 'Failed to create request!!'}
 
     def get_power_trace_result_by_id(self, property):
         trace_id = Property.objects.get(id=property.id).power_trace_request_id
@@ -584,7 +584,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 return {'status': False, 'data': {}, 'message': power_trace_result_by_id_res.json()['message']}
         except:
             traceback.print_exc()
-            return {'status': False, 'data': {}, 'message': 'Server Error!'}
+            return {'status': False, 'data': {}, 'message': 'Information not available'}
 
     def generate_shortuuid(self):
         shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")
@@ -702,7 +702,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             message = objectResponse['message']
             data = objectResponse['data']
             get_neighborhood = GetNeighborhood.objects.filter(request_id=request_id)[0]
-            get_neighborhood.neighborhood = objectResponse['data']
+            get_neighborhood.ownership_info = objectResponse['data']
             get_neighborhood.save()
         else:
             status = False
@@ -712,32 +712,117 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='(?P<pk>[\w-]+)/get-neighborhood')
     def get_neighborhood_in_one_call(self, request, *args, **kwargs):
-        respone_data = {"status": True, "message": "", "data": None}
-        request_body = request.data
+        respone_data = {"status": False, "data": {"ownership_info": None, "power_trace": None}, "message": ""}
+        fetch_ownership_respone_data = {"status": True, "message": "", "data": None}
         property_data = Property.objects.get(id=kwargs['pk'])
-        get_neighborhood = GetNeighborhood.objects.filter(property = property_data).first()
+        request_body = request.data
+        get_neighborhood = GetNeighborhood.objects.filter(property=property_data).first()
         if request.data == {}:
-            if get_neighborhood :
-                if get_neighborhood.owner_status == "complete":
-                    respone_data['data'] = get_neighborhood.neighborhood
-                    respone_data['message'] = "Collected Data Successfully"
+            if get_neighborhood:
+                if get_neighborhood.status == "complete":
+                    fetch_ownership_respone_data['data'] = get_neighborhood.ownership_info
+                    fetch_ownership_respone_data['message'] = "Collected Data Successfully"
                 else:
-                    respone_data = PropertyViewSet.get_neighborhood_by_request_id_method(self, get_neighborhood.request_id)
-                    # get_neighborhood.owner_status = "complete"
-                    # get_neighborhood.save()
+                    fetch_ownership_respone_data = PropertyViewSet.get_neighborhood_by_request_id_method(self,
+                                                                                                         get_neighborhood.ownership_info_request_id)
+                    fetch_power_trace_response_data = PropertyViewSet.get_power_trace_by_power_trace_request_id(self,
+                                                                                                                get_neighborhood,
+                                                                                                                request)
+                    print('::::::::::::')
+                    print(fetch_power_trace_response_data)
+                    if fetch_ownership_respone_data['status'] and fetch_power_trace_response_data['code'] == 200:
+                        print('xxxx')
+                        # if fetch_power_trace_response_data['code']==200 :
+                        respone_data['data']['ownership_info'] = fetch_ownership_respone_data['data']
+                        respone_data['data']['power_trace'] = fetch_power_trace_response_data['data']
             else:
                 respone_data = {"status": False, "message": "Neighborhood info not requested", "data": None}
 
         else:
             if not get_neighborhood:
                 get_neighborhood = GetNeighborhood()
-            respone_data = PropertyViewSet.request_neighborhood_method(self, request_body, property_data)
-            get_neighborhood.property= property_data
+            fetch_ownership_respone_data = PropertyViewSet.request_neighborhood_method(self, request_body,
+                                                                                       property_data)
+            get_neighborhood.property = property_data
             get_neighborhood.owner_status = "fetching"
-            get_neighborhood.request_id = respone_data['data']
+            get_neighborhood.ownership_info_request_id = fetch_ownership_respone_data['data']
             get_neighborhood.save()
 
+            ##power trace create_starts here
+            if fetch_ownership_respone_data['status']:
+                power_trace_response = PropertyViewSet.create_multiple_power_trace(self, get_neighborhood, request)
+                if power_trace_response['code'] == 200:
+                    get_neighborhood.power_trace_request_id = power_trace_response['data']['id']
+                    get_neighborhood.save()
+                    print(get_neighborhood.power_trace_request_id)
+                    respone_data['status'] = True
+                    respone_data['message'] = 'Neighborhood data is requested'
+                    respone_data['data'] = None
         return JsonResponse(respone_data)
+
+    def create_multiple_power_trace(self, get_neighborhood, request):
+        print(get_neighborhood)
+        try:
+            power_trace_request_url = POWER_TRACE_HOST + 'api/powertrace/createRequest'
+            power_trace_start_by_data_url = POWER_TRACE_HOST + 'api/powertrace/save-powertrace-info-by-data'
+
+            trace_name = generate_shortuuid()
+            package_type = 2
+            user_id = request.user.id
+            countId = len(get_neighborhood.ownership_info)
+
+            power_trace_request_pload = {'trace_name': trace_name,
+                                         'package_type': package_type,
+                                         'user_id': user_id}
+            power_trace_start_by_data_pload = {}
+            total = 0
+            total = countId
+            power_trace_request_pload['countId'] = total
+
+            for idx, val in enumerate(get_neighborhood.ownership_info):
+                try:
+                    power_trace_start_by_data_pload['owner_name' + str(idx)] = val['owner_info']['full_name']
+                    power_trace_start_by_data_pload['owner_address' + str(idx)] = val['owner_info']['full_address']
+                    power_trace_start_by_data_pload['property_id' + str(idx)] = idx
+                except:
+                    print('ex')
+                    return {'code': 500,
+                            'message': 'Failed to create request! owner_name/owner_address/property_id is missing.'}
+
+            power_trace_request_res = requests.post(power_trace_request_url, data=power_trace_request_pload,
+                                                    headers=power_trace_headers)
+            if power_trace_request_res.json()['code'] == 200:
+                power_trace_request_id = int(power_trace_request_res.json()['data']['id'])
+                power_trace_start_by_data_pload['trace_request_id'] = power_trace_request_id
+                power_trace_start_by_data_pload['count_id'] = total
+                power_trace_start_by_data_pload['async'] = "false"
+
+                power_trace_start_by_data_res = requests.post(power_trace_start_by_data_url,
+                                                              data=power_trace_start_by_data_pload,
+                                                              headers=power_trace_headers)
+                # print(power_trace_start_by_data_res.json())
+                if power_trace_start_by_data_res.json()['code'] == 200:
+                    info_list = power_trace_start_by_data_res.json()['data']
+                    # update_property_power_trace_info(info_list)
+                    return (power_trace_request_res.json())
+                else:
+                    return {'code': 400, 'message': 'PowerTrace Failed due to Information parsing failure!',
+                            'data': power_trace_start_by_data_res.json()}
+            else:
+                return {'code': 400, 'message': 'Trace name is already exists!', 'data': power_trace_request_res.json()}
+        except:
+            traceback.print_exc()
+            return {'code': 500, 'message': 'Failed to create request! Server Error!'}
+
+    def get_power_trace_by_power_trace_request_id(self, get_neighborhood, request):
+        try:
+            url = POWER_TRACE_HOST + 'api/powertrace/trace-result-by-info-id?request_info_id=' + str(
+                get_neighborhood.power_trace_request_id)
+            power_trace_result_by_id_res = requests.post(url, headers=power_trace_headers)
+            return power_trace_result_by_id_res.json()
+        except:
+            traceback.print_exc()
+            return {'code': 500, 'message': 'Server Error!'}
 
     def request_neighborhood_method(self, requestData, property):
         status = False
@@ -793,8 +878,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
             status = True
             message = objectResponse['message']
             data = objectResponse['data']
-            get_neighborhood =GetNeighborhood.objects.filter(request_id=request_id)[0]
-            get_neighborhood.neighborhood = objectResponse['data']
+            get_neighborhood = GetNeighborhood.objects.filter(ownership_info_request_id=request_id)[0]
+            get_neighborhood.ownership_info = objectResponse['data']
             get_neighborhood.owner_status = "complete"
             get_neighborhood.save()
         else:
