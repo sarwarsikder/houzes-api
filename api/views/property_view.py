@@ -480,6 +480,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if fetch_ownership_info_response['status']:
                 upgrade_profile.coin = upgrade_profile.coin - fetch_owner_info_coin_required
                 upgrade_profile.save()
+
+                payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info').first()
                 payment_transaction = PaymentTransaction()
                 payment_transaction.property = property
                 payment_transaction.payment_plan = payment_plan
@@ -496,6 +498,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 if create_power_trace_response['status']:
                     upgrade_profile.coin = upgrade_profile.coin - power_trace_coin_required
                     upgrade_profile.save()
+
+                    payment_plan = PaymentPlan.objects.filter(payment_plan_name='power-trace').first()
 
                     payment_transaction = PaymentTransaction()
                     payment_transaction.property = property
