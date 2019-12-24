@@ -228,3 +228,53 @@ class GetNeighborhoodSerializer(serializers.ModelSerializer):
     class Meta :
         model = GetNeighborhood
         fields = '__all__'
+
+class PlanSerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = Plans
+        fields = '__all__'
+
+class PaymentPlanSerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = PaymentPlan
+        fields = '__all__'
+
+class UpgradeProfileSerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = UpgradeProfile
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = {
+            'id': instance.id,
+            'user': UserSerializer(User.objects.get(id= instance.user.id)).data,
+            'coin' : instance.coin,
+            'plan' : PlanSerializer(Plans.objects.get(id = instance.plan.id)).data,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at
+        }
+        return representation
+
+
+class PaymentTransactionSerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = PaymentTransaction
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = {
+            'id': instance.id,
+            'property': PropertySerializer(Property.objects.get(id= instance.property.id)).data,
+            'payment_plan' : PaymentPlanSerializer(PaymentPlan.objects.get(id = instance.payment_plan.id)).data,
+            'transaction_coin' : instance.transaction_coin,
+            'created_by' :  UserSerializer(User.objects.get(id=instance.created_by.id)).data,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at
+        }
+        return representation
+
+
+class UpgradeHistorySerializer(serializers.ModelSerializer):
+    class Meta :
+        model = UpgradeHistory
+        fields = '__all__'

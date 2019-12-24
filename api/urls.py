@@ -10,6 +10,11 @@ from api.views.forget_password_view import ForgetPasswordViewSet
 from api.views.get_neighborhood_view import GetNeighborhoodViewSet
 from api.views.history_view import HistoryViewSet
 from api.views.history_detail_view import HistoryDetailViewSet
+from api.views.payment_plan_view import PaymentPlanViewSet
+from api.views.payment_transaction_view import PaymentTransactionViewSet
+from api.views.plan_view import PlanViewSet
+from api.views.upgrade_history_view import UpgradeHistoryViewSet
+from api.views.upgrade_profile_view import UpgradeProfileViewSet
 from api.views.user_view import UserViewSet
 from api.views.user_location_view import UserLocationViewSet
 from api.views.user_verification_view import UserVerificationsViewSet
@@ -49,6 +54,11 @@ router.register(r'history-detail', HistoryDetailViewSet)
 router.register(r'forget-password', ForgetPasswordViewSet)
 router.register(r'activity-log', ActivityLogViewSet)
 router.register(r'get-neighborhood', GetNeighborhoodViewSet)
+router.register(r'plan', PlanViewSet)
+router.register(r'payment-plan', PaymentPlanViewSet)
+router.register(r'upgrade-profile', UpgradeProfileViewSet)
+router.register(r'payment-transaction', PaymentTransactionViewSet)
+router.register(r'upgrade-history', UpgradeHistoryViewSet)
 
 
 

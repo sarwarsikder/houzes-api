@@ -443,14 +443,49 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if 'power_trace' in request.data:
                 power_trace = int(request.data['power_trace'])
 
+        user = User.objects.get(id = request.user.id)
+        original_user = user
+        if user.is_admin == False :
+            user = User.objects.get(id = user.invited_by)
+        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+        if not upgrade_profile :
+            return JsonResponse({"status":False,
+                                 "data": {},
+                                 'message': 'Profile is not upgraded'})
+        coin_required = 0
+        fetch_owner_info_coin_required = 0
+        power_trace_coin_required = 0
+        if upgrade_profile :
+            if fetch_owner_info == 1 :
+                payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info').first()
+                if payment_plan :
+                    fetch_owner_info_coin_required = payment_plan.payment_plan_coin
+            if power_trace == 1 :
+                payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'power-trace').first()
+                if payment_plan :
+                    power_trace_coin_required =  payment_plan.payment_plan_coin
+            if upgrade_profile.coin < fetch_owner_info_coin_required+power_trace_coin_required :
+                return JsonResponse({"status": False,
+                                     "data": {},
+                                     'message': 'Insufficient coin'})
+
+
         package_type = 2
         property = Property.objects.get(id=kwargs['id'])
         property_address = ' '.join([property.street, property.city, property.state, property.zip])
-        fetch_ownership_info_response = {"status": False}
-        power_trace_response = {"status": False}
+        fetch_ownership_info_response = {"status": False, 'data': {}, 'message' : ''}
+        power_trace_response = {"status": False, 'data': {}, 'message' : ''}
         if fetch_owner_info:
             fetch_ownership_info_response = PropertyViewSet.fetch_ownership_info(self, property)
             if fetch_ownership_info_response['status']:
+                upgrade_profile.coin = upgrade_profile.coin - fetch_owner_info_coin_required
+                upgrade_profile.save()
+                payment_transaction = PaymentTransaction()
+                payment_transaction.property = property
+                payment_transaction.payment_plan = payment_plan
+                payment_transaction.transaction_coin = fetch_owner_info_coin_required
+                payment_transaction.created_by = original_user
+                payment_transaction.save()
                 property_payment_message.append('Ownership data is collected')
             else:
                 property_payment_message.append(fetch_ownership_info_response['message'])
@@ -459,6 +494,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 create_power_trace_response = PropertyViewSet.create_power_trace(self, package_type, request.user.id,
                                                                                  property.id, property_address)
                 if create_power_trace_response['status']:
+                    upgrade_profile.coin = upgrade_profile.coin - power_trace_coin_required
+                    upgrade_profile.save()
+
+                    payment_transaction = PaymentTransaction()
+                    payment_transaction.property = property
+                    payment_transaction.payment_plan = payment_plan
+                    payment_transaction.transaction_coin = power_trace_coin_required
+                    payment_transaction.created_by = original_user
+                    payment_transaction.save()
+
                     power_trace_response = PropertyViewSet.get_power_trace_result_by_id(self, property)
                 else:
                     power_trace_response = {'status': False, 'data': {},

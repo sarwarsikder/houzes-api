@@ -364,7 +364,7 @@ class Plans(models.Model):
 
 class PaymentPlan(models.Model):
     payment_plan_name = models.CharField(max_length=500, null=True)
-    payment_plan_coin = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    payment_plan_coin = models.IntegerField(default=0)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    null=True, blank=True, on_delete=models.SET_NULL)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -378,7 +378,7 @@ class PaymentPlan(models.Model):
 
 
 class UpgradeProfile(models.Model):
-    user = user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     coin = models.IntegerField(null=True)
     plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -403,7 +403,7 @@ class PaymentTransaction(models.Model):
 
 class UpgradeHistory(models.Model):
     upgrade_profile = models.ForeignKey(UpgradeProfile,on_delete=models.CASCADE)
-    payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE)
+    plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
     transaction_coin = models.IntegerField(null=True)
     transaction_json = JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
