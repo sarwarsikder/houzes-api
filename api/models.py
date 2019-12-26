@@ -251,6 +251,8 @@ class Scout(models.Model):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
     url = models.CharField(max_length=255, null=True)
+    phone_number = models.CharField(max_length=255, null=True)
+    email = models.CharField(max_length=255, null=True)
     manager_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -349,7 +351,7 @@ class GetNeighborhood(models.Model):
 class Plans(models.Model):
     plan_name = models.CharField(max_length=500, null=True)
     plan_cost = models.DecimalField(max_digits=5, decimal_places=2, null=True)
-    plan_coin = models.IntegerField(null=True)
+    plan_coin =models.DecimalField(max_digits=10, decimal_places=2, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    null=True, blank=True, on_delete=models.SET_NULL)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -364,7 +366,7 @@ class Plans(models.Model):
 
 class PaymentPlan(models.Model):
     payment_plan_name = models.CharField(max_length=500, null=True)
-    payment_plan_coin = models.IntegerField(default=0)
+    payment_plan_coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    null=True, blank=True, on_delete=models.SET_NULL)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -379,7 +381,8 @@ class PaymentPlan(models.Model):
 
 class UpgradeProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    coin = models.IntegerField(null=True)
+    coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    # wallet = models.DecimalField(max_digits=8, decimal_places=2, null=True)
     plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -390,7 +393,7 @@ class UpgradeProfile(models.Model):
 class PaymentTransaction(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE)
-    transaction_coin = models.IntegerField(null=True)
+    transaction_coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     created_by = models.ForeignKey(User,
                                    null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -404,7 +407,7 @@ class PaymentTransaction(models.Model):
 class UpgradeHistory(models.Model):
     upgrade_profile = models.ForeignKey(UpgradeProfile,on_delete=models.CASCADE)
     plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
-    transaction_coin = models.IntegerField(null=True)
+    transaction_coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     transaction_json = JSONField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
