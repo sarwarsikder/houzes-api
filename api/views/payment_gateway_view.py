@@ -170,10 +170,17 @@ def charge_credit_card(request):
     payment_response = to_dict(response)
     if payment_response['messages']['resultCode']=='Ok' :
         upgradeProfile = UpgradeProfile.objects.filter(user= manager).first()
-        if upgradeProfile:
-            upgradeProfile.plan = plan
-            upgradeProfile.coin = upgradeProfile.coin + amount
-            upgradeProfile.save()
+        if not upgradeProfile:
+            upgradeProfile = UpgradeProfile()
+            upgradeProfile.user = manager
+            upgradeProfile.coin = 0
+        manager.upgrade = True
+        manager.save()
+
+        upgradeProfile.plan = plan
+        upgradeProfile.coin = upgradeProfile.coin + amount
+        upgradeProfile.save()
+
         json_response['status'] = True
         json_response['data'] = UserSerializer(manager).data['upgrade_info']
         json_response['message'] = payment_response['transactionResponse']['messages']['message']['description']
