@@ -450,7 +450,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
         if not upgrade_profile :
             return JsonResponse({"status":False,
-                                 "data": {},
+                                 "data": { "payment" : False },
                                  'message': 'Profile is not upgraded'})
         coin_required = 0
         fetch_owner_info_coin_required = 0
@@ -466,7 +466,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     power_trace_coin_required =  payment_plan.payment_plan_coin
             if upgrade_profile.coin < fetch_owner_info_coin_required+power_trace_coin_required :
                 return JsonResponse({"status": False,
-                                     "data": {},
+                                     "data": {"payment" : False},
                                      'message': 'Insufficient coin'})
 
 
@@ -518,7 +518,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property_payment_message.append(power_trace_response['message'])
         return JsonResponse({"status": fetch_ownership_info_response['status'] or power_trace_response['status'],
                              "data": {"fetch_ownership_info": fetch_ownership_info_response,
-                                      'power_trace': power_trace_response},
+                                      'power_trace': power_trace_response,
+                                      "payment": True
+                                    },
                              'message': json.dumps(property_payment_message)})
 
     def fetch_ownership_info(self, property):

@@ -15,11 +15,21 @@ from rest_framework.decorators import api_view
 # CONSTANTS = imp.load_source('modulename', 'constants.py')
 
 @api_view(['POST'])
-def charge_credit_card(amount):
+def charge_credit_card(request):
     """
     Charge a credit card
     """
-
+    try:
+        amount = request.data['amount']
+        card_number = request.data['card_number']
+        expiration_date = request.data['expiration_date']
+        card_code = request.data['card_code']
+    except :
+        amount = request.body['amount']
+        card_number = request.body['card_number']
+        expiration_date = request.body['expiration_date']
+        card_code = request.body['card_code']
+    json_response = {'status' : False, 'data' : {}, 'message' : ""}
     # Create a merchantAuthenticationType object with authentication details
     # retrieved from the constants file
     merchantAuth = apicontractsv1.merchantAuthenticationType()
@@ -28,72 +38,72 @@ def charge_credit_card(amount):
 
     # Create the payment data for a credit card
     creditCard = apicontractsv1.creditCardType()
-    creditCard.cardNumber = "4111111111111111"
-    creditCard.expirationDate = "2020-12"
-    creditCard.cardCode = "123"
+    creditCard.cardNumber = card_number
+    creditCard.expirationDate = expiration_date
+    creditCard.cardCode = card_code
 
     # Add the payment data to a paymentType object
     payment = apicontractsv1.paymentType()
     payment.creditCard = creditCard
 
     # Create order information
-    order = apicontractsv1.orderType()
-    order.invoiceNumber = "10101"
-    order.description = "Golf Shirts"
+    # order = apicontractsv1.orderType()
+    # order.invoiceNumber = "10101"
+    # order.description = "Golf Shirts"
 
     # Set the customer's Bill To address
-    customerAddress = apicontractsv1.customerAddressType()
-    customerAddress.firstName = "Ellen"
-    customerAddress.lastName = "Johnson"
-    customerAddress.company = "Souveniropolis"
-    customerAddress.address = "14 Main Street"
-    customerAddress.city = "Pecan Springs"
-    customerAddress.state = "TX"
-    customerAddress.zip = "44628"
-    customerAddress.country = "USA"
+    # customerAddress = apicontractsv1.customerAddressType()
+    # customerAddress.firstName = "Ellen"
+    # customerAddress.lastName = "Johnson"
+    # customerAddress.company = "Souveniropolis"
+    # customerAddress.address = "14 Main Street"
+    # customerAddress.city = "Pecan Springs"
+    # customerAddress.state = "TX"
+    # customerAddress.zip = "44628"
+    # customerAddress.country = "USA"
 
     # Set the customer's identifying information
-    customerData = apicontractsv1.customerDataType()
-    customerData.type = "individual"
-    customerData.id = "99999456654"
-    customerData.email = "EllenJohnson@example.com"
+    # customerData = apicontractsv1.customerDataType()
+    # customerData.type = "individual"
+    # customerData.id = "99999456654"
+    # customerData.email = "EllenJohnson@example.com"
 
     # Add values for transaction settings
-    duplicateWindowSetting = apicontractsv1.settingType()
-    duplicateWindowSetting.settingName = "duplicateWindow"
-    duplicateWindowSetting.settingValue = "600"
-    settings = apicontractsv1.ArrayOfSetting()
-    settings.setting.append(duplicateWindowSetting)
+    # duplicateWindowSetting = apicontractsv1.settingType()
+    # duplicateWindowSetting.settingName = "duplicateWindow"
+    # duplicateWindowSetting.settingValue = "600"
+    # settings = apicontractsv1.ArrayOfSetting()
+    # settings.setting.append(duplicateWindowSetting)
 
     # setup individual line items
-    line_item_1 = apicontractsv1.lineItemType()
-    line_item_1.itemId = "12345"
-    line_item_1.name = "first"
-    line_item_1.description = "Here's the first line item"
-    line_item_1.quantity = "2"
-    line_item_1.unitPrice = "12.95"
-    line_item_2 = apicontractsv1.lineItemType()
-    line_item_2.itemId = "67890"
-    line_item_2.name = "second"
-    line_item_2.description = "Here's the second line item"
-    line_item_2.quantity = "3"
-    line_item_2.unitPrice = "7.95"
+    # line_item_1 = apicontractsv1.lineItemType()
+    # line_item_1.itemId = "12345"
+    # line_item_1.name = "first"
+    # line_item_1.description = "Here's the first line item"
+    # line_item_1.quantity = "2"
+    # line_item_1.unitPrice = "12.95"
+    # line_item_2 = apicontractsv1.lineItemType()
+    # line_item_2.itemId = "67890"
+    # line_item_2.name = "second"
+    # line_item_2.description = "Here's the second line item"
+    # line_item_2.quantity = "3"
+    # line_item_2.unitPrice = "7.95"
 
     # build the array of line items
-    line_items = apicontractsv1.ArrayOfLineItem()
-    line_items.lineItem.append(line_item_1)
-    line_items.lineItem.append(line_item_2)
+    # line_items = apicontractsv1.ArrayOfLineItem()
+    # line_items.lineItem.append(line_item_1)
+    # line_items.lineItem.append(line_item_2)
 
     # Create a transactionRequestType object and add the previous objects to it.
     transactionrequest = apicontractsv1.transactionRequestType()
     transactionrequest.transactionType = "authCaptureTransaction"
     transactionrequest.amount = amount
     transactionrequest.payment = payment
-    transactionrequest.order = order
-    transactionrequest.billTo = customerAddress
-    transactionrequest.customer = customerData
-    transactionrequest.transactionSettings = settings
-    transactionrequest.lineItems = line_items
+    # transactionrequest.order = order
+    # transactionrequest.billTo = customerAddress
+    # transactionrequest.customer = customerData
+    # transactionrequest.transactionSettings = settings
+    # transactionrequest.lineItems = line_items
 
     # Assemble the complete transaction request
     createtransactionrequest = apicontractsv1.createTransactionRequest()
@@ -150,7 +160,15 @@ def charge_credit_card(amount):
     # return response
 
     response = createtransactioncontroller.getresponse()
-    json_response = to_dict(response)
+    payment_response = to_dict(response)
+    if payment_response['messages']['resultCode']=='Ok' :
+        json_response['status'] = True
+        json_response['data'] = payment_response
+        json_response['message'] = payment_response['transactionResponse']['messages']['message']['description']
+    else:
+        json_response['status'] = False
+        json_response['data'] = payment_response
+        json_response['message'] = payment_response['transactionResponse']['errors']['error']['errorText']
 
     return JsonResponse(json_response)
 

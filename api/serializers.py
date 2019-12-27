@@ -9,6 +9,55 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
+    def to_representation(self, instance):
+        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+        #
+        # identifiers = dict()
+        # identifiers['color_name'] = instance.color
+        # identifiers['color_code'] = instance.color_code'
+        amount = 0.0
+        upgrade = False
+        power_trace = 0.0
+        owner_info = 0.0
+        if instance.is_admin == True:
+            upgrade = instance.upgrade
+            if UpgradeProfile.objects.filter(user__id = instance.id).first():
+                amount = UpgradeProfile.objects.filter(user__id = instance.id).first().coin
+        else:
+            if User.objects.filter(id = instance.invited_by).first():
+                upgrade = User.objects.filter(id = instance.invited_by).first().upgrade
+            if UpgradeProfile.objects.filter(user__id = instance.invited_by).first():
+                amount = UpgradeProfile.objects.filter(user__id = instance.invited_by).first().coin
+
+        paymentPlanPowerTrace = PaymentPlan.objects.filter(payment_plan_name = 'power-trace').first()
+        if paymentPlanPowerTrace :
+            power_trace = paymentPlanPowerTrace.payment_plan_coin
+        paymentPlanOwnerInfo = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info').first()
+        if paymentPlanOwnerInfo :
+            owner_info = paymentPlanOwnerInfo.payment_plan_coin
+        representation = {
+            'id' : instance.id,
+            'last_login' : instance.last_login,
+            'first_name' : instance.first_name,
+            'last_name': instance.last_name,
+            'email': instance.email,
+            'phone_number' : instance.phone_number,
+            'invited_by' : instance.invited_by,
+            'photo' : instance.photo,
+            'is_active' : instance.is_active,
+            'is_admin' : instance.is_admin,
+            'upgrade_info' : {
+                'upgrade' : upgrade,
+                'amount' : amount,
+                'power_trace' : power_trace,
+                'owner_info' : owner_info
+            },
+            'created_at': instance.created_at,
+            'updated_at' : instance.updated_at
+        }
+
+        return representation
+
 
 class UserLocationSerializer(serializers.ModelSerializer):
     class Meta:
