@@ -13,6 +13,8 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 # CONSTANTS = imp.load_source('modulename', 'constants.py')
+from api.serializers import *
+
 
 @api_view(['POST'])
 def charge_credit_card(request):
@@ -20,15 +22,20 @@ def charge_credit_card(request):
     Charge a credit card
     """
     try:
-        amount = request.data['amount']
+        plan_id = request.data['plan']
         card_number = request.data['card_number']
         expiration_date = request.data['expiration_date']
         card_code = request.data['card_code']
     except :
-        amount = request.body['amount']
+        plan_id = request.body['plan']
         card_number = request.body['card_number']
         expiration_date = request.body['expiration_date']
         card_code = request.body['card_code']
+    plan = Plans.objects.get(id = plan_id)
+    amount = plan.plan_coin
+    manager = User.objects.get(id = request.user.id)
+    if manager.is_admin == False :
+        manager = User.objects.get(id = manager.invited_by)
     json_response = {'status' : False, 'data' : {}, 'message' : ""}
     # Create a merchantAuthenticationType object with authentication details
     # retrieved from the constants file
@@ -162,12 +169,17 @@ def charge_credit_card(request):
     response = createtransactioncontroller.getresponse()
     payment_response = to_dict(response)
     if payment_response['messages']['resultCode']=='Ok' :
+        upgradeProfile = UpgradeProfile.objects.filter(user= manager).first()
+        if upgradeProfile:
+            upgradeProfile.plan = plan
+            upgradeProfile.coin = upgradeProfile.coin + amount
+            upgradeProfile.save()
         json_response['status'] = True
-        json_response['data'] = payment_response
+        json_response['data'] = UserSerializer(manager).data['upgrade_info']
         json_response['message'] = payment_response['transactionResponse']['messages']['message']['description']
     else:
         json_response['status'] = False
-        json_response['data'] = payment_response
+        json_response['data'] = UserSerializer(manager).data['upgrade_info']
         json_response['message'] = payment_response['transactionResponse']['errors']['error']['errorText']
 
     return JsonResponse(json_response)
