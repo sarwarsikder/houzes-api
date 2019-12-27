@@ -57,10 +57,12 @@ INSTALLED_APPS = [
     'rest_framework_social_oauth2',
     'corsheaders',
     'admin_panel',
+    'whitenoise'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -153,7 +155,7 @@ WSGI_APPLICATION = 'houzes_api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'houzes_staging',
+        'NAME': 'houzes_live',
         'USER': 'postgres',
         'PASSWORD': 'wsit97480',
         'HOST': 'houzes-db.cacdyf2lutyz.us-east-1.rds.amazonaws.com',
