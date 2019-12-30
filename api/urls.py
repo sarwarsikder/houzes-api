@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 # from.views import *
-from api.views import power_trace_view, photos_view, scout_form_view, payment_gateway_view
+from api.views import power_trace_view, photos_view, scout_form_view, payment_gateway_view, microservice_endpoint_view
 from api.views.activity_log_view import ActivityLogViewSet
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
 from api.views.forget_password_view import ForgetPasswordViewSet
@@ -74,6 +74,7 @@ urlpatterns = [
     path('scout-form/property/<int:id>/note/multiple-upload/', scout_form_view.note_multiple_upload, name='note-multiple-upload'),
     path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,name='get-ownership-info-by-address'),
     path('payment-gateway/charge-card/', payment_gateway_view.charge_credit_card, name='charge-credit-card'),
+    path('provide-ownership-info/<int:id>/', microservice_endpoint_view.provide_ownership_info, name='ownership-endpoint'),
 ]
 
 urlpatterns += router.urls

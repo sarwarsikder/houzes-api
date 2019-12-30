@@ -18,6 +18,8 @@ POWER_TRACE_CLIENT_SECRET = getattr(settings, "POWER_TRACE_CLIENT_SECRET", None)
 power_trace_headers = {'client_id': POWER_TRACE_CLIENT_ID,
                        'client_secret': POWER_TRACE_CLIENT_SECRET}
 
+FETCH_OWNER_INFO_CLIENT_ID = getattr(settings, "FETCH_OWNER_INFO_CLIENT_ID", None)
+FETCH_OWNER_INFO_CLIENT_SECRET = getattr(settings, "FETCH_OWNER_INFO_CLIENT_SECRET", None)
 
 class doubleQuoteDict(dict):
     def __str__(self):
@@ -538,8 +540,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address'
         headers = {
             'Content-Type': 'application/json',
-            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
-            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+            'client_id': FETCH_OWNER_INFO_CLIENT_ID,
+            'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
         }
         PARAMS = {
             "address": address,
@@ -699,8 +701,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
         headers = {
             'Content-Type': 'application/json',
-            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
-            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+            'client_id': FETCH_OWNER_INFO_CLIENT_ID,
+            'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
         }
         try:
             print('try')
@@ -738,8 +740,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         message = ''
         url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
         headers = {
-            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
-            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+            'client_id': FETCH_OWNER_INFO_CLIENT_ID,
+            'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
         }
         PARAMS = {
             "id": request_id
@@ -795,26 +797,26 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 respone_data = {"status": False, "message": "Neighborhood info not requested", "data": None}
 
         else:
-            if not get_neighborhood:
-                get_neighborhood = GetNeighborhood()
+            # if not get_neighborhood:
+                # get_neighborhood = GetNeighborhood()
             fetch_ownership_respone_data = PropertyViewSet.request_neighborhood_method(self, request_body,
                                                                                        property_data)
-            get_neighborhood.property = property_data
-            get_neighborhood.owner_status = "fetching"
-            get_neighborhood.ownership_info_request_id = fetch_ownership_respone_data['data']
-            get_neighborhood.save()
+            # get_neighborhood.property = property_data
+            # get_neighborhood.owner_status = "fetching"
+            # get_neighborhood.ownership_info_request_id = fetch_ownership_respone_data['data']
+            # get_neighborhood.save()
 
             ##power trace create_starts here
-            if fetch_ownership_respone_data['status']:
-                power_trace_response = PropertyViewSet.create_multiple_power_trace(self, get_neighborhood, request)
-                if power_trace_response['code'] == 200:
-                    get_neighborhood.power_trace_request_id = power_trace_response['data']['id']
-                    get_neighborhood.save()
-                    print(get_neighborhood.power_trace_request_id)
-                    respone_data['status'] = True
-                    respone_data['message'] = 'Neighborhood data is requested'
-                    respone_data['data'] = None
-        return JsonResponse(respone_data)
+            # if fetch_ownership_respone_data['status']:
+            #     power_trace_response = PropertyViewSet.create_multiple_power_trace(self, get_neighborhood, request)
+            #     if power_trace_response['code'] == 200:
+            #         get_neighborhood.power_trace_request_id = power_trace_response['data']['id']
+            #         get_neighborhood.save()
+            #         print(get_neighborhood.power_trace_request_id)
+            #         respone_data['status'] = True
+            #         respone_data['message'] = 'Neighborhood data is requested'
+            #         respone_data['data'] = None
+        return JsonResponse(fetch_ownership_respone_data)
 
     def create_multiple_power_trace(self, get_neighborhood, request):
         print(get_neighborhood)
@@ -881,28 +883,44 @@ class PropertyViewSet(viewsets.ModelViewSet):
             return {'code': 500, 'message': 'Server Error!'}
 
     def request_neighborhood_method(self, requestData, property):
+        GetNeighborhood.objects.filter(property=property).delete()
         status = False
         data = {}
         message = ''
+        formatted_request_data= []
         url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
         headers = {
             'Content-Type': 'application/json',
-            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
-            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+            'client_id': FETCH_OWNER_INFO_CLIENT_ID,
+            'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
         }
         try:
-            r = requests.post(url=url, json=requestData, headers=headers)
+            for data in requestData['address']:
+                get_neighborhood = GetNeighborhood()
+                get_neighborhood.property = property
+                get_neighborhood.neighbor_address = data['address']
+                get_neighborhood.save()
+                formatted_data = {
+                    "address" : data['address'],
+                    "latitude" : None,
+                    "longitude": None,
+                    "property_id": get_neighborhood.id
+                }
+                formatted_request_data.append(formatted_data)
+
+            r = requests.post(url=url, json=formatted_request_data, headers=headers)
             objectResponse = r.json()
+            GetNeighborhood.objects.filter(property=property).update(ownership_info_request_id = objectResponse['request_id'], owner_status = 'requested')
         except:
             status = False
             message = 'Request neighborhood micro service error'
             return Response({"status": status, "data": {}, 'message': message})
         if (objectResponse['status']) == 200:
+            # get_neighborhoods = GetNeighborhood.objects.filter(property=property)
             status = True
             message = objectResponse['message']
             data = objectResponse['request_id']
-            # get_neighborhood = GetNeighborhood(property=property,request_id = objectResponse['request_id'])
-            # get_neighborhood.save()
+
         else:
             status = False
             message = objectResponse['message']
@@ -915,8 +933,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         message = ''
         url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
         headers = {
-            'client_id': 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2',
-            'client_secret': 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
+            'client_id': FETCH_OWNER_INFO_CLIENT_ID,
+            'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
         }
         PARAMS = {
             "id": request_id
