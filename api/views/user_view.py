@@ -95,7 +95,7 @@ class UserViewSet(viewsets.ModelViewSet):
             if User.objects.filter(email=email).count() > 0:
                 status = False
                 data = None
-                message = "Email already exist"
+                message = "Email already in use"
                 return Response({'status': status, 'data': data, 'message': message})
 
             if 'phone_number' in request.data:
