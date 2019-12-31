@@ -799,7 +799,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         else:
             # if not get_neighborhood:
                 # get_neighborhood = GetNeighborhood()
-            fetch_ownership_respone_data = PropertyViewSet.request_neighborhood_method(self, request_body,
+            fetch_ownership_respone_data = PropertyViewSet.request_neighborhood_method(self, request,request_body,
                                                                                        property_data)
             # get_neighborhood.property = property_data
             # get_neighborhood.owner_status = "fetching"
@@ -882,12 +882,15 @@ class PropertyViewSet(viewsets.ModelViewSet):
             traceback.print_exc()
             return {'code': 500, 'message': 'Server Error!'}
 
-    def request_neighborhood_method(self, requestData, property):
+    def request_neighborhood_method(self, request, requestData, property):
         GetNeighborhood.objects.filter(property=property).delete()
+        # return {'status' : True}
         status = False
         data = {}
         message = ''
         formatted_request_data= []
+        fetch_owner_info = 0
+        power_trace = 0
         url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
         headers = {
             'Content-Type': 'application/json',
@@ -895,10 +898,23 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
         }
         try:
+            if 'fetch_owner_info' in requestData:
+                fetch_owner_info = int(requestData['fetch_owner_info'])
+            if 'power_trace' in requestData:
+                power_trace = int(requestData['power_trace'])
+
             for data in requestData['address']:
                 get_neighborhood = GetNeighborhood()
                 get_neighborhood.property = property
                 get_neighborhood.neighbor_address = data['address']
+                get_neighborhood.requested_by = User.objects.get(id = request.user.id)
+                if power_trace == 1:
+                    get_neighborhood.is_owner_info_requested = True
+                    get_neighborhood.is_power_trace_requested = True
+                elif power_trace == 0 and fetch_owner_info == 1:
+                    get_neighborhood.is_owner_info_requested = True
+                elif power_trace == 0 and fetch_owner_info == 0 :
+                    return {'status': False, 'data': {}, 'message': 'Invalid request'}
                 get_neighborhood.save()
                 formatted_data = {
                     "address" : data['address'],
@@ -910,7 +926,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
             r = requests.post(url=url, json=formatted_request_data, headers=headers)
             objectResponse = r.json()
-            GetNeighborhood.objects.filter(property=property).update(ownership_info_request_id = objectResponse['request_id'], owner_status = 'requested')
+            GetNeighborhood.objects.filter(property=property).update(ownership_info_request_id = objectResponse['request_id'], owner_status = 'requested', status='requested')
         except:
             status = False
             message = 'Request neighborhood micro service error'
