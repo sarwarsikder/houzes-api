@@ -904,25 +904,30 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 power_trace = int(requestData['power_trace'])
 
             for data in requestData['address']:
-                get_neighborhood = GetNeighborhood()
-                get_neighborhood.property = property
-                get_neighborhood.neighbor_address = data['address']
-                get_neighborhood.requested_by = User.objects.get(id = request.user.id)
-                if power_trace == 1:
-                    get_neighborhood.is_owner_info_requested = True
-                    get_neighborhood.is_power_trace_requested = True
-                elif power_trace == 0 and fetch_owner_info == 1:
-                    get_neighborhood.is_owner_info_requested = True
-                elif power_trace == 0 and fetch_owner_info == 0 :
-                    return {'status': False, 'data': {}, 'message': 'Invalid request'}
-                get_neighborhood.save()
-                formatted_data = {
-                    "address" : data['address'],
-                    "latitude" : None,
-                    "longitude": None,
-                    "property_id": get_neighborhood.id
-                }
-                formatted_request_data.append(formatted_data)
+                try:
+                    get_neighborhood = GetNeighborhood()
+                    get_neighborhood.property = property
+                    get_neighborhood.neighbor_address = data['address']
+                    get_neighborhood.requested_by = User.objects.get(id = request.user.id)
+                    if power_trace == 1:
+                        get_neighborhood.is_owner_info_requested = True
+                        get_neighborhood.is_power_trace_requested = True
+                    elif power_trace == 0 and fetch_owner_info == 1:
+                        get_neighborhood.is_owner_info_requested = True
+                    elif power_trace == 0 and fetch_owner_info == 0 :
+                        return {'status': False, 'data': {}, 'message': 'Invalid request'}
+                    get_neighborhood.latitude = data['latitude']
+                    get_neighborhood.longitude = data['longitude']
+                    get_neighborhood.save()
+                    formatted_data = {
+                        "address" : data['address'],
+                        "latitude" : data['latitude'],
+                        "longitude": data['longitude'],
+                        "property_id": get_neighborhood.id
+                    }
+                    formatted_request_data.append(formatted_data)
+                except:
+                    print('EXCEPTION IN REQUEST')
 
             r = requests.post(url=url, json=formatted_request_data, headers=headers)
             objectResponse = r.json()

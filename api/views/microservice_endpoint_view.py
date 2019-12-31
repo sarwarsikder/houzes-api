@@ -64,7 +64,11 @@ def get_owner_info_by_request_id(request_id):
                     neighbor.save()
         if get_neighborhoods.first():
             if get_neighborhoods.first().is_power_trace_requested:
-                print(request_power_trace(get_neighborhoods))
+                power_trace_request = request_power_trace(get_neighborhoods)
+                print('after power trace request')
+                print(power_trace_request)
+                if power_trace_request['code']!=200:
+                    get_neighborhoods.update(status='complete')
             else :
                 get_neighborhoods.update(status='complete')
     else:

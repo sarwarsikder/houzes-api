@@ -339,14 +339,17 @@ class GetNeighborhood(models.Model):
     ownership_info = JSONField(default=dict)
     power_trace = JSONField(default=dict)
     power_trace_request_id = models.IntegerField(null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     owner_status = models.CharField(max_length=50, default=None, null=True)
     power_trace_status = models.CharField(max_length=50, default=None, null= True)
     status = models.CharField(max_length=50, default= None, null=True)
     is_power_trace_requested = models.BooleanField(default=False)
     is_owner_info_requested = models.BooleanField(default=False)
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    latitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    longitude = models.DecimalField(max_digits=18, decimal_places=15, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = 'get_neighborhoods'
 

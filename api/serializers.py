@@ -277,6 +277,23 @@ class GetNeighborhoodSerializer(serializers.ModelSerializer):
     class Meta :
         model = GetNeighborhood
         fields = '__all__'
+    def to_representation(self, instance):
+        representation = {
+            'id': instance.id,
+            'neighbor_address': instance.neighbor_address,
+            'ownership_info' : instance.ownership_info,
+            'power_trace' : instance.power_trace,
+            'owner_status' : instance.owner_status,
+            'power_trace_status': instance.power_trace_status,
+            'status' : instance.status,
+            'property' : instance.property.id,
+            'latitude' : instance.latitude,
+            'longitude' : instance.longitude,
+            'requested_by' : instance.requested_by.id,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at
+        }
+        return representation
 
 class PlanSerializer(serializers.ModelSerializer) :
     class Meta :
