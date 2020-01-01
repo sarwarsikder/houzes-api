@@ -199,3 +199,23 @@ def scout_properties(request):
     result_page = paginator.paginate_queryset(properties, request)
     serializer = PropertySerializer(result_page, many=True)
     return paginator.get_paginated_response(data=serializer.data)
+
+@csrf_exempt
+def scout_property_details(request,id):
+    data = {}
+    url = request.GET.get('url')
+    try:
+        scout = Scout.objects.filter(url=url)[0]
+        scoutUserList = ScoutUserList.objects.filter(scout=scout)[0]
+        userList = UserList.objects.get(id = scoutUserList.user_list.id)
+        property = Property.objects.get(id = id)
+        if property.user_list == userList:
+            data = PropertySerializer(property).data
+    except:
+        data = {}
+
+    return JsonResponse(data)
+
+
+
+
