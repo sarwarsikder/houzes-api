@@ -239,6 +239,74 @@ def scout_property_details(request,id):
 
     return JsonResponse(data)
 
+@csrf_exempt
+def scout_property_update(request,id):
+    status = False
+    data = {}
+    message = ""
+    url = request.GET.get('url')
+    try:
+        scout = Scout.objects.filter(url=url)[0]
+        scoutUserList = ScoutUserList.objects.filter(scout=scout)[0]
+        userList = UserList.objects.get(id = scoutUserList.user_list.id)
+        property = Property.objects.get(id = id)
+    except:
+        return JsonResponse({'status': status, 'data': data, 'message': message})
+    try:
+        if 'street' in request.data:
+            property.street = request.data['street']
+        if 'city' in request.data:
+            property.city = request.data['city']
+        if 'state' in request.data:
+            property.state = request.data['state']
+        if 'zip' in request.data:
+            property.zip = request.data['zip']
+    except:
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+
+        if 'street' in body:
+            property.street = body['street']
+        if 'city' in body:
+            property.city = body['city']
+        if 'state' in body:
+            property.state = body['state']
+        if 'zip' in body:
+            property.zip = body['zip']
+    try:
+        property.save()
+        status = True
+        tags =[]
+        for tag in property.property_tags:
+            property_tags = PropertyTags.objects.get(id=tag['id'])
+            print(PropertyTagsSerializer(property_tags).data)
+            tags.append(PropertyTagsSerializer(property_tags).data)
+        data = {
+            'id': property.id,
+            'user_list': property.user_list.id,
+            'street': property.street,
+            'city': property.city,
+            'state': property.state,
+            'zip': property.zip,
+            'cad_acct': property.cad_acct,
+            'gma_tag': property.gma_tag,
+            'latitude': property.latitude,
+            'longitude': property.longitude,
+            'property_tags': tags,
+            'owner_info': property.owner_info,
+            'photos': PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property), many=True).data,
+            'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property), many=True).data,
+            'created_at': property.created_at,
+            'updated_at': property.updated_at,
+            'power_trace_request_id': property.power_trace_request_id
+        }
+        message = "Property updated successfully"
+    except:
+        status = False
+        data = {}
+        message = "Please provide all the field correctly"
+    return JsonResponse({'status': status, 'data': data, 'message': message})
+
 
 
 
