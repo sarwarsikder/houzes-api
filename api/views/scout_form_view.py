@@ -209,8 +209,31 @@ def scout_property_details(request,id):
         scoutUserList = ScoutUserList.objects.filter(scout=scout)[0]
         userList = UserList.objects.get(id = scoutUserList.user_list.id)
         property = Property.objects.get(id = id)
+        tags =[]
+        for tag in property.property_tags:
+            property_tags = PropertyTags.objects.get(id=tag['id'])
+            print(PropertyTagsSerializer(property_tags).data)
+            tags.append(PropertyTagsSerializer(property_tags).data)
         if property.user_list == userList:
-            data = PropertySerializer(property).data
+            data = {
+                'id': property.id,
+                'user_list': userList.id,
+                'street': property.street,
+                'city': property.city,
+                'state': property.state,
+                'zip': property.zip,
+                'cad_acct': property.cad_acct,
+                'gma_tag': property.gma_tag,
+                'latitude': property.latitude,
+                'longitude': property.longitude,
+                'property_tags': tags,
+                'owner_info': property.owner_info,
+                'photos': PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property), many=True).data,
+                'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property), many=True).data,
+                'created_at': property.created_at,
+                'updated_at': property.updated_at,
+                'power_trace_request_id': property.power_trace_request_id
+            }
     except:
         data = {}
 
