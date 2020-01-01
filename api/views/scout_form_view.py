@@ -187,7 +187,7 @@ def scout_properties(request):
     scout = Scout.objects.filter(url=url)[0]
     scout_user_list = ScoutUserList.objects.filter(scout=scout)[0]
     user_list = UserList.objects.get(id=scout_user_list.user_list.id)
-    properties = Property.objects.filter(user_list=user_list)
+    properties = Property.objects.filter(user_list=user_list).order_by('-created_at')
     page_size = request.GET.get('limit')
 
     paginator = PageNumberPagination()
