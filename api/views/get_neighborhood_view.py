@@ -15,4 +15,5 @@ class GetNeighborhoodViewSet(viewsets.ModelViewSet):
         property = Property.objects.get(id = kwargs['id'])
         get_neighborhood = GetNeighborhood.objects.filter(property=property)
         get_neighborhood_serializer = GetNeighborhoodSerializer(get_neighborhood, many=True)
-        return Response(get_neighborhood_serializer.data)
+        data = get_neighborhood_serializer.data
+        return Response(data)

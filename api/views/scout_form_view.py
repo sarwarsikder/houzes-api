@@ -167,3 +167,7 @@ def note_multiple_upload(request, id):
 
     PropertyNotes.objects.bulk_create(objs, batch_size=50)
     return JsonResponse({'status': True, 'message' : 'Property notes created'})
+
+# @csrf_exempt
+# def scout_properties(request,id):
+#

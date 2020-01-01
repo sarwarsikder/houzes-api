@@ -473,7 +473,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                                      "data": {"payment" : False,
                                               "upgrade_info" : UserSerializer(user).data['upgrade_info']
                                       },
-                                     'message': 'Insufficient coin'})
+                                     'message': 'Insufficient wallet'})
 
 
         package_type = 2

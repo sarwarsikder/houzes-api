@@ -9,5 +9,5 @@ def handler404(request, *args, **argv):
 
 def handler500(request, *args, **argv):
     response = JsonResponse({"status": False, "message": "There was an error understanding the request.", "data": None})
-    response.status_code = 200
+    response.status_code = 500
     return response
