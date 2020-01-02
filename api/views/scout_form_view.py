@@ -307,6 +307,68 @@ def scout_property_update(request,id):
         message = "Please provide all the field correctly"
     return JsonResponse({'status': status, 'data': data, 'message': message})
 
+@csrf_exempt
+def assign_tag_to_property(request,id):
+    propertyId = id
+    property_representation = {}
+    status = False
+    data = None
+    message = ""
+    try:
+        property_tag = request.data['tag']
+    except:
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        property_tag = body['tag']
+
+    if PropertyTags.objects.filter(id=property_tag).count() == 0:
+        message = "Missing tag"
+    else:
+        try:
+            tagExist = False
+            property = Property.objects.get(id=propertyId)
+            for tag in property.property_tags:
+                if tag['id'] == property_tag:
+                    message = 'Tag already exist'
+                    tagExist = True
+            if not tagExist:
+                property.property_tags.append({'id': property_tag})
+                property.save()
+                message = 'Tag added to the property'
+                status = True
+                # propertySerializer = PropertySerializer(property)
+                # data = propertySerializer.data
+                tags = []
+                for tag in property.property_tags:
+                    property_tags = PropertyTags.objects.get(id=tag['id'])
+                    print(PropertyTagsSerializer(property_tags).data)
+                    tags.append(PropertyTagsSerializer(property_tags).data)
+                property_representation = {
+                    'id': property.id,
+                    'user_list': property.user_list.id,
+                    'street': property.street,
+                    'city': property.city,
+                    'state': property.state,
+                    'zip': property.zip,
+                    'cad_acct': property.cad_acct,
+                    'gma_tag': property.gma_tag,
+                    'latitude': property.latitude,
+                    'longitude': property.longitude,
+                    'property_tags': tags,
+                    'owner_info': property.owner_info,
+                    'photos': PropertyPhotosSerializer(PropertyPhotos.objects.filter(property=property),
+                                                       many=True).data,
+                    'notes': PropertyNotesSerializer(PropertyNotes.objects.filter(property=property), many=True).data,
+                    'created_at': property.created_at,
+                    'updated_at': property.updated_at,
+                    'power_trace_request_id': property.power_trace_request_id
+                }
+        except:
+            message = 'property does not exist'
+            status = False
+    return JsonResponse({'status': status, 'data': property_representation, 'message': message})
+
+
 
 
 

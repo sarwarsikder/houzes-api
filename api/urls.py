@@ -75,7 +75,7 @@ urlpatterns = [
     path('scout-form/properties/', scout_form_view.scout_properties,name='scout-properties'),
     path('scout-form/property/<int:id>', scout_form_view.scout_property_details, name='scout-property-details'),
     path('scout-form/property/<int:id>/update/', scout_form_view.scout_property_update, name='scout-property-update'),
-
+    path('scout-form/property/<int:id>/assign-tag/', scout_form_view.assign_tag_to_property, name='scout-property-assign-tag'),
     path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,name='get-ownership-info-by-address'),
     path('payment-gateway/charge-card/', payment_gateway_view.charge_credit_card, name='charge-credit-card'),
     path('provide-ownership-info/<int:id>/', microservice_endpoint_view.provide_ownership_info, name='ownership-endpoint'),
