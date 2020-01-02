@@ -81,7 +81,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'history': history,
             'created_at': property.created_at,
             'updated_at': property.updated_at,
-            'power_trace_request_id': property.power_trace_request_id
+            'power_trace_request_id': property.power_trace_request_id,
+            'user_list_details' : UserListSerializer(property.user_list).data,
         }
         return Response(property_representation)
 
