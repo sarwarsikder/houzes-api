@@ -368,6 +368,20 @@ def assign_tag_to_property(request,id):
             status = False
     return JsonResponse({'status': status, 'data': property_representation, 'message': message})
 
+@csrf_exempt
+def delete_property_photo(request,id):
+    photo_id = id
+    status = False
+    message = ""
+    try:
+        PropertyPhotos.objects.get(id=photo_id).delete()
+    except:
+        message = "Error deleting photo"
+        return JsonResponse({'status': status, 'message': message})
+    status = True
+    message = 'Photo deleted successfully'
+    return JsonResponse({'status': status, 'message': message})
+
 
 
 
