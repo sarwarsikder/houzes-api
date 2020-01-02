@@ -382,7 +382,88 @@ def delete_property_photo(request,id):
     message = 'Photo deleted successfully'
     return JsonResponse({'status': status, 'message': message})
 
+@csrf_exempt
+def note_upload(request, id):
+    property = Property.objects.get(id=id)
+    try:
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        title = body['title']
+        notes = body['notes']
+        url = body['url']
+    except:
+        title = request.POST['title']
+        notes = request.POST['notes']
+        url = request.POST['url']
+
+    scout = Scout.objects.filter(url=url)[0]
+    scoutUserList = ScoutUserList.objects.filter(scout=scout)[0]
+    user = UserList.objects.get(id=scoutUserList.scout.id).user
+
+    property_note = PropertyNotes()
+    property_note.title = title
+    property_note.notes = notes
+    property_note.property = property
+    property_note.user = user
+    property_note.save()
+
+    return JsonResponse({'status': True,'data':PropertyNotesSerializer(property_note).data, 'message': 'Property notes created'})
+
+@csrf_exempt
+def update_note(request, id):
+    note_id = id
+    propertyNote = PropertyNotes.objects.get(id=note_id)
+
+    status = False
+    data = {}
+    message = None
+
+    title = None
+    notes = None
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    if 'title' in body:
+        title = body['title']
+        if title == "":
+            message = "Title is required"
+            return JsonResponse({'status': status, 'data': data, 'message': message})
+        else:
+            propertyNote.title = title
+    if 'notes' in body:
+        notes = body['notes']
+        if notes == "":
+            message = "Note is required"
+            return JsonResponse({'status': status, 'data': data, 'message': message})
+        else:
+            propertyNote.notes = notes
+
+    try:
+        propertyNote.save()
+
+        propertyNoteSerializer = PropertyNotesSerializer(propertyNote)
+        status = True
+        data = propertyNoteSerializer.data
+        message = 'Note updated successfully'
+    except:
+        status = False
+        data = {}
+        message = 'Error updating note'
+
+    return JsonResponse({'status': status, 'data': data, 'message': message})
 
 
+@csrf_exempt
+def delete_property_note(request,id):
+    note_id = id
+    status = False
+    message = ""
+    try:
+        PropertyNotes.objects.get(id=note_id).delete()
+    except:
+        message = "Error deleting note"
+        return JsonResponse({'status': status, 'message': message})
+    status = True
+    message = 'Note deleted successfully'
+    return JsonResponse({'status': status, 'message': message})
 
 

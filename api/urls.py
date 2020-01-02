@@ -77,6 +77,9 @@ urlpatterns = [
     path('scout-form/property/<int:id>/update/', scout_form_view.scout_property_update, name='scout-property-update'),
     path('scout-form/property/<int:id>/assign-tag/', scout_form_view.assign_tag_to_property, name='scout-property-assign-tag'),
     path('scout-form/photo/<int:id>/delete/', scout_form_view.delete_property_photo, name='delete-property-photo'),
+    path('scout-form/property/<int:id>/photo/upload/', scout_form_view.note_upload, name='property-note-upload'),
+    path('scout-form/note/<int:id>/update/', scout_form_view.update_note, name='update-note'),
+    path('scout-form/note/<int:id>/delete/', scout_form_view.delete_property_note, name='delete-note'),
 
     path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,name='get-ownership-info-by-address'),
     path('payment-gateway/charge-card/', payment_gateway_view.charge_credit_card, name='charge-credit-card'),
