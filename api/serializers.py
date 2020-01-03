@@ -281,8 +281,8 @@ class GetNeighborhoodSerializer(serializers.ModelSerializer):
         representation = {
             'id': instance.id,
             'neighbor_address': instance.neighbor_address,
-            'ownership_info' : instance.ownership_info,
-            'power_trace' : instance.power_trace,
+            'ownership_info' : None if instance.ownership_info=={} else instance.ownership_info['owner_info'],
+            'power_trace' : None if instance.power_trace == {} else instance.power_trace,
             'owner_status' : instance.owner_status,
             'power_trace_status': instance.power_trace_status,
             'status' : instance.status,
