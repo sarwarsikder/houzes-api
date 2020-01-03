@@ -117,6 +117,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(first_name)
             print(last_name)
             print(phone_number)
+
             if email == None or password == None or first_name == None or last_name == None or phone_number == None:
                 status = False
                 message = "Please provide all the required fields correctly"
@@ -159,25 +160,33 @@ class UserViewSet(viewsets.ModelViewSet):
 
             Invitations.objects.filter(email=user.email).delete()  # delete new user from invitation
 
-            # Email verification task starts here
-            code = generate_shortuuid()
-            userVerifications = UserVerifications(code=code, user=user, is_used=False, verification_type='email')
-            userVerifications.save()
+            if invited_by == None :
+                # Email verification task starts here
+                code = generate_shortuuid()
+                userVerifications = UserVerifications(code=code, user=user, is_used=False, verification_type='email')
+                userVerifications.save()
 
-            send_mail(subject="HouZes email verification",
-                      message="Dear," + str(user.first_name) + ' ' + str(
-                          user.last_name) + " please confirm your email by clicking the link https://" + settings.WEB_APP_URL + '/verify-email/' + str(
-                          code),
-                      from_email=settings.EMAIL_HOST_USER,
-                      recipient_list=[email],
-                      fail_silently=False
-                      )
-            # Email verification task ends here
+                send_mail(subject="HouZes email verification",
+                          message="Dear," + str(user.first_name) + ' ' + str(
+                              user.last_name) + " please confirm your email by clicking the link https://" + settings.WEB_APP_URL + '/verify-email/' + str(
+                              code),
+                          from_email=settings.EMAIL_HOST_USER,
+                          recipient_list=[email],
+                          fail_silently=False
+                          )
+                # Email verification task ends here
 
-            userSerializer = UserSerializer(user)
-            status = True
-            data = userSerializer.data
-            message = "A email has been sent to '" + email + "' for verification.Please verify before you log in."
+                userSerializer = UserSerializer(user)
+                status = True
+                data = userSerializer.data
+                message = "A email has been sent to '" + email + "' for verification.Please verify before you log in."
+            else :
+                user.is_active = True
+                user.save()
+                userSerializer = UserSerializer(user)
+                status = True
+                data = userSerializer.data
+                message = "Account is created successfully. You are ready to log in"
         except Exception as exc:
             print(exc)
             status = False

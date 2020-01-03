@@ -48,9 +48,9 @@ class UserSerializer(serializers.ModelSerializer):
             'is_admin' : instance.is_admin,
             'upgrade_info' : {
                 'upgrade' : upgrade,
-                'amount' : amount,
-                'power_trace' : power_trace,
-                'owner_info' : owner_info
+                'amount' : float(amount),
+                'power_trace' : float(power_trace),
+                'owner_info' : float(owner_info)
             },
             'created_at': instance.created_at,
             'updated_at' : instance.updated_at
