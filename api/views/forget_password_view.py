@@ -44,7 +44,7 @@ class ForgetPasswordViewSet(viewsets.ModelViewSet):
                 forgetPassword = ForgetPassword(user=user, link_key=link_key)
                 forgetPassword.save()
                 data = ForgetPasswordSerializer(forgetPassword).data
-                message = 'Please check your email to fix your password'
+                message = 'Please check your email to reset password'
             except:
                 status = False
                 data = {}

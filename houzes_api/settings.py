@@ -57,10 +57,12 @@ INSTALLED_APPS = [
     'rest_framework_social_oauth2',
     'corsheaders',
     'admin_panel',
+    'whitenoise'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -153,7 +155,7 @@ WSGI_APPLICATION = 'houzes_api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'houzes_staging',
+        'NAME': 'houzes_live',
         'USER': 'postgres',
         'PASSWORD': 'wsit97480',
         'HOST': 'houzes-db.cacdyf2lutyz.us-east-1.rds.amazonaws.com',
@@ -251,6 +253,10 @@ CLIENT_SECRET = "vQgrl1HEfiUktjgXFmC3wK5t7JkU6L6mDwDKkBfb4h4F5yAslvaKXs9kKcH5g0G
 POWER_TRACE_HOST = "http://powertrace-service.ratoolkit.com:8080/ra-powertrace/"
 POWER_TRACE_CLIENT_ID = "HQARK3QZDPLLBWSMVY0X2C5UJ2B15YQJSIY"
 POWER_TRACE_CLIENT_SECRET = "URBVBVBDDJ2E2JEBJEO84594T546VJVBKJGB"
+
+FETCH_OWNER_INFO_HOST = 'http://58.84.34.65:8080/'
+FETCH_OWNER_INFO_CLIENT_ID = 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2'
+FETCH_OWNER_INFO_CLIENT_SECRET = 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
 
 WEB_APP_URL='houzes.com'
 try:

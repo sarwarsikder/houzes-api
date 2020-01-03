@@ -136,7 +136,11 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
             thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user_id), property_id,str(time.time()).replace('.','_') + '_thumb.jpg')
             thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,thumb_file_path)
             with Image.open(image_data) as image:
-                thumb = resizeimage.resize_cover(image, [150, 150])
+                width,height= image.size
+                if height<= 150 or width <=150:
+                    thumb =image
+                else:
+                    thumb = resizeimage.resize_cover(image, [150, 150])
                 thumb_byte = BytesIO()
                 thumb.save(thumb_byte, format=thumb.format)
                 thumb_image = thumb_byte.getvalue()

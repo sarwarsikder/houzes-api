@@ -40,14 +40,21 @@ class ScoutViewSet(viewsets.ModelViewSet):
         try:
             if 'first_name' in request.data:
                 first_name = request.data['first_name']
-
             if 'last_name' in request.data:
                 last_name = request.data['last_name']
+            if 'email' in request.data:
+                email = request.data['email']
+            if 'phone_number' in request.data :
+                phone_number = request.data['phone_number']
         except:
             if 'first_name' in request.body:
                 first_name = request.body['first_name']
             if 'last_name' in request.body:
                 last_name = request.body['last_name']
+            if 'email' in request.body:
+                email = request.body['email']
+            if 'phone_number' in request.body :
+                phone_number = request.body['phone_number']
 
         if first_name == None:
             status = False
@@ -73,7 +80,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
         manager = User.objects.get(id=request.user.id)
 
         try:
-            scout = Scout(first_name=first_name,last_name=last_name,url=url,manager_id=manager)
+            scout = Scout(first_name=first_name,last_name=last_name,url=url,manager_id=manager, email=email, phone_number=phone_number)
             scout.save()
             scoutSerializer = ScoutSerializer(scout)
             scoutUserList = ScoutUserList(scout=scout, user_list=user_list)
@@ -131,7 +138,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path='member/(?P<id>[\w-]+)')
     def get_scout_by_member(self, request, *args, **kwargs):
         user = User.objects.get(id=kwargs['id'])
-        if user.invited_by == request.user.id :
+        if user.invited_by == request.user.id or user.id == request.user.id:
             scout = Scout.objects.filter(manager_id=user.id)
         else :
             scout = Scout.objects.none()

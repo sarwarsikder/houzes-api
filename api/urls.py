@@ -3,13 +3,18 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 # from.views import *
-from api.views import power_trace_view, photos_view, scout_form_view
+from api.views import power_trace_view, photos_view, scout_form_view, payment_gateway_view, microservice_endpoint_view
 from api.views.activity_log_view import ActivityLogViewSet
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
 from api.views.forget_password_view import ForgetPasswordViewSet
 from api.views.get_neighborhood_view import GetNeighborhoodViewSet
 from api.views.history_view import HistoryViewSet
 from api.views.history_detail_view import HistoryDetailViewSet
+from api.views.payment_plan_view import PaymentPlanViewSet
+from api.views.payment_transaction_view import PaymentTransactionViewSet
+from api.views.plan_view import PlanViewSet
+from api.views.upgrade_history_view import UpgradeHistoryViewSet
+from api.views.upgrade_profile_view import UpgradeProfileViewSet
 from api.views.user_view import UserViewSet
 from api.views.user_location_view import UserLocationViewSet
 from api.views.user_verification_view import UserVerificationsViewSet
@@ -49,7 +54,11 @@ router.register(r'history-detail', HistoryDetailViewSet)
 router.register(r'forget-password', ForgetPasswordViewSet)
 router.register(r'activity-log', ActivityLogViewSet)
 router.register(r'get-neighborhood', GetNeighborhoodViewSet)
-
+router.register(r'plan', PlanViewSet)
+router.register(r'payment-plan', PaymentPlanViewSet)
+router.register(r'upgrade-profile', UpgradeProfileViewSet)
+router.register(r'payment-transaction', PaymentTransactionViewSet)
+router.register(r'upgrade-history', UpgradeHistoryViewSet)
 
 
 urlpatterns = [
@@ -63,8 +72,19 @@ urlpatterns = [
     path('scout-form/create-property/', scout_form_view.create_property, name='create-property'),
     path('scout-form/property/<int:id>/photo/multiple-upload/', scout_form_view.photo_multiple_upload, name='photo-multiple-upload'),
     path('scout-form/property/<int:id>/note/multiple-upload/', scout_form_view.note_multiple_upload, name='note-multiple-upload'),
-    path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,name='get-ownership-info-by-address'),
+    path('scout-form/properties/', scout_form_view.scout_properties,name='scout-properties'),
+    path('scout-form/property/<int:id>', scout_form_view.scout_property_details, name='scout-property-details'),
+    path('scout-form/property/<int:id>/update/', scout_form_view.scout_property_update, name='scout-property-update'),
+    path('scout-form/property/<int:id>/assign-tag/', scout_form_view.assign_tag_to_property, name='scout-property-assign-tag'),
+    path('scout-form/photo/<int:id>/delete/', scout_form_view.delete_property_photo, name='delete-property-photo'),
+    path('scout-form/property/<int:id>/photo/upload/', scout_form_view.note_upload, name='property-note-upload'),
+    path('scout-form/note/<int:id>/update/', scout_form_view.update_note, name='update-note'),
+    path('scout-form/note/<int:id>/delete/', scout_form_view.delete_property_note, name='delete-note'),
 
+    path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,name='get-ownership-info-by-address'),
+    path('payment-gateway/charge-card/', payment_gateway_view.charge_credit_card, name='charge-credit-card'),
+    path('provide-ownership-info/<int:id>/', microservice_endpoint_view.provide_ownership_info, name='ownership-endpoint'),
+    path('provide-power-trace/<int:id>/', microservice_endpoint_view.provide_power_trace,name='powertrace-endpoint'),
 ]
 
 urlpatterns += router.urls
