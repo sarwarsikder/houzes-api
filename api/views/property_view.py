@@ -428,7 +428,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='(?P<id>[\w-]+)/payment')
     def property_payment(self, request, *args, **kwargs):
+        #If  fetch_owner_info id 1 then it will fetch other than will be 0
         fetch_owner_info = 1
+        # If  power_trace id 1 then it will fetch other than will be 0
         power_trace = 1
         property_payment_message = []
         try:
