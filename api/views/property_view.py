@@ -1040,7 +1040,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
             traceback.print_exc()
             return {'status': False, 'message': 'Failed to create request! Server Error!'}
 
-
 def update_property_power_trace_info(info_list):
     for info in info_list:
         try:
