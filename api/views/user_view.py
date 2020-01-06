@@ -240,6 +240,7 @@ class UserViewSet(viewsets.ModelViewSet):
             user = User.objects.get(id=userVerifications.user.id)
             print(user)
             user.is_active = True
+            user.is_admin = True
             user.save()
             status = True
             message = 'User is verified'
