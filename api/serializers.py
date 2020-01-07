@@ -300,10 +300,35 @@ class PlanSerializer(serializers.ModelSerializer) :
         model = Plans
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = {
+            'id': instance.id,
+            'plan_name': instance.plan_name,
+            'plan_cost': float(instance.plan_cost),
+            'plan_coin': float(instance.plan_coin),
+            'created_by': instance.created_by.id,
+            'updated_by': instance.updated_by.id if instance.updated_by !=None else None,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at
+        }
+        return representation
+
 class PaymentPlanSerializer(serializers.ModelSerializer) :
     class Meta :
         model = PaymentPlan
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = {
+            'id': instance.id,
+            'payment_plan_name': instance.payment_plan_name,
+            'payment_plan_coin': float(instance.payment_plan_coin),
+            'created_by': instance.created_by.id,
+            'updated_by': instance.updated_by.id if instance.updated_by !=None else None,
+            'created_at': instance.created_at,
+            'updated_at': instance.updated_at
+        }
+        return representation
 
 class UpgradeProfileSerializer(serializers.ModelSerializer) :
     class Meta :
@@ -314,7 +339,7 @@ class UpgradeProfileSerializer(serializers.ModelSerializer) :
         representation = {
             'id': instance.id,
             'user': UserSerializer(User.objects.get(id= instance.user.id)).data,
-            'coin' : instance.coin,
+            'coin' : float(instance.coin),
             'plan' : PlanSerializer(Plans.objects.get(id = instance.plan.id)).data,
             'created_at': instance.created_at,
             'updated_at': instance.updated_at

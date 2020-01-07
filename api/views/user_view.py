@@ -135,12 +135,13 @@ class UserViewSet(viewsets.ModelViewSet):
             if 'photo' in request.FILES:
                 # data['photo'] = "in progress"
                 file = request.FILES['photo']
-                file_path = "photos/user/{}/{}".format("id", str(time.time()) + '.jpg')
+                file_path = "photos/user/{}/{}".format(generate_shortuuid(), str(time.time()) + '.jpg')
                 s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,
                                                                     file_path)
                 file_upload(file, file_path)
                 request.data['photo'] = s3_url
                 photo = s3_url
+                print(photo)
         except:
             status = False
             message = "Error uploading photo"
@@ -153,10 +154,11 @@ class UserViewSet(viewsets.ModelViewSet):
                         photo=photo)
             print(user)
             user.save()
-            if user.photo != None:
-                if 'http' in user.photo:
-                    user.photo = user.photo.replace("id", str(user.id))
-                    user.save()
+            # if user.photo != None:
+            #     if 'http' in user.photo:
+            #         print('somossa eikhanei')
+            #         user.photo = user.photo.replace("id", str(user.id))
+            #         user.save()
 
             Invitations.objects.filter(email=user.email).delete()  # delete new user from invitation
 
