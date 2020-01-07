@@ -344,3 +344,8 @@ class UpgradeHistorySerializer(serializers.ModelSerializer):
     class Meta :
         model = UpgradeHistory
         fields = '__all__'
+
+class MailWizardInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MailWizardInfo
+        fields = '__all__'

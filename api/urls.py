@@ -30,7 +30,8 @@ from api.views.property_view import PropertyViewSet
 from api.views.invitations_view import InvitationsViewSet
 from api.views.scout_view import ScoutViewSet
 from api.views.scout_user_list_view import ScoutUserListViewSet
-from api.views import  ownership_info_view
+from api.views import ownership_info_view
+from api.views.mail_wizard_view import MailWizardInfoViewSet
 
 router = routers.DefaultRouter()
 router.register(r'user', UserViewSet)
@@ -59,6 +60,7 @@ router.register(r'payment-plan', PaymentPlanViewSet)
 router.register(r'upgrade-profile', UpgradeProfileViewSet)
 router.register(r'payment-transaction', PaymentTransactionViewSet)
 router.register(r'upgrade-history', UpgradeHistoryViewSet)
+router.register(r'mail-wizard', MailWizardInfoViewSet)
 
 
 urlpatterns = [
