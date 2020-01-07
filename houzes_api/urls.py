@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.documentation import include_docs_urls
 from api.views import error_handler
+import notifications.urls
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,6 +17,7 @@ urlpatterns = [
     url('recurring-bill/', include(('recurring_bill.urls', 'recurring_bill'), namespace='recurring_bill')),
     url('authorization/', include(('authorization.urls', 'authorization'), namespace='authorization')),
     url('auth/',include('rest_framework_social_oauth2.urls')),
+    url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ]
 
 handler404 = error_handler.handler404

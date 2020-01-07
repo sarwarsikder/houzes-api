@@ -1,5 +1,6 @@
 import json
 import traceback
+import datetime
 
 import requests
 from django.db.models import Count, Q
@@ -8,6 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, pagination, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from notifications.signals import notify
 
 from api.serializers import *
 from houzes_api import settings
@@ -178,10 +180,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
             status = True
             data = PropertySerializer(property).data
             message = "Successfully created property"
+            try:
+                user = User.objects.get(id = request.user.id)
+                notify.send(user, recipient=user, verb='uploaded property information', action_object=property)
+            except:
+                print('Error in notification')
         except:
             status = False
             data = {}
             message = "Failed to create property"
+
         return Response({'status': status, 'data': data, 'message': message})
 
     @action(detail=False, url_path='info/(?P<pk>[\w-]+)')

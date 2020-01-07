@@ -3,7 +3,8 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.documentation import include_docs_urls
 # from.views import *
-from api.views import power_trace_view, photos_view, scout_form_view, payment_gateway_view, microservice_endpoint_view
+from api.views import power_trace_view, photos_view, scout_form_view, payment_gateway_view, microservice_endpoint_view, \
+    notifications_view
 from api.views.activity_log_view import ActivityLogViewSet
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
 from api.views.forget_password_view import ForgetPasswordViewSet
@@ -85,6 +86,8 @@ urlpatterns = [
     path('payment-gateway/charge-card/', payment_gateway_view.charge_credit_card, name='charge-credit-card'),
     path('provide-ownership-info/<int:id>/', microservice_endpoint_view.provide_ownership_info, name='ownership-endpoint'),
     path('provide-power-trace/<int:id>/', microservice_endpoint_view.provide_power_trace,name='powertrace-endpoint'),
+    path('notifications/', notifications_view.get_all_notifications, name='notifications'),
+
 ]
 
 urlpatterns += router.urls

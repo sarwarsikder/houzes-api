@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
-
+from notifications.models import Notification
 from api.models import *
 
 
@@ -368,4 +368,9 @@ class PaymentTransactionSerializer(serializers.ModelSerializer) :
 class UpgradeHistorySerializer(serializers.ModelSerializer):
     class Meta :
         model = UpgradeHistory
+        fields = '__all__'
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = Notification
         fields = '__all__'
