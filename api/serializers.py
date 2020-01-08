@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 from notifications.models import Notification
 from api.models import *
+from django.contrib.contenttypes.models import ContentType
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -374,3 +375,25 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta :
         model = Notification
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            # "level": instance.level,
+            # "unread": instance.unread,
+            "actor_object_id": int(instance.actor_object_id),
+            "verb": instance.verb,
+            # "description": instance.description,
+            # "target_object_id": instance.target_object_id,
+            "action_object_object_id": int(instance.action_object_object_id) if instance.action_object_object_id else None,
+            "timestamp": instance.timestamp,
+            # "public": instance.public,
+            # "deleted": instance.deleted,
+            # "emailed": instance.emailed,
+            # "data": instance.data,
+            "recipient": UserSerializer(User.objects.get(id= instance.recipient.id)).data,
+            # "actor_content_type": instance.actor_content_type,
+            # "target_content_type": instance.target_content_type,
+            "action_object_content_type": ContentType.objects.get(id=instance.action_object_content_type.id).model if instance.action_object_content_type else None
+        }
+        return representation

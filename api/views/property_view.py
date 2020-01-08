@@ -293,6 +293,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
             Property.objects.get(id=property_id).delete()
             status = True
             message = "Property deleted"
+            try:
+                user = User.objects.get(id=request.user.id)
+                notify.send(user, recipient=user, verb='deleted a property')
+            except:
+                print('Error in notification')
         except:
             status = False
             message = "Error deleting property or property does not exist"
@@ -468,12 +473,24 @@ class PropertyViewSet(viewsets.ModelViewSet):
         coin_required = 0
         fetch_owner_info_coin_required = 0
         power_trace_coin_required = 0
+        property = Property.objects.get(id=kwargs['id'])
+
         if upgrade_profile :
             if fetch_owner_info == 1 :
+                try:
+                    # user = User.objects.get(id=request.user.id)
+                    notify.send(original_user, recipient=original_user, verb='requested to fetch ownership information of a property', action_object=property)
+                except:
+                    print('Error in notification')
                 payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info').first()
                 if payment_plan :
                     fetch_owner_info_coin_required = payment_plan.payment_plan_coin
             if power_trace == 1 :
+                try:
+                    # user = User.objects.get(id=request.user.id)
+                    notify.send(original_user, recipient=original_user, verb='requested to power trace on a property', action_object=property)
+                except:
+                    print('Error in notification')
                 payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'power-trace').first()
                 if payment_plan :
                     power_trace_coin_required =  payment_plan.payment_plan_coin
@@ -486,7 +503,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
 
         package_type = 2
-        property = Property.objects.get(id=kwargs['id'])
+        # property = Property.objects.get(id=kwargs['id'])
         property_address = ' '.join([property.street, property.city, property.state, property.zip])
         fetch_ownership_info_response = {"status": False, 'data': {}, 'message' : ''}
         power_trace_response = {"status": False, 'data': {}, 'message' : ''}
@@ -783,6 +800,12 @@ class PropertyViewSet(viewsets.ModelViewSet):
         fetch_ownership_respone_data = {"status": True, "message": "", "data": None}
         property_data = Property.objects.get(id=kwargs['pk'])
         request_body = request.data
+
+        try:
+            user = User.objects.get(id=request.user.id)
+            notify.send(user, recipient=user, verb='requested neighborhood information', action_object=property_data)
+        except:
+            print('Error in notification')
 
         fetch_ownership_respone_data = PropertyViewSet.request_neighborhood_method(self, request,request_body,
                                                                                        property_data)

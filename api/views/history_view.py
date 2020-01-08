@@ -3,6 +3,7 @@ import datetime
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
+from notifications.signals import notify
 from rest_framework import filters
 from rest_framework import viewsets, status, pagination
 from rest_framework.decorators import action
@@ -122,6 +123,11 @@ class HistoryViewSet(viewsets.ModelViewSet):
             history = History(start_point_latitude=start_point_latitude,start_point_longitude = start_point_longitude,start_time=start_time,user=user)
             history.save()
             historySerializer = HistorySerializer(history)
+            try:
+                # user = User.objects.get(id = request.user.id)
+                notify.send(user, recipient=user, verb='started driving', action_object=history)
+            except:
+                print('Error in notification')
         except:
             message = 'Error start diriving'
             return Response({'status': status, 'data': data, 'message': message})
@@ -171,6 +177,11 @@ class HistoryViewSet(viewsets.ModelViewSet):
         try:
             history.save()
             historySerializer = HistorySerializer(history)
+            try:
+                # user = User.objects.get(id = request.user.id)
+                notify.send(user, recipient=user, verb='stopped driving', action_object=history)
+            except:
+                print('Error in notification')
         except:
             message = 'Error end diriving'
             return Response({'status': status, 'data': data, 'message': message})
