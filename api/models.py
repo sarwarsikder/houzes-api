@@ -436,7 +436,8 @@ class MailWizardSubsType(models.Model):
 class MailWizardInfo(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    subs_type = models.ForeignKey(MailWizardSubsType, on_delete=models.CASCADE, null=True)
+    subs_type = models.ForeignKey(MailWizardSubsType, on_delete=models.CASCADE, null=True, default=None)
+    item_id = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

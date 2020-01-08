@@ -6,82 +6,101 @@ from api.models import *
 from rest_framework.response import Response
 
 
-
-
 class MailWizardInfoViewSet(viewsets.ModelViewSet):
     queryset = MailWizardInfo.objects.all()
     serializer_class = MailWizardInfoSerializer
 
-    @action(detail=False, url_path='property/(?P<id>[\w-]+)')
+    @action(detail=False, methods=['POST'], url_path='property/(?P<id>[\w-]+)')
     def send_mail_to_property_owner(self, request, *args, **kwargs):
+        status = False
+        response = {'status': False, 'message': ''}
         property = Property.objects.get(id=kwargs['id'])
-        url = 'http://172.18.1.11:8002/mailer-service/send-mailer-data/'
+        user = User.objects.get(id=request.user.id)
+
+        # print(property.__dict__)
+        # print(len(property.owner_info))
+
+        if len(property.owner_info) == 0:
+            response['status'] = False
+            response['message'] = 'Owner info is empty. Please apply Fetch Ownership to get Owner info.'
+            return Response(response)
+
+        full_name = property.owner_info[0]['full_name']
+        full_address = property.owner_info[0]['full_address']
+        mailing_city = property.owner_info[0]['formatted_address']['city']
+        mailing_state = property.owner_info[0]['formatted_address']['state']
+        mailing_zip = property.owner_info[0]['formatted_address']['zip_code']
+
+        text_body = request.data['mail_text']
+        item_id = request.data['tem_item_id']
+        subs_id = request.data['subs_id']
+        url = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
         headers = {
             'Content-Type': 'application/json',
         }
         PARAMS = {
-            {
-                "user_id": 26,
-                "list_id": 56,
-                "response_text": "hi....",
-                "user_info": {
-                    "firstName": "hhhh",
-                    "lastName": "kkkkk",
-                    "email": "zahidul@workspaceit.com",
-                    "proofEmail": "",
-                    "compName": "",
-                    "website": "",
-                    "telephoneNo": ""
+            "user_id": user.id,
+            "list_id": property.id,
+            "response_text": text_body.strip(),
+            "user_info": {
+                "firstName": user.first_name,
+                "lastName": user.last_name,
+                "email": user.email,
+                "proofEmail": "",
+                "compName": "",
+                "website": "",
+                "telephoneNo": ""
+            },
+            "letter_info": {
+                "type": "Letter",
+                "item_id": item_id,
+                "paper_id": "7",
+                "ink_id": "11",
+                "envelope_id": "21",
+                "postage_id": "5"
+            },
+            "is_imported": False,
+            "rec_data": [
+                {
+                    "full_name": full_name.strip(),
+                    "mailing_address1": full_address.strip(),
+                    "mailing_city": mailing_city.strip(),
+                    "mailing_state": mailing_state.strip(),
+                    "mailing_zip": mailing_zip.strip(),
+                    "prop_address1": property.street + ', ' + property.city + ', ' + property.state + ', ' + property.zip,
+                    "prop_city": property.city,
+                    "prop_state": property.state,
+                    "prop_zip": property.zip
                 },
-                "letter_info": {
-                    "type": "Letter",
-                    "size_id": "",
-                    "size_name": "",
-                    "item_id": "527",
-                    "item_name": "TAPLT1",
-                    "paper_id": "7",
-                    "paper_name": "Yellow",
-                    "ink_id": "11",
-                    "ink_name": "Color",
-                    "envelope_id": "21",
-                    "envelope_name": "#10 ENVELOPE - WHITE - $.04",
-                    "postage_id": "5",
-                    "postage_name": "Presorted First Class Stamp w/ Cancellation - $ 0.424 Each 500 or More",
-                    "date": "30 jan 2019"
-                },
-                "is_imported": False,
-                "rec_data": [
-                    {
-                        "full_name": "test name",
-                        "mailing_address1": "mailing address",
-                        "mailing_city": " Anchorage",
-                        "mailing_state": "Alaska",
-                        "mailing_zip": "99501",
-                        "prop_address1": "Proof address",
-                        "prop_city": "Anchorage",
-                        "prop_state": "Alaska",
-                        "prop_zip": "99501"
-                    },
-                    {
-                        "full_name": "test name",
-                        "mailing_address1": "mailing address",
-                        "mailing_city": " Anchorage ",
-                        "mailing_state": "Alaska ",
-                        "mailing_zip": "99501",
-                        "prop_address1": "Proof address",
-                        "prop_city": "Anchorage ",
-                        "prop_state": "Alaska ",
-                        "prop_zip": "99501"
-                    }
-                ]
-            }
+            ]
         }
+
         try:
-            r = requests.post(url=url, data=PARAMS, headers=headers)
-            objectResponse = r.json()
-            print(objectResponse)
-        except:
-            print('ex')
-            status = False
-            message = 'Get neighborhood micro service error'
-        return Response({'status' : True})
+            r = requests.post(url=url, json=PARAMS, headers=headers)
+            if r.status_code == 200:
+                mailWizardSubsType = MailWizardSubsType.objects.filter(id=subs_id).first()
+
+                mailWizardInfo = MailWizardInfo(property=property, sender=user, subs_type=mailWizardSubsType,
+                                                item_id=item_id)
+                mailWizardInfo.save()
+
+
+                # if mailWizardSubsType:
+                #     mailWizardInfo = MailWizardInfo(property=property, sender=user, subs_type=mailWizardSubsType,
+                #                                     item_id=item_id)
+                #     mailWizardInfo.save()
+                # else:
+                #     mailWizardInfo = MailWizardInfo(property=property, sender=user, subs_type=None,
+                #                                     item_id=item_id)
+                #     mailWizardInfo.save()
+
+                response['status'] = True
+                response['message'] = 'Mail wizard sent successfully'
+            else:
+                response['status'] = False
+                response['message'] = 'Mail wizard sending unsuccessful'
+        except Exception as e:
+            print('ex' + str(e))
+            response['status'] = False
+            response['message'] = 'Mail wizard sending unsuccessful'
+        return Response(response)
