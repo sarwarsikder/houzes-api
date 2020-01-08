@@ -84,7 +84,6 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                                                 item_id=item_id)
                 mailWizardInfo.save()
 
-
                 # if mailWizardSubsType:
                 #     mailWizardInfo = MailWizardInfo(property=property, sender=user, subs_type=mailWizardSubsType,
                 #                                     item_id=item_id)
@@ -103,4 +102,27 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             print('ex' + str(e))
             response['status'] = False
             response['message'] = 'Mail wizard sending unsuccessful'
+        return Response(response)
+
+    @action(detail=False, url_path='all')
+    def get_mail_wizard(self, request, *args, **kwargs):
+        response = {'status': False, 'message': ''}
+        url = 'http://13.59.67.162:8111/mailer-service/fetch-templates/'
+        headers = {
+            'Content-Type': 'application/json',
+        }
+
+        PARAMS = {
+        }
+
+        try:
+            res = requests.get(url=url)
+            data = res.json()
+            response['status'] = True
+            response['template'] = data
+            response['message'] = 'Mail wizard received successfully'
+        except Exception as e:
+            print('ex' + str(e))
+            response['status'] = False
+            response['message'] = 'Mail wizard received unsuccessful'
         return Response(response)
