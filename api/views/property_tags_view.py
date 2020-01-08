@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from notifications.signals import notify
 from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -105,6 +106,12 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                         'created_at': property.created_at,
                         'updated_at': property.updated_at
                     }
+                    try:
+                        user = User.objects.get(id=request.user.id)
+                        notify.send(user, recipient=user,
+                                    verb='tagged a property', action_object=property)
+                    except:
+                        print('Error in notification')
             except:
                 message = 'property does not exist'
                 status = False
