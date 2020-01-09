@@ -60,7 +60,8 @@ class UserSerializer(serializers.ModelSerializer):
                 'amount' : float(amount),
                 'power_trace' : float(power_trace),
                 'owner_info' : float(owner_info),
-                'mailer_wizard' : float(mailer_wizard)
+                'mailer_wizard' : float(mailer_wizard),
+                'plan' : PlanSerializer(plan).data
             },
             'created_at': instance.created_at,
             'updated_at' : instance.updated_at
