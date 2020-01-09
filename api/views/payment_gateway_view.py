@@ -11,6 +11,10 @@ from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import createTransactionController
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
+from houzes_api import settings
+
+AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME = getattr(settings, 'AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME', None)
+AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY = getattr(settings, "AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY", None)
 
 # CONSTANTS = imp.load_source('modulename', 'constants.py')
 from api.serializers import *
@@ -22,17 +26,14 @@ def charge_credit_card(request):
     Charge a credit card
     """
     try:
-        plan_id = request.data['plan']
         card_number = request.data['card_number']
         expiration_date = request.data['expiration_date']
         card_code = request.data['card_code']
     except :
-        plan_id = request.body['plan']
         card_number = request.body['card_number']
         expiration_date = request.body['expiration_date']
         card_code = request.body['card_code']
-    plan = Plans.objects.get(id = plan_id)
-    amount = plan.plan_coin
+    amount = 10.0
     manager = User.objects.get(id = request.user.id)
     if manager.is_admin == False :
         manager = User.objects.get(id = manager.invited_by)
@@ -40,8 +41,8 @@ def charge_credit_card(request):
     # Create a merchantAuthenticationType object with authentication details
     # retrieved from the constants file
     merchantAuth = apicontractsv1.merchantAuthenticationType()
-    merchantAuth.name = '5K7ntL4d'
-    merchantAuth.transactionKey = '57m6DyFB5s3Lsx8s'
+    merchantAuth.name = AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME
+    merchantAuth.transactionKey = AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY
 
     # Create the payment data for a credit card
     creditCard = apicontractsv1.creditCardType()
@@ -174,11 +175,11 @@ def charge_credit_card(request):
             upgradeProfile = UpgradeProfile()
             upgradeProfile.user = manager
             upgradeProfile.coin = 0
+            upgradeProfile.plan = Plans.objects.filter(plan_name='Free').first()
         manager.upgrade = True
         manager.save()
 
-        upgradeProfile.plan = plan
-        upgradeProfile.coin = upgradeProfile.coin + amount
+        upgradeProfile.coin = float(upgradeProfile.coin) + float(amount)
         upgradeProfile.save()
 
         json_response['status'] = True

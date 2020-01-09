@@ -20,22 +20,30 @@ class UserSerializer(serializers.ModelSerializer):
         upgrade = False
         power_trace = 0.0
         owner_info = 0.0
+        mailer_wizard = 0.0
+
         if instance.is_admin == True:
             upgrade = instance.upgrade
-            if UpgradeProfile.objects.filter(user__id = instance.id).first():
+            upgrade_profile = UpgradeProfile.objects.filter(user__id = instance.id).first()
+            if upgrade_profile:
                 amount = UpgradeProfile.objects.filter(user__id = instance.id).first().coin
         else:
+            upgrade_profile = UpgradeProfile.objects.filter(user__id = instance.invited_by).first()
             if User.objects.filter(id = instance.invited_by).first():
                 upgrade = User.objects.filter(id = instance.invited_by).first().upgrade
-            if UpgradeProfile.objects.filter(user__id = instance.invited_by).first():
-                amount = UpgradeProfile.objects.filter(user__id = instance.invited_by).first().coin
-
-        paymentPlanPowerTrace = PaymentPlan.objects.filter(payment_plan_name = 'power-trace').first()
+            if upgrade_profile:
+                amount = upgrade_profile.coin
+        plan = Plans.objects.filter(id=upgrade_profile.plan.id).first()
+        paymentPlanPowerTrace = PaymentPlan.objects.filter(payment_plan_name = 'power-trace', plan = plan).first()
         if paymentPlanPowerTrace :
             power_trace = paymentPlanPowerTrace.payment_plan_coin
-        paymentPlanOwnerInfo = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info').first()
+        paymentPlanOwnerInfo = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info', plan=plan).first()
         if paymentPlanOwnerInfo :
             owner_info = paymentPlanOwnerInfo.payment_plan_coin
+        paymentPlanMailerWizard = PaymentPlan.objects.filter(payment_plan_name = 'mailer-wizard', plan=plan).first()
+        if paymentPlanMailerWizard :
+            mailer_wizard = paymentPlanMailerWizard.payment_plan_coin
+
         representation = {
             'id' : instance.id,
             'last_login' : instance.last_login,
@@ -51,7 +59,8 @@ class UserSerializer(serializers.ModelSerializer):
                 'upgrade' : upgrade,
                 'amount' : float(amount),
                 'power_trace' : float(power_trace),
-                'owner_info' : float(owner_info)
+                'owner_info' : float(owner_info),
+                'mailer_wizard' : float(mailer_wizard)
             },
             'created_at': instance.created_at,
             'updated_at' : instance.updated_at

@@ -115,3 +115,21 @@ def scout_post_save(sender, instance, created, update_fields, **kwargs):
             activityLog.save()
     except :
         print('Error while scout post save')
+
+@receiver(post_save,sender = User)
+def user_post_save(sender, instance, created, update_fields, **kwargs):
+    try :
+        if created:
+            user = User.objects.get(id=instance.id)
+            if user.is_admin == True:
+                upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+                if not upgrade_profile :
+                    upgrade_profile = UpgradeProfile()
+                    upgrade_profile.user = user
+                    upgrade_profile.coin = 0.0
+                    upgrade_profile.plan = Plans.objects.filter(plan_name='Free').first()
+                    upgrade_profile.save()
+                    user.upgrade = True
+                    user.save()
+    except :
+        print('Error while user post save')
