@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
 from django.conf import settings
+from reportlab.platypus.doctemplate import onDrawStr
 
 
 class UserManager(BaseUserManager):
@@ -340,8 +341,8 @@ class GetNeighborhood(models.Model):
     power_trace = JSONField(default=dict)
     power_trace_request_id = models.IntegerField(null=True)
     owner_status = models.CharField(max_length=50, default=None, null=True)
-    power_trace_status = models.CharField(max_length=50, default=None, null= True)
-    status = models.CharField(max_length=50, default= None, null=True)
+    power_trace_status = models.CharField(max_length=50, default=None, null=True)
+    status = models.CharField(max_length=50, default=None, null=True)
     is_power_trace_requested = models.BooleanField(default=False)
     is_owner_info_requested = models.BooleanField(default=False)
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -357,7 +358,7 @@ class GetNeighborhood(models.Model):
 class Plans(models.Model):
     plan_name = models.CharField(max_length=500, null=True)
     plan_cost = models.DecimalField(max_digits=5, decimal_places=2, null=True)
-    plan_coin =models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    plan_coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    null=True, blank=True, on_delete=models.SET_NULL)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -396,6 +397,7 @@ class UpgradeProfile(models.Model):
     class Meta:
         db_table = 'upgrade_profiles'
 
+
 class PaymentTransaction(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE)
@@ -409,9 +411,8 @@ class PaymentTransaction(models.Model):
         db_table = 'payment_transactions'
 
 
-
 class UpgradeHistory(models.Model):
-    upgrade_profile = models.ForeignKey(UpgradeProfile,on_delete=models.CASCADE)
+    upgrade_profile = models.ForeignKey(UpgradeProfile, on_delete=models.CASCADE)
     plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
     transaction_coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     transaction_json = JSONField(null=True)
@@ -421,6 +422,27 @@ class UpgradeHistory(models.Model):
     class Meta:
         db_table = 'upgrade_histories'
 
+
+class MailWizardSubsType(models.Model):
+    type_name = models.CharField(max_length=500, null=True)
+    days_interval = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'mail_wizard_subs_types'
+
+
+class MailWizardInfo(models.Model):
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    subs_type = models.ForeignKey(MailWizardSubsType, on_delete=models.CASCADE, null=True, default=None)
+    item_id = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'mail_wizard_info'
 
 
 admin.site.register(User)

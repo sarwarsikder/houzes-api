@@ -397,3 +397,8 @@ class NotificationSerializer(serializers.ModelSerializer):
             "action_object_content_type": ContentType.objects.get(id=instance.action_object_content_type.id).model if instance.action_object_content_type else None
         }
         return representation
+
+class MailWizardInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MailWizardInfo
+        fields = '__all__'
