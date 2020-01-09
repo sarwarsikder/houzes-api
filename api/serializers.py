@@ -334,6 +334,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer) :
             'id': instance.id,
             'payment_plan_name': instance.payment_plan_name,
             'payment_plan_coin': float(instance.payment_plan_coin),
+            'plan' : PlanSerializer(Plans.objects.get(id = instance.plan.id)).data,
             'created_by': instance.created_by.id,
             'updated_by': instance.updated_by.id if instance.updated_by !=None else None,
             'created_at': instance.created_at,
