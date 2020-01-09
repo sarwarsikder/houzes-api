@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+
 default_headers = (
     'x-requested-with',
     'content-type',
@@ -32,7 +33,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECRET_KEY = '3i*wqdxveir3$u%ijfo7m@fb(9l@s)bq0&q4mt*n5@h3990^j3'
 SECRET_KEY = '6T9TUuaaxBOlrcQz0JN5bdZREly05MABvpuGBSNbZO8JOJ0f3MK7SwmyO0vpWumIlcRkSnXe9mfDqLl6tmjYP1xkvM7vIuy4GPSSGHoV6DU9xicEkuscFriS6SZGuXaB'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -73,7 +73,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
 ROOT_URLCONF = 'houzes_api.urls'
 CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = ('localhost:4200')
@@ -85,8 +84,6 @@ CORS_ORIGIN_REGEX_WHITELIST = (
 CORS_ALLOW_HEADERS = default_headers + (
     'cache-control',
 )
-
-
 
 TEMPLATES = [
     {
@@ -203,10 +200,8 @@ STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-   os.path.join(BASE_DIR, "admin_panel/static"),
+    os.path.join(BASE_DIR, "admin_panel/static"),
 ]
-
-
 
 # Facebook configuration
 # SOCIAL_AUTH_FACEBOOK_KEY = '931483470524585'
@@ -220,23 +215,20 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
     'fields': 'id, name, email'
 }
 
-
 # Google configuration
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '1SHT_DbIoJODMssT1rnbIBGn'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '468965753089-g34blpbr5huekl0r0sohp9ocj2pa9dsk.apps.googleusercontent.com'
 
 # Define SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE to get extra permissions from Google.
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
-'https://www.googleapis.com/auth/userinfo.email',
-'https://www.googleapis.com/auth/userinfo.profile',
-    ]
-
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+]
 
 AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"
 AWS_SECRET_KEY = "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"
 AWS_REGION = "us-east-2"
 S3_BUCKET_NAME = "houzes"
-
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -258,7 +250,7 @@ FETCH_OWNER_INFO_HOST = 'http://58.84.34.65:8080/'
 FETCH_OWNER_INFO_CLIENT_ID = 'ZDPLLBHQARK3QWSMVY0X2B15YQJSIYC5UJ2'
 FETCH_OWNER_INFO_CLIENT_SECRET = 'RBVUBV6VJVBKJBDDJ2E2JEBJEO84594T54GB'
 
-WEB_APP_URL='houzes.com'
+WEB_APP_URL = 'houzes.com'
 try:
     if APP_ENV is 'DEV':
         from .dev_settings import *

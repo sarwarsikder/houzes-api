@@ -32,6 +32,7 @@ from api.views.scout_view import ScoutViewSet
 from api.views.scout_user_list_view import ScoutUserListViewSet
 from api.views import ownership_info_view
 from api.views.mail_wizard_view import MailWizardInfoViewSet
+from api.views.billing_card_info_view import BillingCardInfoViewSet
 
 router = routers.DefaultRouter()
 router.register(r'user', UserViewSet)
@@ -50,7 +51,7 @@ router.register(r'team', InvitationsViewSet)
 router.register(r'scout', ScoutViewSet)
 router.register(r'scout-user-list', ScoutUserListViewSet)
 router.register(r'assign-member-to-list', AssignMemberToListViewSet)
-router.register(r'history',HistoryViewSet)
+router.register(r'history', HistoryViewSet)
 router.register(r'history-detail', HistoryDetailViewSet)
 router.register(r'forget-password', ForgetPasswordViewSet)
 router.register(r'activity-log', ActivityLogViewSet)
@@ -61,32 +62,41 @@ router.register(r'upgrade-profile', UpgradeProfileViewSet)
 router.register(r'payment-transaction', PaymentTransactionViewSet)
 router.register(r'upgrade-history', UpgradeHistoryViewSet)
 router.register(r'mail-wizard', MailWizardInfoViewSet)
+router.register(r'billing-card', BillingCardInfoViewSet)
+
 
 
 urlpatterns = [
     path('power-trace/create/', power_trace_view.create),
     path('power-trace/getAllRequestByUserId/<int:user_id>/', power_trace_view.get_all_request_by_user_id),
     path('power-trace/getResultById/<int:trace_id>/', power_trace_view.get_result_by_id),
-    path('photos/property/<int:id>/original/', photos_view.original_single_property_photo_by_propertyId,  name='original-photo-by-property'),
-    path('photos/property/<int:id>/thumb/', photos_view.thumb_single_property_photo_by_propertyId,  name='original-photo-by-property'),
-    path('scout-form/check-url/', scout_form_view.check_url ,name='check-url'),
+    path('photos/property/<int:id>/original/', photos_view.original_single_property_photo_by_propertyId,
+         name='original-photo-by-property'),
+    path('photos/property/<int:id>/thumb/', photos_view.thumb_single_property_photo_by_propertyId,
+         name='original-photo-by-property'),
+    path('scout-form/check-url/', scout_form_view.check_url, name='check-url'),
     path('scout-form/tags/', scout_form_view.get_tags, name='get-tags'),
     path('scout-form/create-property/', scout_form_view.create_property, name='create-property'),
-    path('scout-form/property/<int:id>/photo/multiple-upload/', scout_form_view.photo_multiple_upload, name='photo-multiple-upload'),
-    path('scout-form/property/<int:id>/note/multiple-upload/', scout_form_view.note_multiple_upload, name='note-multiple-upload'),
-    path('scout-form/properties/', scout_form_view.scout_properties,name='scout-properties'),
+    path('scout-form/property/<int:id>/photo/multiple-upload/', scout_form_view.photo_multiple_upload,
+         name='photo-multiple-upload'),
+    path('scout-form/property/<int:id>/note/multiple-upload/', scout_form_view.note_multiple_upload,
+         name='note-multiple-upload'),
+    path('scout-form/properties/', scout_form_view.scout_properties, name='scout-properties'),
     path('scout-form/property/<int:id>', scout_form_view.scout_property_details, name='scout-property-details'),
     path('scout-form/property/<int:id>/update/', scout_form_view.scout_property_update, name='scout-property-update'),
-    path('scout-form/property/<int:id>/assign-tag/', scout_form_view.assign_tag_to_property, name='scout-property-assign-tag'),
+    path('scout-form/property/<int:id>/assign-tag/', scout_form_view.assign_tag_to_property,
+         name='scout-property-assign-tag'),
     path('scout-form/photo/<int:id>/delete/', scout_form_view.delete_property_photo, name='delete-property-photo'),
     path('scout-form/property/<int:id>/photo/upload/', scout_form_view.note_upload, name='property-note-upload'),
     path('scout-form/note/<int:id>/update/', scout_form_view.update_note, name='update-note'),
     path('scout-form/note/<int:id>/delete/', scout_form_view.delete_property_note, name='delete-note'),
 
-    path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,name='get-ownership-info-by-address'),
+    path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,
+         name='get-ownership-info-by-address'),
     path('payment-gateway/charge-card/', payment_gateway_view.charge_credit_card, name='charge-credit-card'),
-    path('provide-ownership-info/<int:id>/', microservice_endpoint_view.provide_ownership_info, name='ownership-endpoint'),
-    path('provide-power-trace/<int:id>/', microservice_endpoint_view.provide_power_trace,name='powertrace-endpoint'),
+    path('provide-ownership-info/<int:id>/', microservice_endpoint_view.provide_ownership_info,
+         name='ownership-endpoint'),
+    path('provide-power-trace/<int:id>/', microservice_endpoint_view.provide_power_trace, name='powertrace-endpoint'),
 ]
 
 urlpatterns += router.urls
