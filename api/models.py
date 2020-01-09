@@ -374,6 +374,7 @@ class Plans(models.Model):
 class PaymentPlan(models.Model):
     payment_plan_name = models.CharField(max_length=500, null=True)
     payment_plan_coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    null=True, blank=True, on_delete=models.SET_NULL)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL,

@@ -244,6 +244,13 @@ class UserViewSet(viewsets.ModelViewSet):
             user.is_active = True
             user.is_admin = True
             user.save()
+            try:
+                plan = Plans.objects.filter(plan_name='Free').first()
+                if plan:
+                    upgradeProfile = UpgradeProfile(user = user, coin=0.0, plan=plan)
+                    upgradeProfile.save()
+            except:
+                print('Error upgrading profile')
             status = True
             message = 'User is verified'
         else:

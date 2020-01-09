@@ -123,7 +123,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             res = requests.get(url=url)
             data = res.json()
             response['status'] = True
-            response['template'] = data
+            response['data'] = data
             response['message'] = 'Mail wizard received successfully'
         except Exception as e:
             print('ex' + str(e))

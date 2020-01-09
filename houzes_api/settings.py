@@ -156,7 +156,7 @@ WSGI_APPLICATION = 'houzes_api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'houzes_live',
+        'NAME': 'houzes_staging',
         'USER': 'postgres',
         'PASSWORD': 'wsit97480',
         'HOST': 'houzes-db.cacdyf2lutyz.us-east-1.rds.amazonaws.com',
