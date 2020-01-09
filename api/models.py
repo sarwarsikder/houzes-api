@@ -446,6 +446,20 @@ class MailWizardInfo(models.Model):
         db_table = 'mail_wizard_info'
 
 
+class BillingCardInfo(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    card_name = models.CharField(max_length=50, null=True)
+    card_number = models.CharField(max_length=50, null=True)
+    card_code = models.CharField(max_length=5, null=True)
+    exp_date = models.CharField(max_length=7, null=True)
+    is_save = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'billing_card_info'
+
+
 admin.site.register(User)
 admin.site.register(UserSockets)
 admin.site.register(UserLocation)

@@ -411,3 +411,8 @@ class MailWizardInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = MailWizardInfo
         fields = '__all__'
+
+class BillingCardInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BillingCardInfo
+        fields = '__all__'
