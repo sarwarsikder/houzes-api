@@ -34,6 +34,10 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         text_body = request.data['mail_text']
         item_id = request.data['tem_item_id']
         subs_id = request.data['subs_id']
+
+        prop_address1 = [property.street, property.city, property.state, property.zip]
+        separator = ', '
+
         url = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
         headers = {
             'Content-Type': 'application/json',
@@ -67,7 +71,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     "mailing_city": mailing_city.strip(),
                     "mailing_state": mailing_state.strip(),
                     "mailing_zip": mailing_zip.strip(),
-                    "prop_address1": property.street + ', ' + property.city + ', ' + property.state + ', ' + property.zip,
+                    "prop_address1": separator.join(prop_address1),
                     "prop_city": property.city,
                     "prop_state": property.state,
                     "prop_zip": property.zip
