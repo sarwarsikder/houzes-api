@@ -111,7 +111,10 @@ class UserViewSet(viewsets.ModelViewSet):
             if 'invited_by' in request.data:
                 invited_by = request.data['invited_by']
             if 'is_admin' in request.data:
-                is_admin = request.data['is_admin']
+                if isinstance(request.data['is_admin'], str):
+                    is_admin = True
+                else:
+                    is_admin = request.data['is_admin']
             print(email)
             print(password)
             print(first_name)
