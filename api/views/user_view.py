@@ -164,6 +164,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
             if invited_by == None :
                 # Email verification task starts here
+                user.is_admin = True
+                user.save()
                 code = generate_shortuuid()
                 userVerifications = UserVerifications(code=code, user=user, is_used=False, verification_type='email')
                 userVerifications.save()
