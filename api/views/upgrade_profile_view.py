@@ -26,11 +26,16 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             plan_id = request.data['plan']
             card_number = request.data['card_number']
             expiration_date = request.data['expiration_date']
+            card_code = request.data['card_code']
+            is_save = request.data['is_save']
 
         except:
             plan_id = request.body['plan']
             card_number = request.body['card_number']
             expiration_date = request.body['expiration_date']
+            card_code = request.body['card_code']
+            is_save = request.body['is_save']
+
         try:
             plan = Plans.objects.get(id = plan_id)
         except :
@@ -66,6 +71,15 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             upgrade_history.plan = plan
             upgrade_history.transaction_coin = plan.plan_coin
             upgrade_history.save()
+
+            billing_card_info = BillingCardInfo()
+            billing_card_info.user = user
+            billing_card_info.card_name = None
+            billing_card_info.card_number = card_number
+            billing_card_info.card_code = card_code
+            billing_card_info.exp_date = expiration_date
+            billing_card_info.is_save = is_save
+            billing_card_info.save()
 
             response_data['status'] = True
             response_data['data'] = upgrade_profile_serializer.data

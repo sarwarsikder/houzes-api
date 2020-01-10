@@ -25,15 +25,25 @@ def charge_credit_card(request):
     """
     Charge a credit card
     """
+    card_number = ""
+    expiration_date = ""
+    card_code = ""
+    is_save = False
+    amount = 0
     try:
         card_number = request.data['card_number']
         expiration_date = request.data['expiration_date']
         card_code = request.data['card_code']
+        is_save = request.data['is_save']
+        amount = request.data['amount']
     except :
-        card_number = request.body['card_number']
-        expiration_date = request.body['expiration_date']
-        card_code = request.body['card_code']
-    amount = 10.0
+        # card_number = request.body['card_number']
+        # expiration_date = request.body['expiration_date']
+        # card_code = request.body['card_code']
+        # is_save = request.body['is_save']
+        # amount = request.body['amount']
+        print('xx')
+
     manager = User.objects.get(id = request.user.id)
     if manager.is_admin == False :
         manager = User.objects.get(id = manager.invited_by)
@@ -181,6 +191,15 @@ def charge_credit_card(request):
 
         upgradeProfile.coin = float(upgradeProfile.coin) + float(amount)
         upgradeProfile.save()
+
+        billing_card_info = BillingCardInfo()
+        billing_card_info.user = User.objects.get(id=request.user.id)
+        billing_card_info.card_name = None
+        billing_card_info.card_number = card_number
+        billing_card_info.card_code = card_code
+        billing_card_info.exp_date = expiration_date
+        billing_card_info.is_save = is_save
+        billing_card_info.save()
 
         json_response['status'] = True
         json_response['data'] = UserSerializer(manager).data['upgrade_info']

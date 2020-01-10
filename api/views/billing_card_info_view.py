@@ -44,7 +44,7 @@ class BillingCardInfoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='all')
     def get_(self, request, *args, **kwargs):
-        response = {'status': False, 'message': ''}
+        response = {'status': False, 'data' : [], 'message': ''}
 
         try:
             billingCard = BillingCardInfo.objects.all().filter(user_id=request.user.id)
@@ -65,3 +65,8 @@ class BillingCardInfoViewSet(viewsets.ModelViewSet):
             response['status'] = False
             response['message'] = 'Billing Card Info received unsuccessful'
         return Response(response)
+
+    def list(self, request, *args, **kwargs):
+        billing_card_info = BillingCardInfo.objects.filter(user__id = request.user.id)
+        billing_card_info_serializer = BillingCardInfoSerializer(billing_card_info, many=True)
+        return Response(billing_card_info_serializer.data)
