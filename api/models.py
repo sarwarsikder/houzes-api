@@ -335,6 +335,10 @@ class ActivityLog(models.Model):
 
 class GetNeighborhood(models.Model):
     neighbor_address = models.CharField(max_length=50, null=True)
+    street = models.CharField(max_length=255, null=True, default=None)
+    city = models.CharField(max_length=255, null=True, default= None)
+    state = models.CharField(max_length=255, null=True, default=None)
+    zip = models.CharField(max_length=255, null=True, default=None)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     ownership_info_request_id = models.IntegerField(null=True)
     ownership_info = JSONField(default=dict)
