@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         # identifiers['color_name'] = instance.color
         # identifiers['color_code'] = instance.color_code'
         amount = 0.0
-        upgrade = False
+        is_team_invitable = False
         power_trace = 0.0
         owner_info = 0.0
         mailer_wizard = 0.0
@@ -34,6 +34,9 @@ class UserSerializer(serializers.ModelSerializer):
             if upgrade_profile:
                 amount = upgrade_profile.coin
         plan = Plans.objects.filter(id=upgrade_profile.plan.id).first()
+        if plan.plan_name == 'Team':
+            is_team_invitable = True
+
         paymentPlanPowerTrace = PaymentPlan.objects.filter(payment_plan_name = 'power-trace', plan = plan).first()
         if paymentPlanPowerTrace :
             power_trace = paymentPlanPowerTrace.payment_plan_coin
@@ -56,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active' : instance.is_active,
             'is_admin' : instance.is_admin,
             'upgrade_info' : {
-                'upgrade' : upgrade,
+                'is_team_invitable' : is_team_invitable,
                 'amount' : float(amount),
                 'power_trace' : float(power_trace),
                 'owner_info' : float(owner_info),
