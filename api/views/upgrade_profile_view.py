@@ -58,7 +58,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             return Response(response_data)
 
         if upgrade_profile :
-            upgrade_profile.coin = upgrade_profile.coin+plan.plan_coin
+            upgrade_profile.coin = float(upgrade_profile.coin)+0
             upgrade_profile.plan = plan
             upgrade_profile.save()
             upgrade_profile_serializer = UpgradeProfileSerializer(upgrade_profile)
@@ -87,7 +87,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         else:
             upgrade_profile = UpgradeProfile()
             upgrade_profile.user = user
-            upgrade_profile.coin = plan.plan_coin
+            upgrade_profile.coin = 0.0
             upgrade_profile.plan = plan
             upgrade_profile.save()
             upgrade_profile_serializer = UpgradeProfileSerializer(upgrade_profile)
