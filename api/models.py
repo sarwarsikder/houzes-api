@@ -336,7 +336,7 @@ class ActivityLog(models.Model):
 class GetNeighborhood(models.Model):
     neighbor_address = models.CharField(max_length=50, null=True)
     street = models.CharField(max_length=255, null=True, default=None)
-    city = models.CharField(max_length=255, null=True, default= None)
+    city = models.CharField(max_length=255, null=True, default=None)
     state = models.CharField(max_length=255, null=True, default=None)
     zip = models.CharField(max_length=255, null=True, default=None)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
@@ -440,6 +440,7 @@ class MailWizardSubsType(models.Model):
 
 class MailWizardInfo(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
+    neighbor = models.ForeignKey(GetNeighborhood, on_delete=models.CASCADE, null=True)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     subs_type = models.ForeignKey(MailWizardSubsType, on_delete=models.CASCADE, null=True, default=None)
     item_id = models.IntegerField(default=0)

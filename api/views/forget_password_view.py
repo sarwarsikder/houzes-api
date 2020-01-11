@@ -48,7 +48,7 @@ class ForgetPasswordViewSet(viewsets.ModelViewSet):
             except:
                 status = False
                 data = {}
-                message = 'Error'
+                message = 'Server Error'
 
         else:
             status = False

@@ -905,6 +905,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
                         get_neighborhood = GetNeighborhood()
                         get_neighborhood.property = property
                         get_neighborhood.neighbor_address = data['address']
+                        get_neighborhood.street = data['street']
+                        get_neighborhood.city = data['city']
+                        get_neighborhood.state = data['state']
+                        get_neighborhood.zip = data['zip']
                         get_neighborhood.requested_by = User.objects.get(id = request.user.id)
                         if power_trace == 1:
                             get_neighborhood.is_owner_info_requested = True
