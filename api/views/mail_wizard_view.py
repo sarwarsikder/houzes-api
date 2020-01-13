@@ -97,7 +97,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             if r.status_code == 200:
                 mailWizardSubsType = MailWizardSubsType.objects.filter(id=subs_id).first()
 
-                mailWizardInfo = MailWizardInfo(property=property, neighborhood=None, sender=user,
+                mailWizardInfo = MailWizardInfo(property=property, neighbor=None, sender=user,
                                                 subs_type=mailWizardSubsType,
                                                 item_id=item_id)
                 mailWizardInfo.save()
