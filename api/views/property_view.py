@@ -1100,6 +1100,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     print(tag_list[i])
                     del tag_list[i]
                     break
+                if tag_list[i]['id'] == int(kwargs['id']):
+                    del tag_list[i]
+                    break
             property.property_tags = tag_list
             property.save()
             return Response({'status' : True, 'data': PropertySerializer(property).data, 'message' : 'Successfully deleted tag'})
