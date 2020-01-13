@@ -83,7 +83,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
 
             response_data['status'] = True
             response_data['data'] = upgrade_profile_serializer.data
-            response_data['message'] = 'Profile is upgraded'
+            response_data['message'] = '“Congratulations” Profile is upgraded. Start driving & adding HouZes'
         else:
             upgrade_profile = UpgradeProfile()
             upgrade_profile.user = user
@@ -103,7 +103,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
 
             response_data['status'] = True
             response_data['data'] = upgrade_profile_serializer.data
-            response_data['message'] = 'Profile is upgraded'
+            response_data['message'] = '“Congratulations” Profile is upgraded. Start driving & adding HouZes'
 
         return Response(response_data)
 
