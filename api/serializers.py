@@ -322,6 +322,8 @@ class PlanSerializer(serializers.ModelSerializer) :
             'plan_coin': float(instance.plan_coin),
             'created_by': instance.created_by.id,
             'updated_by': instance.updated_by.id if instance.updated_by !=None else None,
+            'description' : instance.description,
+            'image' : instance.image,
             'created_at': instance.created_at,
             'updated_at': instance.updated_at
         }

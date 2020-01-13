@@ -368,6 +368,8 @@ class Plans(models.Model):
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    null=True, blank=True, on_delete=models.SET_NULL,
                                    related_name='%(class)s_requests_created')
+    description = models.CharField(max_length=500, null=True, default=None)
+    image = models.CharField(max_length=500, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
