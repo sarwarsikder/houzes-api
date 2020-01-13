@@ -1090,6 +1090,22 @@ class PropertyViewSet(viewsets.ModelViewSet):
             traceback.print_exc()
             return {'status': False, 'message': 'Failed to create request! Server Error!'}
 
+    @action(detail=False, methods=['DELETE'], url_path='(?P<pk>[\w-]+)/tag/(?P<id>[\w-]+)')
+    def delete_property_tag(self, request, *args, **kwargs):
+        try:
+            property = Property.objects.get(id=kwargs['pk'])
+            tag_list = property.property_tags
+            for i in range(len(tag_list)):
+                if tag_list[i]['id'] == kwargs['id']:
+                    print(tag_list[i])
+                    del tag_list[i]
+                    break
+            property.property_tags = tag_list
+            property.save()
+            return Response({'status' : True, 'data': PropertySerializer(property).data, 'message' : 'Successfully deleted tag'})
+        except:
+            return Response({'status' : False, 'data': {}, 'message' : 'Error deleting tag'})
+
 def update_property_power_trace_info(info_list):
     for info in info_list:
         try:
