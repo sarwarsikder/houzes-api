@@ -13,7 +13,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path='property/(?P<id>[\w-]+)')
     def send_mail_to_property_owner(self, request, *args, **kwargs):
         status = False
-        response = {'status': False, 'message': ''}
+        response = {'status': False, 'data': {}, 'message': ''}
         property = Property.objects.get(id=kwargs['id'])
         user = User.objects.get(id=request.user.id)
 
@@ -89,6 +89,10 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                                                                              plan=upgrade_profile.plan).first().payment_plan_coin)
             if upgrade_profile.coin < required_coin:
                 response['status'] = False
+                response['data'] = {
+                    'payment' : False,
+                    'upgrade_info' : UserSerializer(manager).data['upgrade_info']
+                }
                 response['message'] = 'Mail wizard sending unsuccessful due to insufficient balance'
                 return Response(response)
             upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
@@ -112,13 +116,26 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 #     mailWizardInfo.save()
 
                 response['status'] = True
+                response['data'] = {
+                    'payment' : True,
+                    'upgrade_info': UserSerializer(manager).data['upgrade_info']
+                }
                 response['message'] = 'Mail wizard sent successfully'
             else:
                 response['status'] = False
+                response['data'] = {
+                    'payment' : False,
+                    'upgrade_info': UserSerializer(manager).data['upgrade_info']
+
+                }
                 response['message'] = 'Mail wizard sending unsuccessful'
         except Exception as e:
             print('ex' + str(e))
             response['status'] = False
+            response['data'] = {
+                'payment': True,
+                'upgrade_info': UserSerializer(manager).data['upgrade_info']
+            }
             response['message'] = 'Mail wizard sending unsuccessful'
         return Response(response)
 
@@ -147,14 +164,13 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='neighbor/(?P<id>[\w-]+)')
     def send_mail_to_neighbor_owner(self, request, *args, **kwargs):
-        response = {'status': False, 'message': ''}
+        response = {'status': False, 'data' : {},'message': ''}
         get_neighborhood = GetNeighborhood.objects.get(id=kwargs['id'])
         user = User.objects.get(id=request.user.id)
 
         if get_neighborhood.ownership_info == {}:
             response['status'] = False
-            response[
-                'message'] = 'Owner info is empty for this neighbor. Please apply Fetch Ownership to get Owner info.'
+            response['message'] = 'Owner info is empty for this neighbor. Please apply Fetch Ownership to get Owner info.'
             return Response(response)
 
         full_name = get_neighborhood.ownership_info['owner_info']['full_name']
@@ -221,6 +237,10 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                                                                              plan=upgrade_profile.plan).first().payment_plan_coin)
             if upgrade_profile.coin < required_coin:
                 response['status'] = False
+                response['data'] = {
+                    'payment': False,
+                    'upgrade_info': UserSerializer(manager).data['upgrade_info']
+                }
                 response['message'] = 'Mail wizard sending unsuccessful due to insufficient balance'
                 return Response(response)
             upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
@@ -235,12 +255,24 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 mailWizardInfo.save()
 
                 response['status'] = True
+                response['data'] = {
+                    'payment': True,
+                    'upgrade_info': UserSerializer(manager).data['upgrade_info']
+                }
                 response['message'] = 'Mail wizard sent successfully'
             else:
                 response['status'] = False
+                response['data'] = {
+                    'payment': False,
+                    'upgrade_info': UserSerializer(manager).data['upgrade_info']
+                }
                 response['message'] = 'Mail wizard sending unsuccessful'
         except Exception as e:
             print('ex' + str(e))
             response['status'] = False
+            response['data'] = {
+                'payment': True,
+                'upgrade_info': UserSerializer(manager).data['upgrade_info']
+            }
             response['message'] = 'Mail wizard sending unsuccessful'
         return Response(response)
