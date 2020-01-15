@@ -296,6 +296,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
         property = Property.objects.filter(user_list=list).annotate(photo_count=Count('propertyphotos'),
                                                                     note_count=Count('propertynotes')).order_by('-id')
 
+        search = request.GET.get('search')
+        print(search)
+        if search:
+            property = property.filter(Q(street__icontains=search) | Q(city__icontains=search) | Q(state__icontains=search) | Q(zip__icontains=search))
+
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size
