@@ -483,6 +483,7 @@ def delete_property(request,id):
     except:
         return JsonResponse({'status': False, 'data': data, 'message': "Invalid property"})
     try:
+        property.delete()
         status = True
         data = {}
         message = 'Deleted property successfully'
