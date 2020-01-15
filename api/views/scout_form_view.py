@@ -467,3 +467,28 @@ def delete_property_note(request,id):
     return JsonResponse({'status': status, 'message': message})
 
 
+@csrf_exempt
+def delete_property(request,id):
+    status = False
+    data = {}
+    message = ""
+    url = request.GET.get('url')
+    try:
+        scout = Scout.objects.filter(url=url)[0]
+        scoutUserList = ScoutUserList.objects.filter(scout=scout)[0]
+        userList = UserList.objects.get(id = scoutUserList.user_list.id)
+        property = Property.objects.get(id = id)
+        if property.user_list != userList:
+            return JsonResponse({'status': False, 'data': data, 'message': "Invalid property"})
+    except:
+        return JsonResponse({'status': False, 'data': data, 'message': "Invalid property"})
+    try:
+        status = True
+        data = {}
+        message = 'Deleted property successfully'
+    except:
+        status = False
+        data = {}
+        message = 'Property delete unsuccessful'
+
+    return JsonResponse({'status': status, 'data': data, 'message': message})

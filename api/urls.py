@@ -91,6 +91,7 @@ urlpatterns = [
     path('scout-form/property/<int:id>/photo/upload/', scout_form_view.note_upload, name='property-note-upload'),
     path('scout-form/note/<int:id>/update/', scout_form_view.update_note, name='update-note'),
     path('scout-form/note/<int:id>/delete/', scout_form_view.delete_property_note, name='delete-note'),
+    path('scout-form/property/<int:id>/delete/', scout_form_view.delete_property, name='delete-property'),
 
     path('ownership-info/get-owner-info-by-address/', ownership_info_view.get_owner_info_by_address,
          name='get-ownership-info-by-address'),
