@@ -230,13 +230,32 @@ class PropertyViewSet(viewsets.ModelViewSet):
         for entry in requestData['property_data']:
             print(entry)
             property_info = Property()
-            owner_name = entry['owner_firstname'] + " " + entry['owner_lastname']
-            owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + entry['owner_zip']
+            try:
+                owner_name = entry['owner_firstname'] + " " + entry['owner_lastname']
+                owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + entry['owner_zip']
+            except:
+                owner_name = ""
+                owner_address = ""
+            # property_info.owner_info = json.loads(
+            #     '[{"ownerName" : "' + owner_name + '","ownerAddress" : "' + owner_address
+            #     + '","ownerLandLine" : "' + entry['land_line']
+            #     + '","ownerMobilePhone" : "' + entry['mobile_phone']
+            #     + '","ownerEmail" : "' + entry['email_address'] + '"}]'
+            # )
+
+
             property_info.owner_info = json.loads(
-                '[{"ownerName" : "' + owner_name + '","ownerAddress" : "' + owner_address
-                + '","ownerLandLine" : "' + entry['land_line']
-                + '","ownerMobilePhone" : "' + entry['mobile_phone']
-                + '","ownerEmail" : "' + entry['email_address'] + '"}]'
+                '[{"company_name" : "' + '",'
+                + '"estate" : "'
+                + '","formatted_address" : {'
+                    + '"city" : '+ '""'
+                    +',"state" :'+'""'
+                    +',"street" : {}'
+                    +',"zip_code" :'+'""'+'}'
+                +',"formatted_name" : {}'+
+                ',"full_address" : "'+owner_address+
+                '","full_name" : "'+owner_name+
+                '","other_info" : "'+''+'"}]'
             )
             property_info.street = entry['property_street']
             property_info.zip = entry['property_zip']
