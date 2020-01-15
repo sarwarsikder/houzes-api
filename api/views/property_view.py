@@ -1,4 +1,5 @@
 import json
+import threading
 import traceback
 import datetime
 
@@ -226,23 +227,39 @@ class PropertyViewSet(viewsets.ModelViewSet):
             requestData = request.body
         print(requestData)
         objs = []
-        iterator = 0
-        while iterator < len(requestData['cities']):
-            property = Property()
-            property.owner_info = json.loads(
-                '[{"ownerName" : "' + requestData['ownerName'][iterator] + '","ownerAddress" : "' +
-                requestData['ownerAddress'][iterator] + '"}]')
-            property.street = requestData['streets'][iterator]
-            property.zip = requestData['zips'][iterator]
-            property.city = requestData['cities'][iterator]
-            property.state = requestData['states'][iterator]
-            property.user_list_id = requestData['user_list']
+        for entry in requestData['property_data']:
+            print(entry)
+            property_info = Property()
+            owner_name = entry['owner_firstname'] + " " + entry['owner_lastname']
+            owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + entry['owner_zip']
+            property_info.owner_info = json.loads(
+                '[{"ownerName" : "' + owner_name + '","ownerAddress" : "' + owner_address
+                + '","ownerLandLine" : "' + entry['land_line']
+                + '","ownerMobilePhone" : "' + entry['mobile_phone']
+                + '","ownerEmail" : "' + entry['email_address'] + '"}]'
+            )
+            property_info.street = entry['property_street']
+            property_info.zip = entry['property_zip']
+            property_info.city = entry['property_city']
+            property_info.state = entry['property_state']
+            property_info.user_list_id = requestData['user_list']
 
-            objs.append(property)
 
-            iterator += 1
+            # iterator = 0
+            # while iterator < len(requestData['cities']):
+            # property.owner_info = json.loads(
+            #     '[{"ownerName" : "' + requestData['ownerName'][iterator] + '","ownerAddress" : "' +
+            #     requestData['ownerAddress'][iterator] + '"}]')
+            # property.street = requestData['streets'][iterator]
+            # property.zip = requestData['zips'][iterator]
+            # property.city = requestData['cities'][iterator]
+            # property.state = requestData['states'][iterator]
+            # property.user_list_id = requestData['user_list']
+            # iterator+=1
+            objs.append(property_info)
 
-        Property.objects.bulk_create(objs, batch_size=50)
+        print(objs)
+        Property.objects.bulk_create(objs, batch_size=10000)
         return JsonResponse({'status': True, 'message': 'Properties created'})
 
     # @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
@@ -1108,6 +1125,44 @@ class PropertyViewSet(viewsets.ModelViewSet):
             return Response({'status' : True, 'data': PropertySerializer(property).data, 'message' : 'Successfully deleted tag'})
         except:
             return Response({'status' : False, 'data': {}, 'message' : 'Error deleting tag'})
+
+    @action(detail=False, methods=['GET'], url_path='fetch-missing-lat-lng/(?P<pk>[\w-]+)')
+    def fetch_lat_lng(self, request, *args, **kwargs):
+        try:
+            list_id = kwargs['pk']
+            # update_property_lat_lng(list_id)
+            threading.Thread(target=PropertyViewSet.update_property_lat_lng, args=(list_id,)).start()
+            return Response({'code': 200, 'message': 'Updating Lat/Lng...'})
+        except:
+            traceback.print_exc()
+            return Response({'code': 500, 'message': 'Server Error!'})
+
+    def get_property_info_by_address(address):
+        url = 'https://www.mapdevelopers.com/data.php?operation=geocode'
+        data = {'address': address,
+                'region': 'USA'}
+        res = requests.post(url, data=data)
+        return res.json()
+
+    def update_property_lat_lng(list_id):
+        print("Started...list_id: " + str(list_id))
+        property_list = list(Property.objects.filter(latitude__isnull=True, user_list_id=list_id))
+        for property_info in property_list:
+            try:
+                address = property_info.street + ' ' + property_info.city + ' ' + property_info.state + ' ' + property_info.zip
+                print(address)
+                fetched_data = PropertyViewSet.get_property_info_by_address(address)
+                if 'response' in fetched_data and fetched_data['response']:
+                    lat = float(fetched_data['data']['lat'])
+                    lng = float(fetched_data['data']['lng'])
+                    print(lat, lng)
+                    property_info.latitude = lat
+                    property_info.longitude = lng
+                    Property.objects.filter(id=property_info.id).update(latitude=lat, longitude=lng)
+            except:
+                traceback.print_exc()
+                return Response({'code': 500, 'message': 'Server Error!'})
+        print("Completed...list_id: " + str(list_id))
 
 def update_property_power_trace_info(info_list):
     for info in info_list:
