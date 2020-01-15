@@ -227,23 +227,39 @@ class PropertyViewSet(viewsets.ModelViewSet):
             requestData = request.body
         print(requestData)
         objs = []
-        iterator = 0
-        while iterator < len(requestData['cities']):
-            property = Property()
-            property.owner_info = json.loads(
-                '[{"ownerName" : "' + requestData['ownerName'][iterator] + '","ownerAddress" : "' +
-                requestData['ownerAddress'][iterator] + '"}]')
-            property.street = requestData['streets'][iterator]
-            property.zip = requestData['zips'][iterator]
-            property.city = requestData['cities'][iterator]
-            property.state = requestData['states'][iterator]
-            property.user_list_id = requestData['user_list']
+        for entry in requestData['property_data']:
+            print(entry)
+            property_info = Property()
+            owner_name = entry['owner_firstname'] + " " + entry['owner_lastname']
+            owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + entry['owner_zip']
+            property_info.owner_info = json.loads(
+                '[{"ownerName" : "' + owner_name + '","ownerAddress" : "' + owner_address
+                + '","ownerLandLine" : "' + entry['land_line']
+                + '","ownerMobilePhone" : "' + entry['mobile_phone']
+                + '","ownerEmail" : "' + entry['email_address'] + '"}]'
+            )
+            property_info.street = entry['property_street']
+            property_info.zip = entry['property_zip']
+            property_info.city = entry['property_city']
+            property_info.state = entry['property_state']
+            property_info.user_list_id = requestData['user_list']
 
-            objs.append(property)
 
-            iterator += 1
+            # iterator = 0
+            # while iterator < len(requestData['cities']):
+            # property.owner_info = json.loads(
+            #     '[{"ownerName" : "' + requestData['ownerName'][iterator] + '","ownerAddress" : "' +
+            #     requestData['ownerAddress'][iterator] + '"}]')
+            # property.street = requestData['streets'][iterator]
+            # property.zip = requestData['zips'][iterator]
+            # property.city = requestData['cities'][iterator]
+            # property.state = requestData['states'][iterator]
+            # property.user_list_id = requestData['user_list']
+            # iterator+=1
+            objs.append(property_info)
 
-        Property.objects.bulk_create(objs, batch_size=50)
+        print(objs)
+        Property.objects.bulk_create(objs, batch_size=10000)
         return JsonResponse({'status': True, 'message': 'Properties created'})
 
     # @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
