@@ -30,12 +30,14 @@ def charge_credit_card(request):
     card_code = ""
     is_save = False
     amount = 0
+    card_name = None
     try:
         card_number = request.data['card_number']
         expiration_date = request.data['expiration_date']
         card_code = request.data['card_code']
         is_save = request.data['is_save']
         amount = request.data['amount']
+        card_name = request.data['card_name']
     except :
         # card_number = request.body['card_number']
         # expiration_date = request.body['expiration_date']
@@ -198,6 +200,7 @@ def charge_credit_card(request):
         billing_card_info.card_number = card_number
         billing_card_info.card_code = card_code
         billing_card_info.exp_date = expiration_date
+        billing_card_info.card_name = card_name
         billing_card_info.is_save = is_save
         billing_card_info.save()
 
