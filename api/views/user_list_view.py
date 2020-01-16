@@ -156,7 +156,7 @@ class UserListViewSet(viewsets.ModelViewSet):
         return Response(user_list_serializer.data)
 
 
-    @action(detail=False, methods=['POST'], url_path='(?P<pk>[\w-]+)/assign-tag/(?P<id>[\w-]+)')
+    @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/assign-tag/(?P<id>[\w-]+)')
     def assign_tag_to_list(self, request, *args, **kwargs):
         response = {'status': False, 'data': {}, 'message': ''}
         user_list = UserList.objects.get(id=kwargs['pk'])
