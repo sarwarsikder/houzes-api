@@ -1,7 +1,9 @@
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets,filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+import threading
 
 from api.serializers import *
 from api.models import *
@@ -152,3 +154,41 @@ class UserListViewSet(viewsets.ModelViewSet):
         user_lists = UserList.objects.filter(user_id__in=members)
         user_list_serializer = UserListSerializer(user_lists,many = True)
         return Response(user_list_serializer.data)
+
+
+    @action(detail=False, methods=['POST'], url_path='(?P<pk>[\w-]+)/assign-tag/(?P<id>[\w-]+)')
+    def assign_tag_to_list(self, request, *args, **kwargs):
+        response = {'status': False, 'data': {}, 'message': ''}
+        user_list = UserList.objects.get(id=kwargs['pk'])
+        user_list_serializer = UserListSerializer(user_list)
+        user = User.objects.get(id = request.user.id)
+        tag_id = kwargs['id']
+        if user.is_admin == False:
+            user = User.objects.get(id=user.invited_by)
+        try:
+            property_tag = PropertyTags.objects.get(id=tag_id)
+            if property_tag.user != user :
+                response['message'] = 'Tag does not exist'
+                return Response(response)
+        except:
+            response['message'] = 'Tag does not exist'
+            return Response(response)
+        properties = Property.objects.filter(user_list = user_list)
+        properties = properties.filter(~Q(property_tags__contains=[{'id': str(tag_id)}]) | ~Q(property_tags__contains=[{'id': tag_id}]))
+        threading.Thread(target=UserListViewSet.tag_update_inside_property, args=(properties,tag_id,)).start()
+        response['status'] = True
+        response['message'] = 'properties of the list tagging started'
+        return Response(response)
+
+    def tag_update_inside_property(properties,tag_id):
+        for property in properties:
+            try:
+                tags = []
+                tags = property.property_tags
+                tags.append({'id' : tag_id})
+                property.property_tags = tags
+                property.save()
+            except:
+                print('Exception occoured')
+
+        print('Tag updated')

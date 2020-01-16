@@ -279,6 +279,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         print(objs)
         Property.objects.bulk_create(objs, batch_size=10000)
+        threading.Thread(target=PropertyViewSet.update_property_lat_lng, args=(requestData['user_list'],)).start()
         return JsonResponse({'status': True, 'message': 'Properties created'})
 
     # @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
@@ -1150,16 +1151,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
         except:
             return Response({'status' : False, 'data': {}, 'message' : 'Error deleting tag'})
 
-    @action(detail=False, methods=['GET'], url_path='fetch-missing-lat-lng/(?P<pk>[\w-]+)')
-    def fetch_lat_lng(self, request, *args, **kwargs):
-        try:
-            list_id = kwargs['pk']
-            # update_property_lat_lng(list_id)
-            threading.Thread(target=PropertyViewSet.update_property_lat_lng, args=(list_id,)).start()
-            return Response({'code': 200, 'message': 'Updating Lat/Lng...'})
-        except:
-            traceback.print_exc()
-            return Response({'code': 500, 'message': 'Server Error!'})
+    # @action(detail=False, methods=['GET'], url_path='fetch-missing-lat-lng/(?P<pk>[\w-]+)')
+    # def fetch_lat_lng(self, request, *args, **kwargs):
+    #     try:
+    #         list_id = kwargs['pk']
+    #         # update_property_lat_lng(list_id)
+    #         threading.Thread(target=PropertyViewSet.update_property_lat_lng, args=(list_id,)).start()
+    #         return Response({'code': 200, 'message': 'Updating Lat/Lng...'})
+    #     except:
+    #         traceback.print_exc()
+    #         return Response({'code': 500, 'message': 'Server Error!'})
 
     def get_property_info_by_address(address):
         url = 'https://www.mapdevelopers.com/data.php?operation=geocode'
