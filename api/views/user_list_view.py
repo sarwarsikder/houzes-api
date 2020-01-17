@@ -167,9 +167,10 @@ class UserListViewSet(viewsets.ModelViewSet):
             user = User.objects.get(id=user.invited_by)
         try:
             property_tag = PropertyTags.objects.get(id=tag_id)
-            if property_tag.user != user :
-                response['message'] = 'Tag does not exist'
-                return Response(response)
+            if property_tag.user !=None:
+                if property_tag.user != user :
+                    response['message'] = 'Tag does not exist'
+                    return Response(response)
         except:
             response['message'] = 'Tag does not exist'
             return Response(response)

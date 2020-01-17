@@ -97,11 +97,16 @@ class PropertyTagsSerializer(serializers.ModelSerializer):
         identifiers['color_name'] = instance.color
         identifiers['color_code'] = instance.color_code
 
+        try :
+            user_id = instance.user.id
+        except:
+            user_id = None
+
         representation = {
             'id' : instance.id,
             'name' : instance.name,
             'color': identifiers,
-            'user': instance.user.id,
+            'user': user_id ,
             'created_at': instance.created_at,
             'updated_at' : instance.updated_at
         }

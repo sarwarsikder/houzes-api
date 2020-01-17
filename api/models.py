@@ -71,7 +71,7 @@ class User(AbstractBaseUser):
 
 
 class PropertyTags(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None)
     name = models.CharField(max_length=255, null=True)
     color = models.CharField(max_length=255, null=True)
     color_code = models.CharField(max_length=255, null=True)

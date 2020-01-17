@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from notifications.signals import notify
 from rest_framework import filters
@@ -21,7 +22,7 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
         user = User.objects.get(id = request.user.id)
         if user.is_admin == False:
             user = User.objects.get(id = user.invited_by)
-        queryset = PropertyTags.objects.filter(user = user).order_by('-id')
+        queryset = PropertyTags.objects.filter(Q(user = user) | Q(user = None)).order_by('-id')
         serializer = PropertyTagsSerializer(queryset, many=True)
 
         return Response(serializer.data)

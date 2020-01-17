@@ -28,7 +28,7 @@ def check_url(request):
 
 @csrf_exempt
 def get_tags(request):
-    queryset = PropertyTags.objects.all().order_by('-id')
+    queryset = PropertyTags.objects.filter(user = None).order_by('-id')
     serializer = PropertyTagsSerializer(queryset, many=True)
     return JsonResponse(serializer.data, safe=False)
 
