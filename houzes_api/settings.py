@@ -58,7 +58,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'admin_panel',
     'whitenoise',
-    'notifications'
+    'notifications',
+    'celery_task',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -256,6 +258,18 @@ AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY = '57m6DyFB5s3Lsx8s'
 
 # AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME = '5wW5bq9qD5y'
 # AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY = '3Fh93wse887PV77B'
+
+# ## PROD
+CELERY_BROKER_URL = 'redis://houzes-redis.pafft5.ng.0001.use1.cache.amazonaws.com:6379'
+CELERY_RESULT_BACKEND = 'redis://houzes-redis.pafft5.ng.0001.use1.cache.amazonaws.com:6379'
+
+# ## LOCAL
+# CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
 
 WEB_APP_URL='houzes.com'
 try:

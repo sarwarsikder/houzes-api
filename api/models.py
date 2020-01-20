@@ -455,6 +455,17 @@ class MailWizardInfo(models.Model):
         db_table = 'mail_wizard_info'
 
 
+class MailWizardCeleryTasks(models.Model):
+    mail_wizard_info = models.ForeignKey(to=MailWizardInfo, on_delete=models.CASCADE)
+    run_at = models.DateTimeField(null=True)
+    status = models.CharField(max_length=255, null=False, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'mail_wizard_celery_tasks'
+
+
 class BillingCardInfo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     card_name = models.CharField(max_length=50, null=True)
