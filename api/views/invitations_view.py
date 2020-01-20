@@ -137,6 +137,81 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
             return Response(activities)
 
+    @action(detail=False, url_path='total-houzes/filter')
+    def total_houzes_filter(self,request, *args, **kwargs):
+        start_time = request.GET.get('start_time')
+        end_time = request.GET.get('end_time')
+        print(start_time)
+        print(end_time)
+
+        if User.objects.get(id=request.user.id).is_admin:
+            users = User.objects.filter(invited_by=request.user.id)
+            total_houzes = []
+            for user in users:
+                userLists = UserList.objects.filter(user=user)
+                houzes_count = Property.objects.filter(Q(user_list__in=userLists) & Q(created_at__range=[start_time,end_time])).count()
+                total_houze = {
+                    'user_id': user.id,
+                    'user_first_name': user.first_name,
+                    'user_last_name': user.last_name,
+                    'total_houzes': houzes_count
+                }
+                total_houzes.append(total_houze)
+
+            return Response(total_houzes)
+
+    @action(detail=False, url_path='total-miles/filter')
+    def total_miles_filter(self,request, *args, **kwargs):
+        start_time = request.GET.get('start_time')
+        end_time = request.GET.get('end_time')
+        print(start_time)
+        print(end_time)
+
+        if User.objects.get(id=request.user.id).is_admin:
+            users = User.objects.filter(invited_by=request.user.id)
+            total_miles = []
+            for user in users:
+                length_count = History.objects.filter(user=user).aggregate(Sum('length'))['length__sum']
+                if (length_count == None):
+                    length_count = 0
+
+                length_count = length_count * decimal.Decimal(0.621371)
+
+                total_mile = {
+                    'user_id': user.id,
+                    'user_first_name': user.first_name,
+                    'user_last_name': user.last_name,
+                    'user_photo' : user.photo,
+                    'total_miles': length_count
+                }
+                total_miles.append(total_mile)
+
+            return Response(total_miles )
+
+    @action(detail=False, url_path='total-duration/filter')
+    def total_duration_filter(self,request, *args, **kwargs):
+        if User.objects.get(id=request.user.id).is_admin:
+            users = User.objects.filter(invited_by=request.user.id)
+            total_duration = []
+            for user in users:
+
+                durations = History.objects.annotate(
+                    diff=ExpressionWrapper(F('end_time') - F('start_time'), output_field=DurationField())).filter(
+                    user=user)
+                duration_count = InvitationsViewSet.datetime_parse(durations.aggregate(Sum('diff')))
+
+                activity = {
+                    'user_id': user.id,
+                    'user_first_name': user.first_name,
+                    'user_last_name': user.last_name,
+                    'user_photo': user.photo,
+                    'total_duration': duration_count
+                }
+                total_duration.append(activity)
+
+            return Response(total_duration)
+
+
     def datetime_parse(value):
         data = value['diff__sum']
         if data:
