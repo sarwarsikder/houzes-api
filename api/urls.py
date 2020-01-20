@@ -11,6 +11,7 @@ from api.views.forget_password_view import ForgetPasswordViewSet
 from api.views.get_neighborhood_view import GetNeighborhoodViewSet
 from api.views.history_view import HistoryViewSet
 from api.views.history_detail_view import HistoryDetailViewSet
+from api.views.mail_wizard_subs_type_view import MailWizardSubsTypeViewSet
 from api.views.payment_plan_view import PaymentPlanViewSet
 from api.views.payment_transaction_view import PaymentTransactionViewSet
 from api.views.plan_view import PlanViewSet
@@ -64,6 +65,7 @@ router.register(r'payment-transaction', PaymentTransactionViewSet)
 router.register(r'upgrade-history', UpgradeHistoryViewSet)
 router.register(r'mail-wizard', MailWizardInfoViewSet)
 router.register(r'billing-card', BillingCardInfoViewSet)
+router.register(r'mail-wizard-subscriptions', MailWizardSubsTypeViewSet)
 
 
 

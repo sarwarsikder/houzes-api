@@ -4,6 +4,7 @@ import requests
 from api.serializers import *
 from api.models import *
 from rest_framework.response import Response
+import datetime
 
 
 class MailWizardInfoViewSet(viewsets.ModelViewSet):
@@ -31,9 +32,10 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         mailing_state = property.owner_info[0]['formatted_address']['state']
         mailing_zip = property.owner_info[0]['formatted_address']['zip_code']
 
-        text_body = request.data['mail_text']
+        text_body = 'TEST RESPONSE'
         item_id = request.data['tem_item_id']
         subs_id = request.data['subs_id']
+        mail_count_target = request.data['mail_count']
 
         prop_address1 = [property.street, property.city, property.state, property.zip]
         separator = ', '
@@ -103,7 +105,8 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
                 mailWizardInfo = MailWizardInfo(property=property, neighbor=None, sender=user,
                                                 subs_type=mailWizardSubsType,
-                                                item_id=item_id)
+                                                item_id=item_id,
+                                                mail_count_target = mail_count_target)
                 mailWizardInfo.save()
 
                 # if mailWizardSubsType:
@@ -121,6 +124,16 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     'upgrade_info': UserSerializer(manager).data['upgrade_info']
                 }
                 response['message'] = 'Mail wizard sent successfully'
+
+                try:
+                    mailWizardCeleryTask = MailWizardCeleryTasks()
+                    mailWizardCeleryTask.status = 0
+                    mailWizardCeleryTask.run_at = datetime.datetime.now()
+                    mailWizardCeleryTask.mail_wizard_info = mailWizardInfo
+                    mailWizardCeleryTask.save()
+                except:
+                    print('Schedular insert error')
+
             else:
                 response['status'] = False
                 response['data'] = {
@@ -179,9 +192,10 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         mailing_state = get_neighborhood.ownership_info['owner_info']['formatted_address']['state']
         mailing_zip = get_neighborhood.ownership_info['owner_info']['formatted_address']['zip_code']
 
-        text_body = request.data['mail_text']
+        text_body = 'TEST MAIL'
         item_id = request.data['tem_item_id']
         subs_id = request.data['subs_id']
+        mail_count_target = request.data['mail_count']
 
         prop_address1 = [get_neighborhood.street, get_neighborhood.city, get_neighborhood.state, get_neighborhood.zip]
         separator = ', '
@@ -251,7 +265,8 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
                 mailWizardInfo = MailWizardInfo(property=None, neighbor=get_neighborhood, sender=user,
                                                 subs_type=mailWizardSubsType,
-                                                item_id=item_id)
+                                                item_id=item_id,
+                                                mail_count_target=mail_count_target)
                 mailWizardInfo.save()
 
                 response['status'] = True
@@ -260,6 +275,15 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     'upgrade_info': UserSerializer(manager).data['upgrade_info']
                 }
                 response['message'] = 'Mail wizard sent successfully'
+
+                try:
+                    mailWizardCeleryTask = MailWizardCeleryTasks()
+                    mailWizardCeleryTask.status = 0
+                    mailWizardCeleryTask.run_at = datetime.datetime.now()
+                    mailWizardCeleryTask.mail_wizard_info = mailWizardInfo
+                    mailWizardCeleryTask.save()
+                except:
+                    print('Schedular insert error')
             else:
                 response['status'] = False
                 response['data'] = {
