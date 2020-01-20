@@ -137,6 +137,29 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
             return Response(activities)
 
+    @action(detail=False, url_path='total-houzes/filter')
+    def total_houzes_filter(self,request, *args, **kwargs):
+        start_time = request.GET.get('start_time')
+        end_time = request.GET.get('end_time')
+        print(start_time)
+        print(end_time)
+
+        if User.objects.get(id=request.user.id).is_admin:
+            users = User.objects.filter(invited_by=request.user.id)
+            total_houzes = []
+            for user in users:
+                userLists = UserList.objects.filter(user=user)
+                houzes_count = Property.objects.filter(Q(user_list__in=userLists) & Q(created_at__range=[start_time,end_time])).count()
+                total_houze = {
+                    'user_id': user.id,
+                    'user_first_name': user.first_name,
+                    'user_last_name': user.last_name,
+                    'total_houzes': houzes_count
+                }
+                total_houzes.append(total_houze)
+
+            return Response(total_houzes)
+
     def datetime_parse(value):
         data = value['diff__sum']
         if data:
