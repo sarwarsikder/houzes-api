@@ -446,6 +446,8 @@ class MailWizardInfo(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     subs_type = models.ForeignKey(MailWizardSubsType, on_delete=models.CASCADE, null=True, default=None)
     item_id = models.IntegerField(default=0)
+    mail_count_target = models.IntegerField(default=0)
+    mail_counter = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -188,6 +188,30 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
             return Response(total_miles )
 
+    @action(detail=False, url_path='total-duration/filter')
+    def total_duration_filter(self,request, *args, **kwargs):
+        if User.objects.get(id=request.user.id).is_admin:
+            users = User.objects.filter(invited_by=request.user.id)
+            total_duration = []
+            for user in users:
+
+                durations = History.objects.annotate(
+                    diff=ExpressionWrapper(F('end_time') - F('start_time'), output_field=DurationField())).filter(
+                    user=user)
+                duration_count = InvitationsViewSet.datetime_parse(durations.aggregate(Sum('diff')))
+
+                activity = {
+                    'user_id': user.id,
+                    'user_first_name': user.first_name,
+                    'user_last_name': user.last_name,
+                    'user_photo': user.photo,
+                    'total_duration': duration_count
+                }
+                total_duration.append(activity)
+
+            return Response(total_duration)
+
+
     def datetime_parse(value):
         data = value['diff__sum']
         if data:
