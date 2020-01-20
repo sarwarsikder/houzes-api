@@ -160,6 +160,34 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
             return Response(total_houzes)
 
+    @action(detail=False, url_path='total-miles/filter')
+    def total_miles_filter(self,request, *args, **kwargs):
+        start_time = request.GET.get('start_time')
+        end_time = request.GET.get('end_time')
+        print(start_time)
+        print(end_time)
+
+        if User.objects.get(id=request.user.id).is_admin:
+            users = User.objects.filter(invited_by=request.user.id)
+            total_miles = []
+            for user in users:
+                length_count = History.objects.filter(user=user).aggregate(Sum('length'))['length__sum']
+                if (length_count == None):
+                    length_count = 0
+
+                length_count = length_count * decimal.Decimal(0.621371)
+
+                total_mile = {
+                    'user_id': user.id,
+                    'user_first_name': user.first_name,
+                    'user_last_name': user.last_name,
+                    'user_photo' : user.photo,
+                    'total_miles': length_count
+                }
+                total_miles.append(total_mile)
+
+            return Response(total_miles )
+
     def datetime_parse(value):
         data = value['diff__sum']
         if data:
