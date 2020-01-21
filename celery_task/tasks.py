@@ -136,29 +136,8 @@ def send_mail_wizard_to_property(mail_wizard: MailWizardInfo):
         manager = user
         if not manager.is_admin:
             manager = User.objects.get(id=manager.invited_by)
-        upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
-        required_coin = 0.0
-        required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='mailer-wizard',
-                                                                         plan=upgrade_profile.plan).first().payment_plan_coin)
-        if upgrade_profile.coin < required_coin:
-            response['status'] = False
-            response['data'] = {
-                'payment': False,
-                'upgrade_info': UserSerializer(manager).data['upgrade_info']
-            }
-            response['message'] = 'Mail wizard sending unsuccessful due to insufficient balance'
-            return response
-        upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
-        upgrade_profile.save()
         r = requests.post(url=url, json=PARAMS, headers=headers)
         if r.status_code == 200:
-            # mailWizardSubsType = MailWizardSubsType.objects.filter(id=subs_id).first()
-            #
-            # mailWizardInfo = MailWizardInfo(property=property, neighbor=None, sender=user,
-            #                                 subs_type=mailWizardSubsType,
-            #                                 item_id=item_id)
-            # mailWizardInfo.save()
-
             response['status'] = True
             response['data'] = {
                 'payment': True,
@@ -251,29 +230,8 @@ def send_mail_wizard_to_neighbor(mail_wizard: MailWizardInfo):
         manager = user
         if not manager.is_admin:
             manager = User.objects.get(id=manager.invited_by)
-        upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
-        required_coin = 0.0
-        required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='mailer-wizard',
-                                                                         plan=upgrade_profile.plan).first().payment_plan_coin)
-        if upgrade_profile.coin < required_coin:
-            response['status'] = False
-            response['data'] = {
-                'payment': False,
-                'upgrade_info': UserSerializer(manager).data['upgrade_info']
-            }
-            response['message'] = 'Mail wizard sending unsuccessful due to insufficient balance'
-            return response
-        upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
-        upgrade_profile.save()
         r = requests.post(url=url, json=PARAMS, headers=headers)
         if r.status_code == 200:
-            # mailWizardSubsType = MailWizardSubsType.objects.filter(id=subs_id).first()
-            #
-            # mailWizardInfo = MailWizardInfo(property=None, neighbor=get_neighborhood, sender=user,
-            #                                 subs_type=mailWizardSubsType,
-            #                                 item_id=item_id)
-            # mailWizardInfo.save()
-
             response['status'] = True
             response['data'] = {
                 'payment': True,

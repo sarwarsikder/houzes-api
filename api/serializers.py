@@ -433,3 +433,16 @@ class BillingCardInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = BillingCardInfo
         fields = '__all__'
+
+class PropertyLatLongSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = 'id,latitude,longitude'
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "latitude" : instance.latitude,
+            "longitude" : instance.longitude
+        }
+        return representation

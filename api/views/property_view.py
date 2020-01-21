@@ -41,6 +41,16 @@ class CustomPagination(pagination.PageNumberPagination):
             'results': data,
         })
 
+class PropertiesFilterPagination(pagination.PageNumberPagination):
+    def get_paginated_response(self, data,lat_long):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': self.page.paginator.count,
+            'results': data,
+            'lat_long' : lat_long
+        })
+
 
 class PropertyViewSet(viewsets.ModelViewSet):
     queryset = Property.objects.all()
@@ -473,7 +483,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
         if listId != None:
             property = property.filter(user_list__id=listId)
         property = property.order_by('-created_at')
-        paginator = CustomPagination()
+        property_lat_lon = property.filter(~Q(latitude=None) | ~Q(longitude=None))
+        property_lat_lon_serializer = PropertyLatLongSerializer(property_lat_lon,many=True)
+        paginator = PropertiesFilterPagination()
         if page_size:
             paginator.page_size = page_size
         else:
@@ -482,7 +494,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         result_page = paginator.paginate_queryset(property, request)
 
         serializer = PropertySerializer(result_page, many=True)
-        return paginator.get_paginated_response(data=serializer.data)
+        return paginator.get_paginated_response(data=serializer.data, lat_long=property_lat_lon_serializer.data)
 
     @action(detail=False, methods=['POST'], url_path='(?P<id>[\w-]+)/payment')
     def property_payment(self, request, *args, **kwargs):
