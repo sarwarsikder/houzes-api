@@ -80,17 +80,17 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
             message = "Error uploading photo"
         return Response({'status': status, 'data': data, 'message': message})
 
-    def destroy(self, request, *args, **kwargs):
-        property_photo_id = kwargs['pk']
-
-        try:
-            PropertyPhotos.objects.get(id = property_photo_id).delete()
-            status = True
-            message = "Photo deleted"
-        except:
-            status = False
-            message = "Error deleting photo"
-        return Response({'status': status, 'message': message})
+    # def destroy(self, request, *args, **kwargs):
+    #     property_photo_id = kwargs['pk']
+    #
+    #     try:
+    #         PropertyPhotos.objects.get(id = property_photo_id).delete()
+    #         status = True
+    #         message = "Photo deleted"
+    #     except:
+    #         status = False
+    #         message = "Error deleting photo"
+    #     return Response({'status': status, 'message': message})
 
 
     @action(detail=False, url_path='current-user')

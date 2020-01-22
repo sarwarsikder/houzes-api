@@ -35,6 +35,12 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         except:
             receiver = request.body['email']
 
+        if User.objects.filter(email =receiver.strip()).first():
+            status = False
+            data = None
+            message = 'User already exist'
+            return Response({'status': status, 'data': data, 'message': message})
+
         status = False
         data = None
         message = ""
