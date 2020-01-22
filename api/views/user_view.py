@@ -95,7 +95,7 @@ class UserViewSet(viewsets.ModelViewSet):
             if User.objects.filter(email=email).count() > 0:
                 status = False
                 data = None
-                message = "Email already in use"
+                message = "Email already exists"
                 return Response({'status': status, 'data': data, 'message': message})
 
             if 'phone_number' in request.data:
@@ -186,14 +186,14 @@ class UserViewSet(viewsets.ModelViewSet):
                 userSerializer = UserSerializer(user)
                 status = True
                 data = userSerializer.data
-                message = "A email has been sent to '" + email + "' for verification.Please verify before you log in."
+                message = "Please click on the link that has been sent to your email to verify your account."
             else :
                 user.is_active = True
                 user.save()
                 userSerializer = UserSerializer(user)
                 status = True
                 data = userSerializer.data
-                message = "Account is created successfully. You are ready to log in"
+                message = "Account successfully created."
         except Exception as exc:
             print(exc)
             status = False
@@ -216,7 +216,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 if not user.check_password(request.data['old_password']):
                     return Response({'status': False, 'data': {}, 'message': 'Provide your valid old password'})
                 else:
-                    message = 'Updated successfully'
+                    message = 'Successfully updated'
         s3_url = ""
         if 'photo' in request.FILES:
             file = request.FILES['photo']
@@ -251,9 +251,9 @@ class UserViewSet(viewsets.ModelViewSet):
             user.save()
 
             status = True
-            message = 'User is verified'
+            message = 'Account verification successfull'
         else:
-            message = 'User verification failed'
+            message = 'Account verification has failed '
 
         return Response({'status': status, 'message': message})
 
@@ -297,7 +297,7 @@ class UserViewSet(viewsets.ModelViewSet):
             message = "Error deleting member"
             return Response({'status': status, 'message': message})
         status = True
-        message = 'Member deleted successfully'
+        message = 'Successfully deleted'
         return Response({'status': status, 'message': message})
 
     @action(detail=False, methods=['POST'], url_path='fix-password/(?P<key>[\w-]+)')
@@ -318,7 +318,7 @@ class UserViewSet(viewsets.ModelViewSet):
             ForgetPassword.objects.filter(user=user).delete()
             status = True
             data = UserSerializer(user).data
-            message = 'User passsword is fixed'
+            message = 'Password successfully generated'
         else:
             status = False
             data = {}

@@ -23,7 +23,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
         if len(property.owner_info) == 0:
             response['status'] = False
-            response['message'] = 'Owner info is empty. Please apply Fetch Ownership to get Owner info.'
+            response['message'] = 'Sending unsuccessful! Ownership info is mandatory/required.'
             return Response(response)
 
         full_name = property.owner_info[0]['full_name']
@@ -95,7 +95,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     'payment' : False,
                     'upgrade_info' : UserSerializer(manager).data['upgrade_info']
                 }
-                response['message'] = 'Mail wizard sending unsuccessful due to insufficient balance'
+                response['message'] = 'Sending unsuccessful! May have occured due to insufficient balance. '
                 return Response(response)
             upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
             upgrade_profile.save()
@@ -410,7 +410,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     'payment' : True,
                     'upgrade_info': UserSerializer(manager).data['upgrade_info']
                 }
-                response['message'] = 'Mail wizard sent successfully'
+                response['message'] = 'Successfully sent'
             else:
                 response['status'] = False
                 response['data'] = {
@@ -436,7 +436,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
         if get_neighborhood.ownership_info == {}:
             response['status'] = False
-            response['message'] = 'Owner info is empty for this neighbor. Please apply Fetch Ownership to get Owner info.'
+            response['message'] = 'Sending unsuccessful! Ownership info is mandatory/required.'
             return Response(response)
 
         full_name = get_neighborhood.ownership_info['owner_info']['full_name']
@@ -507,7 +507,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     'payment': False,
                     'upgrade_info': UserSerializer(manager).data['upgrade_info']
                 }
-                response['message'] = 'Mail wizard sending unsuccessful due to insufficient balance'
+                response['message'] = 'Sending unsuccessful! May have occured due to insufficient balance.'
                 return Response(response)
             upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
             upgrade_profile.save()

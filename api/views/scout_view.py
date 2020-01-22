@@ -87,7 +87,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
             scoutUserList.save()
             status = True
             data = scoutSerializer.data
-            message = "Scout is created"
+            message = "New scout/s created"
         except:
             status = False
             data = None
@@ -106,7 +106,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
             try:
                 Scout.objects.get(id=scout_id).delete()
                 status = True
-                message = "Scout deleted"
+                message = "Successfully deleted"
             except:
                 status = False
                 message = "Error deleting scout"

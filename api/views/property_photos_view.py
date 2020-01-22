@@ -73,7 +73,7 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
 
             status = True
             data = propertyPhotosSerializer.data
-            message = "Property photo uploaded successfully"
+            message = "Successfully uploaded."
         except:
             status = False
             data = None
@@ -161,5 +161,5 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
             message = "Error deleting photo"
             return Response({'status': status, 'message': message})
         status = True
-        message = 'Photo deleted successfully'
+        message = 'Deleted successfully'
         return Response({'status': status, 'message': message})

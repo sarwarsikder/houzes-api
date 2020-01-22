@@ -391,7 +391,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
 
             status = True
             data = PropertySerializer(property).data
-            message = "Successfully added property to this drive"
+            message = "Property added successfully to this drive"
         except:
             status = False
             data = {}

@@ -190,7 +190,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
             status = True
             data = PropertySerializer(property).data
-            message = "Successfully created property"
+            message = "Property created sucessfully"
             try:
                 user = User.objects.get(id = request.user.id)
                 notify.send(user, recipient=user, verb='uploaded property information', action_object=property)
@@ -344,7 +344,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         try:
             Property.objects.get(id=property_id).delete()
             status = True
-            message = "Property deleted"
+            message = "Successfully deleted "
             try:
                 user = User.objects.get(id=request.user.id)
                 notify.send(user, recipient=user, verb='deleted a property')
@@ -408,7 +408,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property.save()
             status = True
             data = PropertySerializer(property).data
-            message = "Property updated successfully"
+            message = "Successfully updated"
         except:
             status = False
             data = {}
@@ -553,7 +553,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                                      "data": {"payment" : False,
                                               "upgrade_info" : UserSerializer(user).data['upgrade_info']
                                       },
-                                     'message': 'Insufficient wallet'})
+                                     'message': 'Sorry! Insufficient balance'})
 
 
         package_type = 2
@@ -574,7 +574,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 payment_transaction.transaction_coin = fetch_owner_info_coin_required
                 payment_transaction.created_by = original_user
                 payment_transaction.save()
-                property_payment_message.append('Ownership data is collected')
+                property_payment_message.append('Ownership data collected')
             else:
                 property_payment_message.append(fetch_ownership_info_response['message'])
         if power_trace:
@@ -638,7 +638,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         except:
             print('ex')
             status = False
-            message = 'Fetch owner info micro service error'
+            message = 'Oops! An error has occured while fetching ownership data.'
             return JsonResponse({"status": status, "data": [], 'message': message})
 
         if 'error' in r.json():
@@ -798,7 +798,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         except:
             print('ex')
             status = False
-            message = 'Request neighborhood micro service error'
+            message = 'Oops! An error has occured while requesting neighborhood data.'
             return Response({"status": status, "data": {}, 'message': message})
         if (objectResponse['status']) == 200:
             status = True
@@ -833,7 +833,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         except:
             print('ex')
             status = False
-            message = 'Get neighborhood micro service error'
+            message = 'Oops! An error has occured while requesting neighborhood.'
             return Response({"status": status, "data": {}, 'message': message})
         if (objectResponse['status']) == 200:
             status = True
@@ -990,7 +990,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='power-trace', plan=upgrade_profile.plan).first().payment_plan_coin)
                 if upgrade_profile.coin < required_coin :
                     status = False
-                    message = 'Insufficient balance'
+                    message = 'Sorry! Insufficient balance'
                     return ({"status": status, "data": {}, 'message': message})
                 upgrade_profile.coin = float(upgrade_profile.coin)-required_coin
                 upgrade_profile.save()
@@ -1049,7 +1049,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         except:
             status = False
-            message = 'Request neighborhood micro service error'
+            message = 'Oops! An error has occured while requesting neighborhood data.'
             return ({"status": status, "data": {}, 'message': message})
 
         return ({"status": status, "data": {}, 'message': message})
@@ -1073,7 +1073,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         except:
             print('ex')
             status = False
-            message = 'Get neighborhood micro service error'
+            message = 'Oops! An error has occured while requesting neighborhood data.'
             return Response({"status": status, "data": {}, 'message': message})
         if (objectResponse['status']) == 200:
             status = True
@@ -1116,7 +1116,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 except:
                     return (
                         {'status': False, 'data' : {},
-                         'message': 'Failed to create request! Fetch ownership info first'})
+                         'message': 'Request failed! Ownership info is mandatory/required.'})
                 i = i + 1
             ## Powertrace request
             power_trace_request_res = requests.post(power_trace_request_url, data=power_trace_request_pload,

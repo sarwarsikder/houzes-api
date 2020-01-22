@@ -62,7 +62,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             invitationsSerializer = InvitationsSerializer(invitations)
             status = True
             data = invitationsSerializer.data
-            message = "Invitation sent to " + receiver + " successfully"
+            message = "Invitation sent"
         except:
             status = False
             message = "User is not invited"
