@@ -91,7 +91,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     message = "Email is required"
                     return Response({'status': status, 'data': data, 'message': message})
                 else:
-                    email = email.lower()
+                    email = email.lower().strip()
             if User.objects.filter(email=email).count() > 0:
                 status = False
                 data = None

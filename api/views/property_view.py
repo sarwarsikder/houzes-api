@@ -1175,10 +1175,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
     #         return Response({'code': 500, 'message': 'Server Error!'})
 
     def get_property_info_by_address(address):
+        print(address)
         url = 'https://www.mapdevelopers.com/data.php?operation=geocode'
         data = {'address': address,
-                'region': 'USA'}
+                'region': 'USA',
+                'code': '9jw1wi8'}
         res = requests.post(url, data=data)
+        print(res.json())
         return res.json()
 
     def update_property_lat_lng(list_id):
@@ -1189,7 +1192,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 address = property_info.street + ' ' + property_info.city + ' ' + property_info.state + ' ' + property_info.zip
                 print(address)
                 fetched_data = PropertyViewSet.get_property_info_by_address(address)
-                if 'response' in fetched_data and fetched_data['response']:
+                if 'response' in fetched_data and fetched_data['response'] and fetched_data['data']['zip']:
                     lat = float(fetched_data['data']['lat'])
                     lng = float(fetched_data['data']['lng'])
                     print(lat, lng)
@@ -1198,7 +1201,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     Property.objects.filter(id=property_info.id).update(latitude=lat, longitude=lng)
             except:
                 traceback.print_exc()
-                return Response({'code': 500, 'message': 'Server Error!'})
+                # return Response({'code': 500, 'message': 'Server Error!'})
         print("Completed...list_id: " + str(list_id))
 
 def update_property_power_trace_info(info_list):
