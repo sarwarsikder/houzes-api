@@ -67,6 +67,8 @@ class BillingCardInfoViewSet(viewsets.ModelViewSet):
         return Response(response)
 
     def list(self, request, *args, **kwargs):
-        billing_card_info = BillingCardInfo.objects.filter(user__id = request.user.id)
+        billing_card_info = BillingCardInfo.objects.filter(user__id = request.user.id, is_save = True).order_by('-created_at')
+
+        # billing_card_info = BillingCardInfo.objects.filter(user__id = request.user.id, is_save = True).values('card_number').order_by('-created_at')
         billing_card_info_serializer = BillingCardInfoSerializer(billing_card_info, many=True)
         return Response(billing_card_info_serializer.data)

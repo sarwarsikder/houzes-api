@@ -745,20 +745,20 @@ class PropertyViewSet(viewsets.ModelViewSet):
         except:
             requestData = request.body['tags']
 
-        print(requestData)
-
-        tags = [int(x) for x in requestData.split(',')]
         property_tags = []
-        for tag in tags:
-            property_tags.append({'id': tag})
-            try:
-                propertyTag = PropertyTags.objects.get(id=tag)
+        if requestData !="":
+            tags = [int(x) for x in requestData.split(',')]
 
-            except:
-                status = False
-                data = {}
-                message = 'Invalid tag given'
-                return Response({'status': status, 'data': data, 'message': message})
+            for tag in tags:
+                property_tags.append({'id': tag})
+                try:
+                    propertyTag = PropertyTags.objects.get(id=tag)
+
+                except:
+                    status = False
+                    data = {}
+                    message = 'Invalid tag given'
+                    return Response({'status': status, 'data': data, 'message': message})
         try:
             property.property_tags = property_tags
             property.save()
