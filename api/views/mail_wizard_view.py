@@ -89,7 +89,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
             required_coin = 0.0
             required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='mailer-wizard',
-                                                                             plan=upgrade_profile.plan).first().payment_plan_coin)*mail_count_target
+                                                                             plan=upgrade_profile.plan).first().payment_plan_coin)*float(mail_count_target)
             if upgrade_profile.coin < required_coin:
                 response['status'] = False
                 response['data'] = {

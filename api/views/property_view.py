@@ -519,11 +519,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
             user = User.objects.get(id = user.invited_by)
         upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
         if not upgrade_profile :
+            messages= []
+            messages.append('Profile is not upgraded')
             return JsonResponse({"status":False,
                                  "data": { "payment" : False,
                                            "upgrade_info": UserSerializer(user).data['upgrade_info']
                                     },
-                                 'message': 'Profile is not upgraded'})
+                                 'message': json.dumps(messages)})
         coin_required = 0
         fetch_owner_info_coin_required = 0
         power_trace_coin_required = 0
@@ -549,11 +551,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 if payment_plan :
                     power_trace_coin_required =  payment_plan.payment_plan_coin
             if upgrade_profile.coin < fetch_owner_info_coin_required+power_trace_coin_required :
+                messages = []
+                messages.append('Sorry! Insufficient balance')
                 return JsonResponse({"status": False,
                                      "data": {"payment" : False,
                                               "upgrade_info" : UserSerializer(user).data['upgrade_info']
                                       },
-                                     'message': 'Sorry! Insufficient balance'})
+                                     'message': json.dumps(messages)})
 
 
         package_type = 2
