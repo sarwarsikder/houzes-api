@@ -35,6 +35,8 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         text_body = 'TEST RESPONSE'
         item_id = request.data['tem_item_id']
         subs_id = request.data['subs_id']
+        mail_count_target = request.data['mail_count']
+
 
         prop_address1 = [property.street, property.city, property.state, property.zip]
         separator = ', '
@@ -87,7 +89,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
             required_coin = 0.0
             required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='mailer-wizard',
-                                                                             plan=upgrade_profile.plan).first().payment_plan_coin)
+                                                                             plan=upgrade_profile.plan).first().payment_plan_coin)*mail_count_target
             if upgrade_profile.coin < required_coin:
                 response['status'] = False
                 response['data'] = {
@@ -247,7 +249,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
             required_coin = 0.0
             required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='mailer-wizard',
-                                                                             plan=upgrade_profile.plan).first().payment_plan_coin)
+                                                                             plan=upgrade_profile.plan).first().payment_plan_coin)*mail_count_target
             if upgrade_profile.coin < required_coin:
                 response['status'] = False
                 response['data'] = {

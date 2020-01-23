@@ -446,3 +446,33 @@ class PropertyLatLongSerializer(serializers.ModelSerializer):
             "longitude" : instance.longitude
         }
         return representation
+
+class TeamVisitedPropertySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = '__all__'
+    def to_representation(self, instance):
+        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+        try:
+            user_list_id = instance.user_list.id
+        except:
+            user_list_id = None
+        try:
+            history = HistoryDetail.objects.filter(property__id=instance.id)[0].history.id
+        except:
+            history =None
+        representation = {
+            'id' : instance.id,
+            'user' : UserSerializer(User.objects.get(id=UserList.objects.get(id=user_list_id).user.id)).data,
+            # 'user_list_details': UserListSerializer(UserList.objects.get(id=user_list_id)).data,
+            'street': instance.street,
+            'city': instance.city,
+            'state': instance.state,
+            'zip': instance.zip,
+            'photo_count' : PropertyPhotos.objects.filter(property=instance).count(),
+            'note_count': PropertyNotes.objects.filter(property=instance).count(),
+            'history' : history,
+            'created_at': instance.created_at,
+            'updated_at' : instance.updated_at
+        }
+        return representation
