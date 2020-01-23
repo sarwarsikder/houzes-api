@@ -35,7 +35,6 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         text_body = 'TEST RESPONSE'
         item_id = request.data['tem_item_id']
         subs_id = request.data['subs_id']
-        mail_count_target = request.data['mail_count']
 
         prop_address1 = [property.street, property.city, property.state, property.zip]
         separator = ', '

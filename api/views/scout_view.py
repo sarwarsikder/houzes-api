@@ -9,6 +9,7 @@ from api.models import *
 
 from django.http import JsonResponse
 
+from api.views.send_email_view import SendEmailViewSet
 from houzes_api.settings import WEB_APP_URL
 
 
@@ -88,6 +89,9 @@ class ScoutViewSet(viewsets.ModelViewSet):
             status = True
             data = scoutSerializer.data
             message = "New scout/s created"
+            subject = 'Invitaion To Scout'
+            body = 'Hey, '+user.first_name+' '+user.last_name+' has sent you an invitation to scout from HouZes.Click here to accept invitation https://'+url
+            SendEmailViewSet.send_email_view(self,subject,body,email)
         except:
             status = False
             data = None
