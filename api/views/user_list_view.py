@@ -59,9 +59,14 @@ class UserListViewSet(viewsets.ModelViewSet):
             message = "List does not exist"
         else:
             try:
-                UserList.objects.get(id=user_list_id).delete()
+                user_list = UserList.objects.get(id=user_list_id)
                 status = True
                 message = "List is deleted"
+                scout_id = ScoutUserList.objects.filter(user_list=user_list.id).first()
+                if scout_id:
+                    scout_id = scout_id.id
+                    Scout.objects.get(id=scout_id).delete()
+                user_list.delete()
             except:
                 status = False
                 message = "Error deleting list"
