@@ -19,6 +19,8 @@ from django.core import serializers
 from django.db.models import Sum, DurationField, Count, IntegerField
 from django.utils.dateparse import parse_duration
 
+from api.views.send_email_view import SendEmailViewSet
+
 
 class InvitationsViewSet(viewsets.ModelViewSet):
     queryset = Invitations.objects.all()
@@ -47,14 +49,19 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
         invitation_key = generate_shortuuid()
         try:
-            send_mail(subject="Invitation",
-                      message=str(
-                          request.user) + " sent you an invitation click here to accept https://" + settings.WEB_APP_URL + '/team-invite/' + str(
-                          invitation_key),
-                      from_email=settings.EMAIL_HOST_USER,
-                      recipient_list=[receiver],
-                      fail_silently=False
-                      )
+        #     send_mail(subject="Invitation",
+        #               message=str(
+        #                   request.user) + " sent you an invitation click here to accept https://" + settings.WEB_APP_URL + '/team-invite/' + str(
+        #                   invitation_key),
+        #               from_email=settings.EMAIL_HOST_USER,
+        #               recipient_list=[receiver],
+        #               fail_silently=False
+        #               )
+            subject = 'Invitation'
+            body = str(request.user) + " sent you an invitation click the below link to accept"
+            email = receiver
+            url = 'https://' + settings.WEB_APP_URL + '/team-invite/' + str(invitation_key)
+            SendEmailViewSet.send_email_view(self, subject, body, email, 'concern', url)
 
             invitations = Invitations(user=User.objects.get(id=request.user.id), invitation_key=invitation_key,
                                       email=receiver, status=0)

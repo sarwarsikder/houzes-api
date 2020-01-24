@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.utils import json
 
+from api.views.send_email_view import SendEmailViewSet
 from houzes_api import settings
 from houzes_api.util.file_upload import file_upload
 import time
@@ -173,14 +174,19 @@ class UserViewSet(viewsets.ModelViewSet):
                 userVerifications = UserVerifications(code=code, user=user, is_used=False, verification_type='email')
                 userVerifications.save()
 
-                send_mail(subject="HouZes email verification",
-                          message="Dear," + str(user.first_name) + ' ' + str(
-                              user.last_name) + " please confirm your email by clicking the link https://" + settings.WEB_APP_URL + '/verify-email/' + str(
-                              code),
-                          from_email=settings.EMAIL_HOST_USER,
-                          recipient_list=[email],
-                          fail_silently=False
-                          )
+                # send_mail(subject="HouZes email verification",
+                #           message="Dear," + str(user.first_name) + ' ' + str(
+                #               user.last_name) + " please confirm your email by clicking the link https://" + settings.WEB_APP_URL + '/verify-email/' + str(
+                #               code),
+                #           from_email=settings.EMAIL_HOST_USER,
+                #           recipient_list=[email],
+                #           fail_silently=False
+                #           )
+                subject = "HouZes email verification"
+                body = "please confirm your email by clicking the link below"
+                url = "https://" + settings.WEB_APP_URL + '/verify-email/' + str(code)
+                SendEmailViewSet.send_email_view(self, subject, body, email, first_name + ' ' + last_name, url)
+
                 # Email verification task ends here
 
                 userSerializer = UserSerializer(user)
