@@ -193,7 +193,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             message = "Property created sucessfully"
             try:
                 user = User.objects.get(id = request.user.id)
-                notify.send(user, recipient=user, verb='uploaded property information', action_object=property)
+                notify.send(user, recipient=user, verb='uploaded '+property.street+', '+property.city+', '+property.state+' '+property.zip, action_object=property)
             except:
                 print('Error in notification')
         except:
@@ -537,7 +537,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if fetch_owner_info == 1 :
                 try:
                     # user = User.objects.get(id=request.user.id)
-                    notify.send(original_user, recipient=original_user, verb='requested to fetch ownership information of a property', action_object=property)
+                    notify.send(original_user, recipient=original_user, verb='requested to fetch ownership information of '+property.street+', '+property.city+', '+property.state+' '+property.zip, action_object=property)
                 except:
                     print('Error in notification')
                 payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info', plan = upgrade_profile.plan).first()
@@ -546,7 +546,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if power_trace == 1 :
                 try:
                     # user = User.objects.get(id=request.user.id)
-                    notify.send(original_user, recipient=original_user, verb='requested to power trace on a property', action_object=property)
+                    notify.send(original_user, recipient=original_user, verb='requested to power trace on '+property.street+', '+property.city+', '+property.state+' '+property.zip, action_object=property)
                 except:
                     print('Error in notification')
                 payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'power-trace', plan = upgrade_profile.plan).first()
@@ -863,7 +863,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         try:
             user = User.objects.get(id=request.user.id)
-            notify.send(user, recipient=user, verb='requested neighborhood information', action_object=property_data)
+            notify.send(user, recipient=user, verb='requested neighborhood information of '+property_data.street+', '+property_data.city+', '+property_data.state+' '+property_data.zip, action_object=property_data)
         except:
             print('Error in notification')
 

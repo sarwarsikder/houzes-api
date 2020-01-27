@@ -20,9 +20,22 @@ import time
 def check_url(request):
     url = request.GET.get('url')
     scout = Scout.objects.filter(url=url)[0]
-    scoutUserList = ScoutUserList.objects.filter(scout=scout)[0]
-    userList = UserList.objects.get(id=scoutUserList.user_list.id)
-    userListSerializer = UserListSerializer(userList)
+    user = scout.manager_id
+    scoutUserList = ScoutUserList.objects.filter(scout=scout).first()
+    if not scoutUserList:
+        user_list = UserList()
+        user_list.name = scout.first_name+' '+scout.last_name
+        user_list.user_id = user.id
+        user_list.leads_count = 0
+        user_list.save()
+
+        scoutUserList = ScoutUserList()
+        scoutUserList.user_list=user_list
+        scoutUserList.scout = scout
+        scoutUserList.save()
+    else:
+        user_list = UserList.objects.get(id=scoutUserList.user_list.id)
+    userListSerializer = UserListSerializer(user_list)
     return JsonResponse(userListSerializer.data)
 
 

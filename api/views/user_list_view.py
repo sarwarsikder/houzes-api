@@ -62,10 +62,11 @@ class UserListViewSet(viewsets.ModelViewSet):
                 user_list = UserList.objects.get(id=user_list_id)
                 status = True
                 message = "List is deleted"
-                scout_id = ScoutUserList.objects.filter(user_list=user_list.id).first()
-                if scout_id:
-                    scout_id = scout_id.id
-                    Scout.objects.get(id=scout_id).delete()
+                #If user_list delete scout delete
+                # scout_id = ScoutUserList.objects.filter(user_list=user_list.id).first()
+                # if scout_id:
+                #     scout_id = scout_id.id
+                #     Scout.objects.get(id=scout_id).delete()
                 user_list.delete()
             except:
                 status = False
