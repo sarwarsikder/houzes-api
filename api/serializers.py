@@ -297,10 +297,16 @@ class GetNeighborhoodSerializer(serializers.ModelSerializer):
         model = GetNeighborhood
         fields = '__all__'
     def to_representation(self, instance):
+        print(':::::::::::OWNERSHIP :::::::::::::::')
+        ownership_info = None
+        try:
+            ownership_info = None if instance.ownership_info=={} else instance.ownership_info['owner_info']
+        except:
+            ownership_info = None
         representation = {
             'id': instance.id,
             'neighbor_address': instance.neighbor_address,
-            'ownership_info' : None if instance.ownership_info=={} else instance.ownership_info['owner_info'],
+            'ownership_info' : ownership_info,
             'power_trace' : None if instance.power_trace == {} else instance.power_trace,
             'owner_status' : instance.owner_status,
             'power_trace_status': instance.power_trace_status,

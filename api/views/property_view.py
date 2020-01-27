@@ -1198,7 +1198,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 address = property_info.street + ' ' + property_info.city + ' ' + property_info.state + ' ' + property_info.zip
                 print(address)
                 fetched_data = PropertyViewSet.get_property_info_by_address(address)
-                if 'response' in fetched_data and fetched_data['response'] and fetched_data['data']['zip']:
+                if 'response' in fetched_data and fetched_data['response']:
+                    # fetched_data['data']['lat'] != 42.4347571 and fetched_data['data']['lng'] != -83.9849477
                     lat = float(fetched_data['data']['lat'])
                     lng = float(fetched_data['data']['lng'])
                     print(lat, lng)
