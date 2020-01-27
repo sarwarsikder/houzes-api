@@ -1,11 +1,10 @@
 import shortuuid
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
-from django.conf import settings
-from reportlab.platypus.doctemplate import onDrawStr
 
 
 class UserManager(BaseUserManager):
@@ -478,6 +477,19 @@ class BillingCardInfo(models.Model):
 
     class Meta:
         db_table = 'billing_card_info'
+
+
+class UserFirebase(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)
+    device_type = models.CharField(max_length=50, null=True)
+    device_version = models.CharField(max_length=50, null=True)
+    firebase_token = models.CharField(max_length=255, null=True)
+    user_id = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_firebase'
 
 
 admin.site.register(User)

@@ -32,6 +32,20 @@ class UserViewSet(viewsets.ModelViewSet):
         access_token_object = AccessToken.objects.get(token=access_token)
         user = access_token_object.user
         serializer = UserSerializer(user)
+        try:
+            if request.GET.get('device_id'):
+                user_firebase = UserFirebase()
+                user_firebase.device_type = request.GET.get('device_type')
+                user_firebase.id = user_firebase.device_type.lower() + ":" + request.GET.get('device_id')
+                user_firebase.device_version = request.GET.get('version')
+                user_firebase.firebase_token = request.GET.get('firebase_token')
+                user_firebase.user_id = user.id
+                UserFirebase.objects.filter(id=user_firebase.id).update(firebase_token=user_firebase.firebase_token,
+                                                                        device_version=user_firebase.device_version,
+                                                                        user_id=user_firebase.user_id)
+                user_firebase.save()
+        except:
+            print("-----------")
         return JsonResponse(serializer.data, safe=False)
 
     def generate_shortuuid(self):
