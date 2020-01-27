@@ -244,8 +244,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 owner_name = entry['owner_firstname'] + " " + entry['owner_lastname']
                 owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + entry['owner_zip']
             except:
-                owner_name = ""
-                owner_address = ""
+                owner_name = None
+                owner_address = None
             # property_info.owner_info = json.loads(
             #     '[{"ownerName" : "' + owner_name + '","ownerAddress" : "' + owner_address
             #     + '","ownerLandLine" : "' + entry['land_line']
@@ -253,20 +253,22 @@ class PropertyViewSet(viewsets.ModelViewSet):
             #     + '","ownerEmail" : "' + entry['email_address'] + '"}]'
             # )
 
-
-            property_info.owner_info = json.loads(
-                '[{"company_name" : "' + '",'
-                + '"estate" : "'
-                + '","formatted_address" : {'
-                    + '"city" : '+ '""'
-                    +',"state" :'+'""'
-                    +',"street" : {}'
-                    +',"zip_code" :'+'""'+'}'
-                +',"formatted_name" : {}'+
-                ',"full_address" : "'+owner_address+
-                '","full_name" : "'+owner_name+
-                '","other_info" : "'+''+'"}]'
-            )
+            if owner_name == None or owner_name.strip() == "":
+                property_info.owner_info = []
+            else:
+                property_info.owner_info = json.loads(
+                    '[{"company_name" : "' + '",'
+                    + '"estate" : "'
+                    + '","formatted_address" : {'
+                        + '"city" : '+ '""'
+                        +',"state" :'+'""'
+                        +',"street" : {}'
+                        +',"zip_code" :'+'""'+'}'
+                    +',"formatted_name" : {}'+
+                    ',"full_address" : "'+owner_address+
+                    '","full_name" : "'+owner_name+
+                    '","other_info" : "'+''+'"}]'
+                )
             property_info.street = entry['property_street']
             property_info.zip = entry['property_zip']
             property_info.city = entry['property_city']
