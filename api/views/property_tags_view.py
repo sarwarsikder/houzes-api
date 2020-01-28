@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from notifications.signals import notify
-from rest_framework import filters
+from rest_framework import filters, pagination
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +9,14 @@ from rest_framework.response import Response
 from api.models import *
 from api.serializers import *
 
+class PropertiesFilterByTagPagination(pagination.PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': self.page.paginator.count,
+            'results': data
+        })
 
 class PropertyTagsViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
@@ -144,3 +152,21 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
             message = 'Error deleting property tag'
 
         return Response({'status': status, 'message': message})
+
+
+    @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/property-cluster')
+    def property_by_tag(self, request, *args, **kwargs):
+        userList = UserList.objects.filter(user=request.user)
+        property = Property.objects.filter(Q(user_list__in=userList) &(Q(property_tags__contains=[{'id': kwargs['pk']}]) | Q(property_tags__contains=[{'id': int(kwargs['pk'], 10)}])))
+        page_size = request.GET.get('limit')
+
+
+        paginator = PropertiesFilterByTagPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 1000
+
+        result_page = paginator.paginate_queryset(property, request)
+        serializer = ClusterViewByListSerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data)

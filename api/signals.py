@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from api.models import *
@@ -133,3 +133,11 @@ def user_post_save(sender, instance, created, update_fields, **kwargs):
                     user.save()
     except :
         print('Error while user post save')
+
+# @receiver(pre_save, sender=Property)
+# def property_pre_save(sender, instance, created, update_fields, **kwargs):
+#     try:
+#         if created:
+#             print('::::::::XXXXXXXXXXXXXXXXXXX:::::::::::::')
+#     except:
+#         print('Error while property post save')

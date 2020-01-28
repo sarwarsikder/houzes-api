@@ -231,6 +231,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='bulk-create')
     def property_bulk_create(self, request, *args, **kwargs):
+        message=''
         try:
             requestData = request.data
         except:
@@ -238,6 +239,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         print(requestData)
         objs = []
         UserList.objects.filter(id=requestData['user_list']).update(fetch_lat_lng=False)
+        rowCounter = 0
         for entry in requestData['property_data']:
             print(entry)
             property_info = Property()
@@ -275,7 +277,11 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property_info.city = entry['property_city']
             property_info.state = entry['property_state']
             property_info.user_list_id = requestData['user_list']
-
+            rowCounter = rowCounter+1
+            message = 'Properties uploading.Please wait'
+            if rowCounter>1000:
+                message='Only first 1000 properties will be uploaded to the list'
+                break
 
             # iterator = 0
             # while iterator < len(requestData['cities']):
@@ -293,7 +299,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         print(objs)
         Property.objects.bulk_create(objs, batch_size=10000)
         threading.Thread(target=PropertyViewSet.update_property_lat_lng, args=(requestData['user_list'],)).start()
-        return JsonResponse({'status': True, 'message': 'Properties created'})
+        return JsonResponse({'status': True, 'message': message})
 
     # @action(detail=False, methods=['GET'], url_path='tag/(?P<id>[\w-]+)')
     # def get_property_by_tag(self, request, *args, **kwargs):
