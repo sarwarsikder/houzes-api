@@ -252,6 +252,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             #     + '","ownerMobilePhone" : "' + entry['mobile_phone']
             #     + '","ownerEmail" : "' + entry['email_address'] + '"}]'
             # )
+            UserList.objects.filter(id=requestData['user_list']).update(fetch_lat_lng=False)
 
             if owner_name == None or owner_name.strip() == "":
                 property_info.owner_info = []
@@ -1209,6 +1210,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             except:
                 traceback.print_exc()
                 # return Response({'code': 500, 'message': 'Server Error!'})
+        UserList.objects.filter(id=list_id).update(fetch_lat_lng=True)
         print("Completed...list_id: " + str(list_id))
 
 def update_property_power_trace_info(info_list):
