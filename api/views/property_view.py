@@ -237,6 +237,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             requestData = request.body
         print(requestData)
         objs = []
+        UserList.objects.filter(id=requestData['user_list']).update(fetch_lat_lng=False)
         for entry in requestData['property_data']:
             print(entry)
             property_info = Property()
@@ -252,7 +253,6 @@ class PropertyViewSet(viewsets.ModelViewSet):
             #     + '","ownerMobilePhone" : "' + entry['mobile_phone']
             #     + '","ownerEmail" : "' + entry['email_address'] + '"}]'
             # )
-            UserList.objects.filter(id=requestData['user_list']).update(fetch_lat_lng=False)
 
             if owner_name == None or owner_name.strip() == "":
                 property_info.owner_info = []

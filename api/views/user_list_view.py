@@ -199,3 +199,10 @@ class UserListViewSet(viewsets.ModelViewSet):
                 print('Exception occoured')
 
         print('Tag updated')
+
+    @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/property-cluster')
+    def properties_cluster_by_list_id(self, request, *args, **kwargs):
+        user_list = UserList.objects.get(id=kwargs['pk'])
+        property = Property.objects.filter(user_list=user_list)
+        clusterViewByListSerializer = ClusterViewByListSerializer(property, many=True)
+        return Response(clusterViewByListSerializer.data)

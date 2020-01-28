@@ -482,3 +482,17 @@ class TeamVisitedPropertySerializer(serializers.ModelSerializer):
             'updated_at' : instance.updated_at
         }
         return representation
+
+class ClusterViewByListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = 'id,latitude,longitude,property_tags'
+
+    def to_representation(self, instance):
+        representation = {
+            "id": instance.id,
+            "latitude" : instance.latitude,
+            "longitude" : instance.longitude,
+            'property_tags' : instance.property_tags,
+        }
+        return representation
