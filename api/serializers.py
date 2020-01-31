@@ -11,7 +11,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
-        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+        # instance is the model object. create the custom json format by accessing instance
+        # attributes normaly and return it
         #
         # identifiers = dict()
         # identifiers['color_name'] = instance.color
@@ -22,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         owner_info = 0.0
         mailer_wizard = 0.0
 
-        if instance.is_admin == True:
+        if instance.is_admin:
             upgrade = instance.upgrade
             upgrade_profile = UpgradeProfile.objects.filter(user__id = instance.id).first()
             if upgrade_profile:
@@ -38,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
             is_team_invitable = True
 
         paymentPlanPowerTrace = PaymentPlan.objects.filter(payment_plan_name = 'power-trace', plan = plan).first()
-        if paymentPlanPowerTrace :
+        if paymentPlanPowerTrace:
             power_trace = paymentPlanPowerTrace.payment_plan_coin
         paymentPlanOwnerInfo = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info', plan=plan).first()
         if paymentPlanOwnerInfo :
@@ -91,7 +92,8 @@ class PropertyTagsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
-        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+        # instance is the model object. create the custom json format by accessing instance
+        # attributes normaly and return it
 
         identifiers = dict()
         identifiers['color_name'] = instance.color
@@ -103,15 +105,16 @@ class PropertyTagsSerializer(serializers.ModelSerializer):
             user_id = None
 
         representation = {
-            'id' : instance.id,
-            'name' : instance.name,
+            'id': instance.id,
+            'name': instance.name,
             'color': identifiers,
             'user': user_id ,
             'created_at': instance.created_at,
-            'updated_at' : instance.updated_at
+            'updated_at': instance.updated_at
         }
 
         return representation
+
 
 class PropertyNotesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -123,7 +126,8 @@ class PropertyPhotosSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyPhotos
         # fields = ['user','property','photo_url']
-        fields ='__all__'
+        fields = '__all__'
+
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -138,8 +142,10 @@ class PropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
         fields = '__all__'
+
     def to_representation(self, instance):
-        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+        # instance is the model object. create the custom json format by accessing instance
+        # attributes normaly and return it
         try:
             user_list_id = instance.user_list.id
         except:
@@ -170,6 +176,7 @@ class PropertySerializer(serializers.ModelSerializer):
         }
         return representation
 
+
 class UserDriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDriver
@@ -199,20 +206,24 @@ class InvitationsSerializer(serializers.ModelSerializer):
         model = Invitations
         fields = '__all__'
 
+
 class ScoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scout
         fields = '__all__'
+
 
 class ScoutUserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScoutUserList
         fields = '__all__'
 
+
 class AssignMemberToListSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssignMemberToList
         fields = '__all__'
+
 
 class HistorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -220,26 +231,28 @@ class HistorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
-        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+        # instance is the model object. create the custom json format by accessing
+        # instance attributes normaly and return it
 
         representation = {
             'id': instance.id,
             'start_point_latitude': instance.start_point_latitude,
             'start_point_longitude': instance.start_point_longitude,
             'end_point_latitude': instance.end_point_latitude,
-            'end_point_longitude' : instance.end_point_longitude,
-            'image' : instance.image,
-            'start_time' : instance.start_time,
-            'end_time' : instance.end_time,
-            'polylines' : instance.polylines,
+            'end_point_longitude': instance.end_point_longitude,
+            'image': instance.image,
+            'start_time': instance.start_time,
+            'end_time': instance.end_time,
+            'polylines': instance.polylines,
             'length' : instance.length,
             'user' : instance.user.id,
-            'property_count' : HistoryDetail.objects.filter(history = instance.id).count(),
+            'property_count': HistoryDetail.objects.filter(history = instance.id).count(),
             'created_at': instance.created_at,
             'updated_at': instance.updated_at
         }
 
         return representation
+
 
 class HistoryDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -257,6 +270,7 @@ class HistoryDetailSerializer(serializers.ModelSerializer):
         }
 
         return representation
+
 
 class ForgetPasswordSerializer(serializers.ModelSerializer):
     class Meta :
@@ -296,6 +310,7 @@ class GetNeighborhoodSerializer(serializers.ModelSerializer):
     class Meta :
         model = GetNeighborhood
         fields = '__all__'
+
     def to_representation(self, instance):
         print(':::::::::::OWNERSHIP :::::::::::::::')
         ownership_info = None
@@ -320,6 +335,7 @@ class GetNeighborhoodSerializer(serializers.ModelSerializer):
         }
         return representation
 
+
 class PlanSerializer(serializers.ModelSerializer) :
     class Meta :
         model = Plans
@@ -333,12 +349,13 @@ class PlanSerializer(serializers.ModelSerializer) :
             'plan_coin': float(instance.plan_coin),
             'created_by': instance.created_by.id,
             'updated_by': instance.updated_by.id if instance.updated_by !=None else None,
-            'description' : instance.description,
-            'image' : instance.image,
+            'description': instance.description,
+            'image': instance.image,
             'created_at': instance.created_at,
             'updated_at': instance.updated_at
         }
         return representation
+
 
 class PaymentPlanSerializer(serializers.ModelSerializer) :
     class Meta :
@@ -357,6 +374,7 @@ class PaymentPlanSerializer(serializers.ModelSerializer) :
             'updated_at': instance.updated_at
         }
         return representation
+
 
 class UpgradeProfileSerializer(serializers.ModelSerializer) :
     class Meta :
@@ -398,6 +416,7 @@ class UpgradeHistorySerializer(serializers.ModelSerializer):
         model = UpgradeHistory
         fields = '__all__'
 
+
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta :
         model = Notification
@@ -425,20 +444,30 @@ class NotificationSerializer(serializers.ModelSerializer):
         }
         return representation
 
+
 class MailWizardInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = MailWizardInfo
         fields = '__all__'
+
 
 class MailWizardSubsTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = MailWizardSubsType
         fields = '__all__'
 
+
+class MailWizardUserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MailWizardUserInfo
+        fields = '__all__'
+
+
 class BillingCardInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = BillingCardInfo
         fields = '__all__'
+
 
 class PropertyLatLongSerializer(serializers.ModelSerializer):
     class Meta:
@@ -453,12 +482,16 @@ class PropertyLatLongSerializer(serializers.ModelSerializer):
         }
         return representation
 
+
 class TeamVisitedPropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
         fields = '__all__'
+
     def to_representation(self, instance):
-        # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
+
+        # instance is the model object. create the custom json format by accessing instance
+        # attributes normaly and return it
         try:
             user_list_id = instance.user_list.id
         except:
@@ -468,8 +501,8 @@ class TeamVisitedPropertySerializer(serializers.ModelSerializer):
         except:
             history =None
         representation = {
-            'id' : instance.id,
-            'user' : UserSerializer(User.objects.get(id=UserList.objects.get(id=user_list_id).user.id)).data,
+            'id': instance.id,
+            'user': UserSerializer(User.objects.get(id=UserList.objects.get(id=user_list_id).user.id)).data,
             # 'user_list_details': UserListSerializer(UserList.objects.get(id=user_list_id)).data,
             'street': instance.street,
             'city': instance.city,
@@ -477,11 +510,12 @@ class TeamVisitedPropertySerializer(serializers.ModelSerializer):
             'zip': instance.zip,
             'photo_count' : PropertyPhotos.objects.filter(property=instance).count(),
             'note_count': PropertyNotes.objects.filter(property=instance).count(),
-            'history' : history,
+            'history': history,
             'created_at': instance.created_at,
             'updated_at' : instance.updated_at
         }
         return representation
+
 
 class ClusterViewByListSerializer(serializers.ModelSerializer):
     class Meta:

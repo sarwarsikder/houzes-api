@@ -11,6 +11,7 @@ from api.views.get_neighborhood_view import GetNeighborhoodViewSet
 from api.views.history_view import HistoryViewSet
 from api.views.history_detail_view import HistoryDetailViewSet
 from api.views.mail_wizard_subs_type_view import MailWizardSubsTypeViewSet
+from api.views.mail_wizard_user_info_view import MailWizardUserInfoViewSet
 from api.views.payment_plan_view import PaymentPlanViewSet
 from api.views.payment_transaction_view import PaymentTransactionViewSet
 from api.views.plan_view import PlanViewSet
@@ -65,8 +66,7 @@ router.register(r'upgrade-history', UpgradeHistoryViewSet)
 router.register(r'mail-wizard', MailWizardInfoViewSet)
 router.register(r'billing-card', BillingCardInfoViewSet)
 router.register(r'mail-wizard-subscriptions', MailWizardSubsTypeViewSet)
-
-
+router.register(r'mail-wizard-user-info', MailWizardUserInfoViewSet)
 
 urlpatterns = [
     path('power-trace/create/', power_trace_view.create),

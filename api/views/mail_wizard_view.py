@@ -13,7 +13,6 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='property/(?P<id>[\w-]+)')
     def send_mail_to_property_owner(self, request, *args, **kwargs):
-        status = False
         response = {'status': False, 'data': {}, 'message': ''}
         property = Property.objects.get(id=kwargs['id'])
         user = User.objects.get(id=request.user.id)
@@ -32,14 +31,21 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         mailing_state = property.owner_info[0]['formatted_address']['state']
         mailing_zip = property.owner_info[0]['formatted_address']['zip_code']
 
+        user_info = request.data['user_info']
+
+        return_address_street = self.dictVal(user_info, 'address_street')
+        return_address_city = self.dictVal(user_info, 'address_city')
+        return_address_state = self.dictVal(user_info, 'address_state')
+        return_address_zip = str(self.dictVal(user_info, 'address_zip'))
+
         text_body = 'TEST RESPONSE'
         item_id = request.data['tem_item_id']
         subs_id = request.data['subs_id']
         mail_count_target = request.data['mail_count']
 
 
-        prop_address1 = [property.street, property.city, property.state, property.zip]
-        separator = ', '
+        # prop_address1 = [property.street, property.city, property.state, property.zip]
+        # separator = ', '
 
         url = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
         headers = {
@@ -50,13 +56,13 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             "list_id": property.id,
             "response_text": text_body.strip(),
             "user_info": {
-                "firstName": user.first_name,
-                "lastName": user.last_name,
-                "email": user.email,
-                "proofEmail": "",
-                "compName": "",
-                "website": "",
-                "telephoneNo": ""
+                "firstName": self.dictVal(user_info, 'first_name'),
+                "lastName": self.dictVal(user_info, 'last_name'),
+                "email": self.dictVal(user_info, 'email'),
+                "proofEmail": self.dictVal(user_info, 'email'),
+                "compName": self.dictVal(user_info, 'company_name'),
+                "website": self.dictVal(user_info, 'website'),
+                "telephoneNo": self.dictVal(user_info, 'phone_no')
             },
             "letter_info": {
                 "type": "Letter",
@@ -74,7 +80,11 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     "mailing_city": mailing_city.strip(),
                     "mailing_state": mailing_state.strip(),
                     "mailing_zip": mailing_zip.strip(),
-                    "prop_address1": separator.join(prop_address1),
+                    "return_address_street": return_address_street.strip(),
+                    "return_address_city": return_address_city.strip(),
+                    "return_address_state": return_address_state.strip(),
+                    "return_address_zip": return_address_zip.strip(),
+                    "prop_address1": property.street,
                     "prop_city": property.city,
                     "prop_state": property.state,
                     "prop_zip": property.zip
@@ -93,8 +103,8 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             if upgrade_profile.coin < required_coin:
                 response['status'] = False
                 response['data'] = {
-                    'payment' : False,
-                    'upgrade_info' : UserSerializer(manager).data['upgrade_info']
+                    'payment': False,
+                    'upgrade_info': UserSerializer(manager).data['upgrade_info']
                 }
                 response['message'] = 'Sending unsuccessful! May have occured due to insufficient balance. '
                 return Response(response)
@@ -107,8 +117,22 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 mailWizardInfo = MailWizardInfo(property=property, neighbor=None, sender=user,
                                                 subs_type=mailWizardSubsType,
                                                 item_id=item_id,
-                                                mail_count_target = mail_count_target)
+                                                request_json=PARAMS,
+                                                mail_count_target=mail_count_target)
                 mailWizardInfo.save()
+                try:
+                    mailer_wizard_user_info = MailWizardUserInfo.objects.get(user_id=user.id)
+                except MailWizardUserInfo.DoesNotExist:
+                    mailer_wizard_user_info = MailWizardUserInfo()
+                mailer_wizard_user_info.user_id = user.id
+                mailer_wizard_user_info.first_name = self.dictVal(user_info, 'first_name')
+                mailer_wizard_user_info.last_name = self.dictVal(user_info, 'last_name')
+                mailer_wizard_user_info.email = self.dictVal(user_info, 'email')
+                mailer_wizard_user_info.address_street = return_address_street
+                mailer_wizard_user_info.address_city = return_address_city
+                mailer_wizard_user_info.address_state = return_address_state
+                mailer_wizard_user_info.address_zip = return_address_zip
+                mailer_wizard_user_info.save()
 
                 # if mailWizardSubsType:
                 #     mailWizardInfo = MailWizardInfo(property=property, sender=user, subs_type=mailWizardSubsType,
@@ -121,7 +145,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
                 response['status'] = True
                 response['data'] = {
-                    'payment' : True,
+                    'payment': True,
                     'upgrade_info': UserSerializer(manager).data['upgrade_info']
                 }
                 response['message'] = 'Mail wizard sent successfully'
@@ -369,7 +393,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     "mailing_address1": full_address.strip(),
                     "mailing_city": mailing_city.strip(),
                     "mailing_state": mailing_state.strip(),
-                    "mailing_zip": mailing_zip.strip(),
+                    "mailing_zip": str(mailing_zip).strip(),
                     "prop_address1": separator.join(prop_address1),
                     "prop_city": property.city,
                     "prop_state": property.state,
@@ -544,3 +568,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             response['message'] = 'Mail wizard sending unsuccessful'
         return response
 
+    def dictVal(self, dict_obj, key):
+        if key in dict_obj.keys():
+            return dict_obj[key];
+        return ""

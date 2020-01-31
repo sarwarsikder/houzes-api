@@ -446,6 +446,7 @@ class MailWizardInfo(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     subs_type = models.ForeignKey(MailWizardSubsType, on_delete=models.CASCADE, null=True, default=None)
     item_id = models.IntegerField(default=0)
+    request_json = JSONField(null=True)
     mail_count_target = models.IntegerField(default=0)
     mail_counter = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -453,6 +454,26 @@ class MailWizardInfo(models.Model):
 
     class Meta:
         db_table = 'mail_wizard_info'
+
+
+class MailWizardUserInfo(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    first_name = models.CharField(max_length=255, null=False)
+    last_name = models.CharField(max_length=255, null=False)
+    email = models.CharField(max_length=255, null=True)
+    company_name = models.TextField(null=True)
+    website = models.TextField(null=True)
+    phone_no = models.CharField(max_length=25, null=True)
+    address_street = models.TextField(null=True)
+    address_city = models.CharField(max_length=255, null=True)
+    address_state = models.CharField(max_length=50, null=True)
+    address_zip = models.CharField(max_length=10, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'mail_wizard_user_info'
 
 
 class MailWizardCeleryTasks(models.Model):

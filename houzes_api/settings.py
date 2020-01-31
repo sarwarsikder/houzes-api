@@ -235,8 +235,8 @@ S3_BUCKET_NAME = "houzes"
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'support@realacquisitions.com'
-EMAIL_HOST_PASSWORD = 'Reboot2@18'
+EMAIL_HOST_USER = 'support@houzes.com'
+EMAIL_HOST_PASSWORD = 'Success6'
 EMAIL_USE_TLS = True
 # EMAIL_USE_SSL = True
 
