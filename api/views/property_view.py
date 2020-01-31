@@ -280,8 +280,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
             rowCounter = rowCounter+1
             message = 'Properties uploading.Please wait'
             if rowCounter>1000:
-                message='Only first 1000 properties will be uploaded to the list'
-                break
+                message='Upload 1000 property for at a time.'
+                return JsonResponse({'status': False, 'message': message})
 
             # iterator = 0
             # while iterator < len(requestData['cities']):

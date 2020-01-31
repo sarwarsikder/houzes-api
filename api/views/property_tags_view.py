@@ -153,33 +153,30 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
 
         return Response({'status': status, 'message': message})
 
-
     @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/property-cluster')
     def property_by_tag(self, request, *args, **kwargs):
-        userList = UserList.objects.filter(user=request.user)
-        property = Property.objects.filter(Q(user_list__in=userList) &(Q(property_tags__contains=[{'id': kwargs['pk']}]) | Q(property_tags__contains=[{'id': int(kwargs['pk'], 10)}])))
-        page_size = request.GET.get('limit')
-
-
-        paginator = PropertiesFilterByTagPagination()
-        if page_size:
-            paginator.page_size = page_size
-        else:
-            paginator.page_size = 1000
-
-        result_page = paginator.paginate_queryset(property, request)
-        serializer = ClusterViewByListSerializer(result_page, many=True)
-        return paginator.get_paginated_response(data=serializer.data)
-
-    @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/property-cluster-filter')
-    def property_by_tag(self, request, *args, **kwargs):
         try:
-            if "member" in request.GET:
+            if "members" in request.GET:
                 userList = UserList.objects.filter(user__in=list(map(int, request.GET.get("member").split(","))))
                 property = Property.objects.filter(Q(user_list__in=userList) & (
-                            Q(property_tags__contains=[{'id': kwargs['pk']}]) | Q(
-                        property_tags__contains=[{'id': int(kwargs['pk'], 10)}])))
+                        Q(property_tags__contains=[{'id': kwargs['pk']}]) | Q(
+                    property_tags__contains=[{'id': int(kwargs['pk'], 10)}])))
                 page_size = 1000
+
+                paginator = PropertiesFilterByTagPagination()
+                if page_size:
+                    paginator.page_size = page_size
+                else:
+                    paginator.page_size = 1000
+
+                result_page = paginator.paginate_queryset(property, request)
+                serializer = ClusterViewByListSerializer(result_page, many=True)
+                return paginator.get_paginated_response(data=serializer.data)
+            else:
+                userList = UserList.objects.filter(user=request.user)
+                property = Property.objects.filter(Q(user_list__in=userList) &(Q(property_tags__contains=[{'id': kwargs['pk']}]) | Q(property_tags__contains=[{'id': int(kwargs['pk'], 10)}])))
+                page_size = request.GET.get('limit')
+
 
                 paginator = PropertiesFilterByTagPagination()
                 if page_size:
@@ -192,4 +189,4 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                 return paginator.get_paginated_response(data=serializer.data)
         except:
             print("-----")
-        return Response({'next': None,'previous': None,'count': 0,'results': []})
+        return Response({'next': None, 'previous': None, 'count': 0, 'results': []})
