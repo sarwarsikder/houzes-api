@@ -272,6 +272,9 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
 WEB_APP_URL='houzes.com'
+
+MAILER_WIZARD_MICRO_SERVICE_URL = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
+
 try:
     if APP_ENV is 'DEV':
         from .dev_settings import *
