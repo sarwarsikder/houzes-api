@@ -14,6 +14,7 @@ from notifications.signals import notify
 
 from api.serializers import *
 from houzes_api import settings
+from util.ScrapeHelper import ScrapeHelper
 
 POWER_TRACE_HOST = getattr(settings, "POWER_TRACE_HOST", None)
 POWER_TRACE_CLIENT_ID = getattr(settings, "POWER_TRACE_CLIENT_ID", None)
@@ -202,6 +203,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
             message = "Failed to create property"
 
         return Response({'status': status, 'data': data, 'message': message})
+
+    @action(detail=False, methods=['get'])
+    def get_code(self, request):
+        return Response(ScrapeHelper.get_code())
 
     @action(detail=False, url_path='info/(?P<pk>[\w-]+)')
     def get_details_by_google_place_id(self, request, *args, **kwargs):
@@ -1179,7 +1184,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         url = 'https://www.mapdevelopers.com/data.php?operation=geocode'
         data = {'address': address,
                 'region': 'USA',
-                'code': '9jw1wi8'}
+                'code': ScrapeHelper.get_code()}
         res = requests.post(url, data=data)
         print(res.json())
         return res.json()
