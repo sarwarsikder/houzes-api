@@ -20,6 +20,7 @@ class MailWizardUserInfoViewSet(viewsets.ModelViewSet):
     def get_user_info(self, request):
         response = {'status': False, 'data': {}, 'message': ''}
         try:
+            response['status'] = True
             response['data'] = MailWizardUserInfoSerializer(MailWizardUserInfo.objects.filter
                                                             (user_id=request.user.id).first()).data
         except MailWizardUserInfo.DoesNotExist:
