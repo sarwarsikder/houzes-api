@@ -159,7 +159,7 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
             if "members" in request.GET:
                 userList = UserList.objects.filter(user__in=list(map(int, request.GET.get("members").split(","))))
                 property = Property.objects.filter(Q(user_list__in=userList) & (
-                        Q(property_tags__contains=[{'id': kwargs['pk']}]) | Q(
+                        Q(property_tags__contains=[{'id': str(kwargs['pk'])}]) | Q(
                     property_tags__contains=[{'id': int(kwargs['pk'], 10)}])))
                 page_size = 1000
 
