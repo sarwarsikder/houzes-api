@@ -421,7 +421,8 @@ class HistoryViewSet(viewsets.ModelViewSet):
     def get_first_ten_team_visited_properties(self,request,*args,**kwargs):
         page_size = request.GET.get('limit')
         users = User.objects.filter(invited_by=request.user.id)
-        histories = History.objects.filter(~Q(end_time=None), user__in=users).order_by('-id')
+        print(users)
+        histories = History.objects.filter(~Q(end_time=None) & Q(user__in=users)).order_by('-id')
         history_details = HistoryDetail.objects.filter(history__in=histories).values('property_id')
         properties = Property.objects.filter(id__in=history_details)
         paginator = CustomPagination()
