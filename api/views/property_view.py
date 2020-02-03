@@ -336,7 +336,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
         tagId = kwargs['id']
         page_size = request.GET.get('limit')
         user = User.objects.get(id=request.user.id)
-        property = Property.objects.filter(property_tags__contains=[{'id': int(tagId, 10)}], user_list__user=user)
+        # property = Property.objects.filter(property_tags__contains=[{'id': int(tagId, 10)}], user_list__user=user)
+        property = Property.objects.filter(user_list__user=user)
+        property = property.filter(Q(property_tags__contains=[{'id': str(tagId)}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size
@@ -1176,16 +1178,16 @@ class PropertyViewSet(viewsets.ModelViewSet):
         except:
             return Response({'status' : False, 'data': {}, 'message' : 'Error deleting tag'})
 
-    # @action(detail=False, methods=['GET'], url_path='fetch-missing-lat-lng/(?P<pk>[\w-]+)')
-    # def fetch_lat_lng(self, request, *args, **kwargs):
-    #     try:
-    #         list_id = kwargs['pk']
-    #         # update_property_lat_lng(list_id)
-    #         threading.Thread(target=PropertyViewSet.update_property_lat_lng, args=(list_id,)).start()
-    #         return Response({'code': 200, 'message': 'Updating Lat/Lng...'})
-    #     except:
-    #         traceback.print_exc()
-    #         return Response({'code': 500, 'message': 'Server Error!'})
+    @action(detail=False, methods=['GET'], url_path='fetch-missing-lat-lng/(?P<pk>[\w-]+)')
+    def fetch_lat_lng(self, request, *args, **kwargs):
+        try:
+            list_id = kwargs['pk']
+            # update_property_lat_lng(list_id)
+            threading.Thread(target=PropertyViewSet.update_property_lat_lng, args=(list_id,)).start()
+            return Response({'code': 200, 'message': 'Updating Lat/Lng...'})
+        except:
+            traceback.print_exc()
+            return Response({'code': 500, 'message': 'Server Error!'})
 
     def get_property_info_by_address(address):
         print(address)
