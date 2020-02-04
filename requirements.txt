@@ -2,8 +2,9 @@ amqp==2.5.2
 authorizenet==1.1.3
 Babel==2.8.0
 billiard==3.6.1.0
-boto3==1.9.188
-botocore==1.12.188
+boto==2.49.0
+boto3==1.9.184
+botocore==1.12.184
 celery==4.4.0
 certifi==2019.6.16
 chardet==3.0.4
@@ -21,6 +22,7 @@ django-notifications-hq==1.5.0
 django-oauth-toolkit==1.2.0
 django-oauth2-provider==0.2.6.1
 django-rest-framework-social-oauth2==1.1.0
+django-storages==1.7.1
 django-stubs==1.2.0
 django-timezone-field==4.0
 djangorestframework==3.9.0

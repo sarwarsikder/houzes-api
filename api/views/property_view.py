@@ -974,6 +974,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if 'power_trace' in requestData:
                 power_trace = int(requestData['power_trace'])
             if 'address' in requestData:
+                address_counter = 0
                 for data in requestData['address']:
                     try:
                         get_neighborhood = GetNeighborhood()
@@ -1001,13 +1002,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
                             "property_id": get_neighborhood.id
                         }
                         formatted_request_data.append(formatted_data)
+                        address_counter = address_counter+1
                     except:
                         print('EXCEPTION IN REQUEST')
                 required_coin = 0.0
                 if fetch_owner_info == 1:
-                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='fetch-ownership-info', plan=upgrade_profile.plan).first().payment_plan_coin)
+                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='fetch-ownership-info', plan=upgrade_profile.plan).first().payment_plan_coin)*address_counter
                 if power_trace == 1:
-                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='power-trace', plan=upgrade_profile.plan).first().payment_plan_coin)
+                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='power-trace', plan=upgrade_profile.plan).first().payment_plan_coin)*address_counter
                 if upgrade_profile.coin < required_coin :
                     status = False
                     message = 'Sorry! Insufficient balance'

@@ -39,10 +39,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-APP_ENV = 'PROD'  # PROD, DEV
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     'rest_framework',
+    'storages',
     'oauth2_provider',
     'social_django',
     'rest_framework_social_oauth2',
@@ -62,6 +59,10 @@ INSTALLED_APPS = [
     'celery_task',
     'django_celery_beat',
 ]
+APP_ENV = 'PROD'  # PROD, DEV
+
+# Application definition
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -228,10 +229,24 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/userinfo.profile',
 ]
 
-AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"
-AWS_SECRET_KEY = "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"
-AWS_REGION = "us-east-2"
-S3_BUCKET_NAME = "houzes"
+
+AWS_S3_ACCESS_KEY_ID = 'AKIAIHTBVHHY6BGFFMIQ'
+AWS_S3_SECRET_ACCESS_KEY = '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'
+AWS_REGION = 'us-east-2'
+AWS_S3_REGION = 'us-east-2'
+S3_BUCKET_NAME = 'houzes'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_S3_SECURE_URLS = True  # use http instead of https
+AWS_QUERYSTRING_AUTH = False  # don't add complex authentication-related query parameters for requests
+# AWS_S3_ACCESS_KEY_ID = 'AKIAIHTBVHHY6BGFFMIQ'  # enter your access key id
+# AWS_S3_SECRET_ACCESS_KEY = 'ikg1QAua5p9AJBw1vNMd3uUv3EwU1lf'  # enter your secret access key
+# S3_BUCKET_NAME = "houzes"
+AWS_STORAGE_BUCKET_NAME = 'houzes'
+# AWS_REGION = "us-east-2"
+# AWS_LOCATION = 'pdf-files'
+AWS_DEFAULT_ACL = None
+
+
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -272,6 +287,7 @@ CELERY_RESULT_BACKEND = 'redis://houzes-redis.pafft5.ng.0001.use1.cache.amazonaw
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
+
 
 WEB_APP_URL='houzes.com'
 
