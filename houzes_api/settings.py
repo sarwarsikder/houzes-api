@@ -230,23 +230,25 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 ]
 
 
-AWS_S3_ACCESS_KEY_ID = 'AKIAIHTBVHHY6BGFFMIQ'
-AWS_S3_SECRET_ACCESS_KEY = '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'
-AWS_REGION = 'us-east-2'
-AWS_S3_REGION = 'us-east-2'
-S3_BUCKET_NAME = 'houzes'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+# nadim's key
+AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"
+AWS_SECRET_KEY = "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"
+AWS_REGION = "us-east-2"
+
+S3_BUCKET_NAME = "houzes"
+# S3 Settings
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_S3_SECURE_URLS = True  # use http instead of https
 AWS_QUERYSTRING_AUTH = False  # don't add complex authentication-related query parameters for requests
-# AWS_S3_ACCESS_KEY_ID = 'AKIAIHTBVHHY6BGFFMIQ'  # enter your access key id
-# AWS_S3_SECRET_ACCESS_KEY = 'ikg1QAua5p9AJBw1vNMd3uUv3EwU1lf'  # enter your secret access key
-# S3_BUCKET_NAME = "houzes"
+AWS_S3_REGION_NAME = "us-east-2"
+
+# nadim's key
+AWS_S3_ACCESS_KEY_ID = "AKIAIHTBVHHY6BGFFMIQ"
+AWS_S3_SECRET_ACCESS_KEY = "ikg1QAua5p9AJBw1vNMd3uUv3EwU1lf+4PZNWhF5"
+
 AWS_STORAGE_BUCKET_NAME = 'houzes'
-# AWS_REGION = "us-east-2"
-# AWS_LOCATION = 'pdf-files'
+
 AWS_DEFAULT_ACL = None
-
-
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
