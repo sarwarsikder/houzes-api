@@ -18,6 +18,7 @@ from django.core.mail import send_mail
 import requests
 from api.serializers import *
 from api.models import *
+from houzes_api.util.s3_image_upload import image_upload
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -153,13 +154,23 @@ class UserViewSet(viewsets.ModelViewSet):
             if 'photo' in request.FILES:
                 # data['photo'] = "in progress"
                 file = request.FILES['photo']
-                file_path = "photos/user/{}/{}".format(generate_shortuuid(), str(time.time()) + '.jpg')
-                s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,
-                                                                    file_path)
-                file_upload(file, file_path)
-                request.data['photo'] = s3_url
-                photo = s3_url
-                print(photo)
+                # file_path = "photos/user/{}/{}".format(generate_shortuuid(), str(time.time()) + '.jpg')
+                # s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,
+                #                                                     file_path)
+                # file_upload(file, file_path)
+                # request.data['photo'] = s3_url
+                # photo = s3_url
+                # print(photo)
+
+                s3_path_prefix = "photos/user/{}/".format(kwargs['pk'])
+                file_name = generate_shortuuid() + str(time.time()) + '.png'
+                img_data = image_upload(file, s3_path_prefix, file_name, True)
+                if img_data["status"]:
+                    full_img_path = img_data['full_img_url']
+                    thumb_img_path = img_data['thumb_url']
+                    photo = full_img_path
+
+
         except:
             status = False
             message = "Error uploading photo"
@@ -240,10 +251,19 @@ class UserViewSet(viewsets.ModelViewSet):
         s3_url = ""
         if 'photo' in request.FILES:
             file = request.FILES['photo']
-            file_path = "photos/user/{}/{}".format(kwargs['pk'], str(time.time()) + '.jpg')
-            s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
-            file_upload(file, file_path)
-            request.data['photo'] = s3_url
+            # file_path = "photos/user/{}/{}".format(kwargs['pk'], str(time.time()) + '.jpg')
+            # s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+            # file_upload(file, file_path)
+
+            s3_path_prefix = "photos/user/{}/".format(kwargs['pk'])
+            file_name = generate_shortuuid() + str(time.time()) + '.png'
+            img_data = image_upload(file, s3_path_prefix, file_name, True)
+            if img_data["status"]:
+                full_img_path = img_data['full_img_url']
+                thumb_img_path = img_data['thumb_url']
+                request.data['photo'] = thumb_img_path
+            else:
+                return Response({'status': True, 'data': {}, 'message': img_data["message"]})
 
         if not request.data._mutable:
             request.data._mutable = state

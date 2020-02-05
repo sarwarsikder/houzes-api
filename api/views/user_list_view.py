@@ -157,7 +157,7 @@ class UserListViewSet(viewsets.ModelViewSet):
         print(':::::')
         members = [int(x) for x in request.GET.get('members').split(',')]
         print(members)
-        user_lists = UserList.objects.filter(user_id__in=members)
+        user_lists = UserList.objects.filter(user_id__in=members).order_by('-created_at')
         user_list_serializer = UserListSerializer(user_lists,many = True)
         return Response(user_list_serializer.data)
 

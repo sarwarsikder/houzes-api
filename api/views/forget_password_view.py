@@ -6,6 +6,7 @@ from rest_framework import viewsets, filters, permissions
 
 from api.serializers import *
 from api.models import *
+from api.views.send_email_view import SendEmailViewSet
 from houzes_api import settings
 
 
@@ -32,14 +33,19 @@ class ForgetPasswordViewSet(viewsets.ModelViewSet):
                 if ForgetPassword.objects.filter(user = user).count() :
                     ForgetPassword.objects.filter(user=user).delete()
                 link_key = generate_shortuuid()
-                send_mail(subject="HouZes Forgot Password",
-                          message="Dear user\n"+
-                              "Click this link to create a new password https://" + settings.WEB_APP_URL + '/forget-password/' +
-                                  str(link_key),
-                          from_email=settings.EMAIL_HOST_USER,
-                          recipient_list=[email],
-                          fail_silently=False
-                          )
+                # send_mail(subject="HouZes Forgot Password",
+                #           message="Dear user\n"+
+                #               "Click this link to create a new password https://" + settings.WEB_APP_URL + '/forget-password/' +
+                #                   str(link_key),
+                #           from_email=settings.EMAIL_HOST_USER,
+                #           recipient_list=[email],
+                #           fail_silently=False
+                #           )
+                subject = "HouZes Forgot Password"
+                body = "Click this link below to create a new password"
+                url = "https://" + settings.WEB_APP_URL + "/forget-password/" +str(link_key)
+                name = user.first_name + ' '+user.last_name
+                SendEmailViewSet.send_email_view(self, subject, body, email, name, url)
                 status = True
                 forgetPassword = ForgetPassword(user=user, link_key=link_key)
                 forgetPassword.save()
