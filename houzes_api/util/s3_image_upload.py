@@ -1,6 +1,6 @@
 import io
 import traceback
-from PIL import Image
+from PIL import Image, ExifTags
 from django.core.files.storage import default_storage
 from PIL import ImageOps
 
@@ -9,8 +9,18 @@ def image_upload(img_file, file_path, file_name, with_thumb):
     data = {}
     try:
         if file_path and file_name:
-            img_file = ImageOps.exif_transpose(img_file)
             im = Image.open(img_file)
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
+            exif = dict(im._getexif().items())
+
+            if exif[orientation] == 3:
+                im = im.rotate(180, expand=True)
+            elif exif[orientation] == 6:
+                im = im.rotate(270, expand=True)
+            elif exif[orientation] == 8:
+                im = im.rotate(90, expand=True)
             buf = io.BytesIO()
             im.save(buf, format="png")
             byte_im = buf.getvalue()
@@ -22,7 +32,7 @@ def image_upload(img_file, file_path, file_name, with_thumb):
 
             if with_thumb:
                 thumb_path = file_path+"thumb/"+file_name
-                im = Image.open(img_file)
+                # im = Image.open(img_file)
 
                 with im as image:
                     width, height = image.size

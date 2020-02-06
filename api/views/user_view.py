@@ -263,7 +263,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 thumb_img_path = img_data['thumb_url']
                 request.data['photo'] = thumb_img_path
             else:
-                return Response({'status': True, 'data': {}, 'message': img_data["message"]})
+                return Response({'status': True, 'data': {}, 'message': img_data["msg"]})
 
         if not request.data._mutable:
             request.data._mutable = state
