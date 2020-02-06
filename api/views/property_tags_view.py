@@ -92,6 +92,10 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                         message = 'Tag already exist'
                         tagExist = True
                 if not tagExist:
+                    try:
+                        property_tag = int(property_tag)
+                    except:
+                        print('DO NOTHING')
                     property.property_tags.append({'id': property_tag})
                     property.save()
                     message = 'Tag added to the property'
