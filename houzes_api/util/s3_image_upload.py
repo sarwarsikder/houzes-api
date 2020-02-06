@@ -2,18 +2,19 @@ import io
 import traceback
 from PIL import Image
 from django.core.files.storage import default_storage
-from resizeimage import resizeimage
+from PIL import ImageOps
 
 
 def image_upload(img_file, file_path, file_name, with_thumb):
     data = {}
     try:
         if file_path and file_name:
+            img_file = ImageOps.exif_transpose(img_file)
             im = Image.open(img_file)
             buf = io.BytesIO()
             im.save(buf, format="png")
             byte_im = buf.getvalue()
-            full_img_path = file_path +file_name
+            full_img_path = file_path + file_name
             s3_file_obj = default_storage.open(full_img_path, 'wb')
             s3_file_obj.write(byte_im)
             s3_file_obj.close()
