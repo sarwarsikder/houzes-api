@@ -22,7 +22,7 @@ def image_upload(img_file, file_path, file_name, with_thumb):
             elif exif[orientation] == 8:
                 im = im.rotate(90, expand=True)
             buf = io.BytesIO()
-            im.save(buf, format="png")
+            im.save(buf, format="png", optimize = True, quality = 70)
             byte_im = buf.getvalue()
             full_img_path = file_path + file_name
             s3_file_obj = default_storage.open(full_img_path, 'wb')
@@ -42,7 +42,7 @@ def image_upload(img_file, file_path, file_name, with_thumb):
                         im_resize = im.resize((200, 200))
                 # im_resize = im.resize((200, 200))
                 buf = io.BytesIO()
-                im_resize.save(buf, format="png")
+                im_resize.save(buf, format="png", optimize=True, quality=70)
                 byte_im = buf.getvalue()
                 s3_file_obj = default_storage.open(thumb_path, 'wb')
                 s3_file_obj.write(byte_im)

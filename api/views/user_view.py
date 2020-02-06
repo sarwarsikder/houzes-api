@@ -169,6 +169,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     full_img_path = img_data['full_img_url']
                     thumb_img_path = img_data['thumb_url']
                     photo = full_img_path
+                    photo_thumb = thumb_img_path
 
 
         except:
@@ -180,7 +181,7 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = User(email=email, password=password, first_name=first_name, last_name=last_name,
                         phone_number=phone_number, invited_by=invited_by, is_active=is_active, is_admin=is_admin,
-                        photo=photo)
+                        photo=photo, photo_thumb=thumb_img_path)
             print(user)
             user.save()
             # if user.photo != None:
@@ -234,6 +235,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({'status': status, 'data': data, 'message': message})
 
     def partial_update(self, request, *args, **kwargs):
+        user = User.objects.get(id=kwargs['pk'])
         message = ''
         if not request.data._mutable:
             state = request.data._mutable
@@ -243,7 +245,7 @@ class UserViewSet(viewsets.ModelViewSet):
             if not 'old_password' in request.data:
                 return Response({'status': False, 'data': {}, 'message': 'old password is required'})
             else:
-                user = User.objects.get(id=kwargs['pk'])
+                # user = User.objects.get(id=kwargs['pk'])
                 if not user.check_password(request.data['old_password']):
                     return Response({'status': False, 'data': {}, 'message': 'Provide your valid old password'})
                 else:
@@ -261,7 +263,8 @@ class UserViewSet(viewsets.ModelViewSet):
             if img_data["status"]:
                 full_img_path = img_data['full_img_url']
                 thumb_img_path = img_data['thumb_url']
-                request.data['photo'] = thumb_img_path
+                request.data['photo'] = full_img_path
+                request.data['photo_thumb'] = thumb_img_path
             else:
                 return Response({'status': True, 'data': {}, 'message': img_data["msg"]})
 

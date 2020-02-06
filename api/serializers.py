@@ -57,6 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number' : instance.phone_number,
             'invited_by' : instance.invited_by,
             'photo' : instance.photo,
+            'photo_thumb' : instance.photo_thumb,
             'is_active' : instance.is_active,
             'is_admin' : instance.is_admin,
             'upgrade_info' : {

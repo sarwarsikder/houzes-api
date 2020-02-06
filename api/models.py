@@ -40,6 +40,7 @@ class User(AbstractBaseUser):
     phone_number = models.CharField(max_length=255, null=False)
     invited_by = models.IntegerField(null=True)
     photo = models.TextField(null=True)
+    photo_thumb = models.TextField(null=True, default=None)
     upgrade = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
