@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             if upgrade_profile:
                 amount = upgrade_profile.coin
         plan = Plans.objects.filter(id=upgrade_profile.plan.id).first()
-        if plan.plan_name == 'Team' and instance.is_admin == True:
+        if plan.plan_name == 'Team' and instance.is_admin :
             is_team_invitable = True
 
         paymentPlanPowerTrace = PaymentPlan.objects.filter(payment_plan_name = 'power-trace', plan = plan).first()

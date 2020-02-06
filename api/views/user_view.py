@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import traceback
 
 from django.http import JsonResponse
 from rest_framework import viewsets, permissions, status
@@ -75,6 +76,7 @@ class UserViewSet(viewsets.ModelViewSet):
         is_active = False
         is_admin = False
         photo = None
+        photo_thumb = None
 
         try:
             if 'password' in request.data:
@@ -162,7 +164,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 # photo = s3_url
                 # print(photo)
 
-                s3_path_prefix = "photos/user/{}/".format(kwargs['pk'])
+                s3_path_prefix = "photos/user/"
                 file_name = generate_shortuuid() + str(time.time()) + '.png'
                 img_data = image_upload(file, s3_path_prefix, file_name, True)
                 if img_data["status"]:
@@ -173,6 +175,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
         except:
+            traceback.print_exc()
             status = False
             message = "Error uploading photo"
             data = None
@@ -181,9 +184,9 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = User(email=email, password=password, first_name=first_name, last_name=last_name,
                         phone_number=phone_number, invited_by=invited_by, is_active=is_active, is_admin=is_admin,
-                        photo=photo, photo_thumb=thumb_img_path)
+                        photo=photo, photo_thumb=photo_thumb)
             print(user)
-            user.save()
+            # user.save()
             # if user.photo != None:
             #     if 'http' in user.photo:
             #         print('somossa eikhanei')
@@ -227,6 +230,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 data = userSerializer.data
                 message = "Account successfully created."
         except Exception as exc:
+            traceback.print_exc()
             print(exc)
             status = False
             data = None

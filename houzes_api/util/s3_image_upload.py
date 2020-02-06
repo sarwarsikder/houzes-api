@@ -10,17 +10,19 @@ def image_upload(img_file, file_path, file_name, with_thumb):
     try:
         if file_path and file_name:
             im = Image.open(img_file)
+
             for orientation in ExifTags.TAGS.keys():
                 if ExifTags.TAGS[orientation] == 'Orientation':
                     break
-            exif = dict(im._getexif().items())
+            if im._getexif() is not None:
+                exif = dict(im._getexif().items())
 
-            if exif[orientation] == 3:
-                im = im.rotate(180, expand=True)
-            elif exif[orientation] == 6:
-                im = im.rotate(270, expand=True)
-            elif exif[orientation] == 8:
-                im = im.rotate(90, expand=True)
+                if exif[orientation] == 3:
+                    im = im.rotate(180, expand=True)
+                elif exif[orientation] == 6:
+                    im = im.rotate(270, expand=True)
+                elif exif[orientation] == 8:
+                    im = im.rotate(90, expand=True)
             buf = io.BytesIO()
             im.save(buf, format="png", optimize = True, quality = 70)
             byte_im = buf.getvalue()

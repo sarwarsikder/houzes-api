@@ -119,9 +119,12 @@ def scout_post_save(sender, instance, created, update_fields, **kwargs):
 @receiver(post_save,sender = User)
 def user_post_save(sender, instance, created, update_fields, **kwargs):
     try :
+        print("----post save start----")
         if created:
             user = User.objects.get(id=instance.id)
-            if user.is_admin == True:
+            print("user post save : ")
+            print(user.__dict__)
+            if user.is_admin:
                 upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
                 if not upgrade_profile :
                     upgrade_profile = UpgradeProfile()
@@ -131,6 +134,11 @@ def user_post_save(sender, instance, created, update_fields, **kwargs):
                     upgrade_profile.save()
                     user.upgrade = True
                     user.save()
+                    print("---------upgrade profile done---------")
+                else:
+                    print("upgrade profile not found")
+            else:
+                print("user is not admin")
     except :
         print('Error while user post save')
 
