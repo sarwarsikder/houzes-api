@@ -77,7 +77,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
         user_list = UserList(name=name, user=user, leads_count=0)
         user_list.save()
 
-        url = WEB_APP_URL+"/scout-form/"+str(user_list.id)+"/"+generate_shortuuid()
+        url = "https://"+WEB_APP_URL+"/scout-form/"+str(user_list.id)+"/"+generate_shortuuid()
         manager = User.objects.get(id=request.user.id)
 
         try:

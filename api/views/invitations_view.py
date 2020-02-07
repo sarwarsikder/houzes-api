@@ -51,14 +51,6 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
         if Invitations.objects.filter(email =receiver.strip()).first():
             try:
-                #     send_mail(subject="Invitation",
-                #               message=str(
-                #                   request.user) + " sent you an invitation click here to accept https://" + settings.WEB_APP_URL + '/team-invite/' + str(
-                #                   invitation_key),
-                #               from_email=settings.EMAIL_HOST_USER,
-                #               recipient_list=[receiver],
-                #               fail_silently=False
-                #               )
                 subject = 'Invitation'
                 body = str(request.user) + " sent you an invitation click the below link to accept."
                 email = receiver
@@ -77,45 +69,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
                 message = "User is not invited"
             return Response({'status': status, 'data': data, 'message': message})
 
-
-        # if 'invitation' in request.data:
-        #     if request.data['invitation']:
-        #         try:
-        #             #     send_mail(subject="Invitation",
-        #             #               message=str(
-        #             #                   request.user) + " sent you an invitation click here to accept https://" + settings.WEB_APP_URL + '/team-invite/' + str(
-        #             #                   invitation_key),
-        #             #               from_email=settings.EMAIL_HOST_USER,
-        #             #               recipient_list=[receiver],
-        #             #               fail_silently=False
-        #             #               )
-        #             subject = 'Invitation'
-        #             body = str(request.user) + " sent you an invitation click the below link to accept."
-        #             email = receiver
-        #             url = 'https://' + settings.WEB_APP_URL + '/team-invite/' + str(invitation_key)
-        #             SendEmailViewSet.send_email_view(self, subject, body, email, '', url)
-        #
-        #             invitations = Invitations(user=User.objects.get(id=request.user.id), invitation_key=invitation_key,
-        #                                       email=receiver, status=0)
-        #             invitations.save()
-        #             invitationsSerializer = InvitationsSerializer(invitations)
-        #             status = True
-        #             data = invitationsSerializer.data
-        #             message = "Invitation resent"
-        #         except:
-        #             status = False
-        #             message = "User is not invited"
-        #         return Response({'status': status, 'data': data, 'message': message})
-
         try:
-        #     send_mail(subject="Invitation",
-        #               message=str(
-        #                   request.user) + " sent you an invitation click here to accept https://" + settings.WEB_APP_URL + '/team-invite/' + str(
-        #                   invitation_key),
-        #               from_email=settings.EMAIL_HOST_USER,
-        #               recipient_list=[receiver],
-        #               fail_silently=False
-        #               )
             subject = 'Invitation'
             body = str(request.user) + " sent you an invitation click the below link to accept."
             email = receiver
