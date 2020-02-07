@@ -77,7 +77,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
         user_list = UserList(name=name, user=user, leads_count=0)
         user_list.save()
 
-        url = "https://"+WEB_APP_URL+"/scout-form/"+str(user_list.id)+"/"+generate_shortuuid()
+        url = WEB_APP_URL+"/scout-form/"+str(user_list.id)+"/"+generate_shortuuid()
         manager = User.objects.get(id=request.user.id)
 
         try:
@@ -91,7 +91,7 @@ class ScoutViewSet(viewsets.ModelViewSet):
             message = "New scout/s created"
             subject = 'Invitaion To Scout'
             body = user.first_name+' '+user.last_name+' has sent you an invitation to scout from HouZes.Click the link below to accept the invitaion'
-            SendEmailViewSet.send_email_view(self,subject,body,email,first_name+' '+last_name,url)
+            SendEmailViewSet.send_email_view(self,subject,body,email,first_name+' '+last_name,"https://"+url)
         except:
             status = False
             data = None
