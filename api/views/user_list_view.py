@@ -168,7 +168,10 @@ class UserListViewSet(viewsets.ModelViewSet):
         user_list = UserList.objects.get(id=kwargs['pk'])
         user_list_serializer = UserListSerializer(user_list)
         user = User.objects.get(id = request.user.id)
-        tag_id = kwargs['id']
+        try:
+            tag_id = int(kwargs['id'])
+        except:
+            tag_id = kwargs['id']
         if user.is_admin == False:
             user = User.objects.get(id=user.invited_by)
         try:
