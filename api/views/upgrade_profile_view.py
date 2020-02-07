@@ -75,15 +75,35 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             upgrade_history.transaction_coin = plan.plan_coin
             upgrade_history.save()
 
-            billing_card_info = BillingCardInfo()
-            billing_card_info.user = user
-            billing_card_info.card_name = None
-            billing_card_info.card_number = card_number
-            billing_card_info.card_code = card_code
-            billing_card_info.exp_date = expiration_date
-            billing_card_info.is_save = is_save
-            billing_card_info.card_name = card_name
-            billing_card_info.save()
+            # billing_card_info = BillingCardInfo()
+            # billing_card_info.user = user
+            # billing_card_info.card_name = None
+            # billing_card_info.card_number = card_number
+            # billing_card_info.card_code = card_code
+            # billing_card_info.exp_date = expiration_date
+            # billing_card_info.is_save = is_save
+            # billing_card_info.card_name = card_name
+            # billing_card_info.save()
+
+            if BillingCardInfo.objects.filter(user__id=user.id, card_number=card_number).first():
+                if is_save:
+                    BillingCardInfo.objects.filter(user=user, card_number=card_number).update(card_name=card_name,
+                                                                                                 card_code=card_code,
+                                                                                                 exp_date=expiration_date,
+                                                                                                 is_save=is_save)
+                else:
+                    BillingCardInfo.objects.filter(user=user, card_number=card_number).update(card_name=card_name,
+                                                                                                    card_code=card_code,
+                                                                                                    exp_date=expiration_date)
+            else:
+                billing_card_info = BillingCardInfo()
+                billing_card_info.user = user
+                billing_card_info.card_number = card_number
+                billing_card_info.card_code = card_code
+                billing_card_info.exp_date = expiration_date
+                billing_card_info.card_name = card_name
+                billing_card_info.is_save = is_save
+                billing_card_info.save()
 
             response_data['status'] = True
             response_data['data'] = upgrade_profile_serializer.data

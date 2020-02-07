@@ -194,15 +194,21 @@ def charge_credit_card(request):
         upgradeProfile.coin = float(upgradeProfile.coin) + float(amount)
         upgradeProfile.save()
 
-        billing_card_info = BillingCardInfo()
-        billing_card_info.user = User.objects.get(id=request.user.id)
-        billing_card_info.card_name = None
-        billing_card_info.card_number = card_number
-        billing_card_info.card_code = card_code
-        billing_card_info.exp_date = expiration_date
-        billing_card_info.card_name = card_name
-        billing_card_info.is_save = is_save
-        billing_card_info.save()
+
+        if BillingCardInfo.objects.filter(user__id = manager.id, card_number = card_number).first():
+            if is_save:
+                BillingCardInfo.objects.filter(user=manager, card_number=card_number).update(card_name=card_name, card_code=card_code,exp_date=expiration_date,is_save=is_save)
+            else:
+                BillingCardInfo.objects.filter(user=manager, card_number=card_number).update(card_name=card_name, card_code=card_code,exp_date=expiration_date)
+        else:
+            billing_card_info = BillingCardInfo()
+            billing_card_info.user = manager
+            billing_card_info.card_number = card_number
+            billing_card_info.card_code = card_code
+            billing_card_info.exp_date = expiration_date
+            billing_card_info.card_name = card_name
+            billing_card_info.is_save = is_save
+            billing_card_info.save()
 
         json_response['status'] = True
         json_response['data'] = UserSerializer(manager).data['upgrade_info']
