@@ -6,7 +6,7 @@ from api.views import error_handler
 import notifications.urls
 
 from authorization.views.customTokenView import CustomTokenView
-from authorization.views.CustomConvertTokenView import CustomConvertTokenView
+from authorization.views.customConvertTokenView import CustomConvertTokenView
 
 urlpatterns = [
     path('admin/', admin.site.urls),

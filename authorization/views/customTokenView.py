@@ -8,6 +8,7 @@ from oauth2_provider.models import get_access_token_model
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.signals import app_authorized
 from oauth2_provider.views.mixins import OAuthLibMixin
+from api.models import *
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -40,6 +41,14 @@ class CustomTokenView(OAuthLibMixin, View):
 
         for k, v in headers.items():
             response[k] = v
+        print('::::::::::USER ID :::::::::::::::::')
+        # user = User.objects.get(id=token.user.id)
+        upgrade_profile = UpgradeProfile.objects.filter(user = token.user).first()
+        if upgrade_profile:
+            if upgrade_profile.subscriptionId!= None:
+                print(upgrade_profile.subscriptionId)
+        else:
+            print("::::::::::INVALID USER::::::::::")
         return response
 
 

@@ -24,6 +24,7 @@ class CustomConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         print("::::::::::SOCIAL LOGIN IS WORKING::::::::::::::::::")
+        print(print(request.POST))
         # Use the rest framework `.data` to fake the post body of the django request.
         request._request.POST = request._request.POST.copy()
         for key, value in request.data.items():
