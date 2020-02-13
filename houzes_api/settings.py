@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'celery_task',
     'django_celery_beat',
 ]
-APP_ENV = 'PROD'  # PROD, DEV
+APP_ENV = 'DEV'  # PROD, DEV
 
 # Application definition
 

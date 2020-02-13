@@ -60,9 +60,13 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             response_data['message'] = subscription_response['messages']['message']['text']
             return Response(response_data)
 
-        if upgrade_profile :
+        if upgrade_profile:
             upgrade_profile.coin = float(upgrade_profile.coin)+0
             upgrade_profile.plan = plan
+            print(':::::::::::::::::::::::::::::::::::::')
+            print(type(subscription_response["subscriptionId"]))
+            upgrade_profile.subscriptionId = subscription_response["subscriptionId"]
+            # upgrade_profile.refId = subscription_response["refId"]
             upgrade_profile.save()
             upgrade_profile_serializer = UpgradeProfileSerializer(upgrade_profile)
 
@@ -112,6 +116,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             upgrade_profile = UpgradeProfile()
             upgrade_profile.user = user
             upgrade_profile.coin = 0.0
+            upgrade_profile.subscriptionId = subscription_response["subscriptionId"]
+            # upgrade_profile.refId = subscription_response["refId"]
             upgrade_profile.plan = plan
             upgrade_profile.save()
             upgrade_profile_serializer = UpgradeProfileSerializer(upgrade_profile)

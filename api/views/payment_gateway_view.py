@@ -214,9 +214,14 @@ def charge_credit_card(request):
         json_response['data'] = UserSerializer(manager).data['upgrade_info']
         json_response['message'] = payment_response['transactionResponse']['messages']['message']['description']
     else:
+        print('::::::::::payment response if failed:::::::::::::::::::')
+        print(payment_response)
         json_response['status'] = False
         json_response['data'] = UserSerializer(manager).data['upgrade_info']
-        json_response['message'] = payment_response['transactionResponse']['errors']['error']['errorText']
+        try:
+            json_response['message'] = payment_response['transactionResponse']['errors']['error']['errorText']
+        except:
+            json_response['message'] = payment_response['messages']['message']['text']
 
     return JsonResponse(json_response)
 
