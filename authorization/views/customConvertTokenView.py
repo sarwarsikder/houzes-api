@@ -1,5 +1,6 @@
 import json
 from braces.views import CsrfExemptMixin
+from oauth2_provider.models import AccessToken
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views.mixins import OAuthLibMixin
 from rest_framework import permissions
@@ -7,6 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_social_oauth2.oauth2_backends import KeepRequestCore
 from rest_framework_social_oauth2.oauth2_endpoints import SocialTokenServer
+from authorization.views.checkSubscription import CheckSubscription as cs
+from authorization.views.downgradeProfile import DowngradeProfile as dp
+from api.models import UpgradeProfile
+
 
 class CustomConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
     """
@@ -24,7 +29,6 @@ class CustomConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
 
     def post(self, request, *args, **kwargs):
         print("::::::::::SOCIAL LOGIN IS WORKING::::::::::::::::::")
-        print(print(request.POST))
         # Use the rest framework `.data` to fake the post body of the django request.
         request._request.POST = request._request.POST.copy()
         for key, value in request.data.items():
@@ -35,5 +39,18 @@ class CustomConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
 
         for k, v in headers.items():
             response[k] = v
-        print(response.data)
+        print(response.data['access_token'])
+        user = AccessToken.objects.filter(token=response.data['access_token']).first().user
+        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+        if upgrade_profile:
+            print('::::::::::IF UPGRADE PROFILE:::::::::::::')
+            if upgrade_profile.subscriptionId != None:
+                print(upgrade_profile.subscriptionId)
+                if not cs.get_subscription_status(self,upgrade_profile.subscriptionId):
+                    # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
+                    dp.downgrade(self,upgrade_profile, user)
+
+        else:
+            print("::::::::::INVALID USER::::::::::")
+        print(response)
         return response

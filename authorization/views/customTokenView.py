@@ -57,4 +57,5 @@ class CustomTokenView(OAuthLibMixin, View):
 
         else:
             print("::::::::::INVALID USER::::::::::")
+        print(response)
         return response
