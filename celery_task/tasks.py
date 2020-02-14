@@ -5,7 +5,7 @@ import datetime
 
 from api.models import *
 from api.serializers import UserSerializer
-from houzes_api.celery import app
+from houzes_api.celery_app import app
 
 
 @app.task()
