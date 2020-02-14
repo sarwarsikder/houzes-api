@@ -35,4 +35,5 @@ class CustomConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
 
         for k, v in headers.items():
             response[k] = v
+        print(response.data)
         return response
