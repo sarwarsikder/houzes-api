@@ -181,6 +181,7 @@ def charge_credit_card(request):
 
     response = createtransactioncontroller.getresponse()
     payment_response = to_dict(response)
+    print(payment_response)
     if payment_response['messages']['resultCode']=='Ok' :
         upgradeProfile = UpgradeProfile.objects.filter(user= manager).first()
         if not upgradeProfile:
@@ -212,11 +213,11 @@ def charge_credit_card(request):
 
         json_response['status'] = True
         json_response['data'] = UserSerializer(manager).data['upgrade_info']
-        json_response['message'] = payment_response['transactionResponse']['messages']['message']['description']
+        json_response['message'] = payment_response['messages']['message']['text']
     else:
         json_response['status'] = False
         json_response['data'] = UserSerializer(manager).data['upgrade_info']
-        json_response['message'] = payment_response['transactionResponse']['errors']['error']['errorText']
+        json_response['message'] = payment_response['messages']['message']['text']
 
     return JsonResponse(json_response)
 
