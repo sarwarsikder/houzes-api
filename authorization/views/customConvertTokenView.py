@@ -39,18 +39,20 @@ class CustomConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
 
         for k, v in headers.items():
             response[k] = v
-        print(response.data['access_token'])
-        user = AccessToken.objects.filter(token=response.data['access_token']).first().user
-        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
-        if upgrade_profile:
-            print('::::::::::IF UPGRADE PROFILE:::::::::::::')
-            if upgrade_profile.subscriptionId != None:
-                print(upgrade_profile.subscriptionId)
-                if not cs.get_subscription_status(self,upgrade_profile.subscriptionId):
-                    # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
-                    dp.downgrade(self,upgrade_profile, user)
+        try:
+            user = AccessToken.objects.filter(token=response.data['access_token']).first().user
+            upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+            if upgrade_profile:
+                print('::::::::::IF UPGRADE PROFILE:::::::::::::')
+                if upgrade_profile.subscriptionId != None:
+                    print(upgrade_profile.subscriptionId)
+                    if not cs.get_subscription_status(self,upgrade_profile.subscriptionId):
+                        # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
+                        dp.downgrade(self,upgrade_profile, user)
 
-        else:
-            print("::::::::::INVALID USER::::::::::")
+            else:
+                print("::::::::::INVALID USER::::::::::")
+        except:
+            print('EXCEPTION OCCURED WHILE CHECKING SUBSCRIPTION')
         print(response)
         return response

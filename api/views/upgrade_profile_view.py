@@ -73,6 +73,10 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             user.upgrade = True
             user.save()
 
+            #IF UPGRADE PROFILE TO "TEAM" THEN REACTIVATE HIS TEAM MEMBERS
+            if upgrade_profile.plan.id == 2:
+                User.objects.filter(invited_by=user.id).update(is_active = True)
+
             upgrade_history = UpgradeHistory()
             upgrade_history.upgrade_profile = upgrade_profile
             upgrade_history.plan = plan

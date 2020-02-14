@@ -43,19 +43,22 @@ class CustomTokenView(OAuthLibMixin, View):
 
         for k, v in headers.items():
             response[k] = v
-        print('::::::::::USER ID :::::::::::::::::')
-        user = User.objects.get(id=token.user.id)
-        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
-        if upgrade_profile:
-            if upgrade_profile.subscriptionId != None:
-                print(upgrade_profile.subscriptionId)
-                if not cs.get_subscription_status(self,upgrade_profile.subscriptionId):
-                    # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
-                    dp.downgrade(self,upgrade_profile, user)
+        try:
+            print('::::::::::USER ID :::::::::::::::::')
+            user = User.objects.get(id=token.user.id)
+            upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+            if upgrade_profile:
+                if upgrade_profile.subscriptionId != None:
+                    print(upgrade_profile.subscriptionId)
+                    if not cs.get_subscription_status(self,upgrade_profile.subscriptionId):
+                        # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
+                        dp.downgrade(self,upgrade_profile, user)
 
 
 
-        else:
-            print("::::::::::INVALID USER::::::::::")
+            else:
+                print("::::::::::INVALID USER::::::::::")
+        except:
+            print('EXCEPTION OCCURED WHILE CHECKING SUBSCRIPTION')
         print(response)
         return response
