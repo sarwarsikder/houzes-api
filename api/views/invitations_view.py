@@ -37,6 +37,14 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         except:
             receiver = request.body['email']
 
+        invitation_count = 0
+        invitation_count = User.objects.filter(invited_by = request.user.id).count()+Invitations.objects.filter(user__id = request.user.id).count()
+        if invitation_count>9:
+            status = False
+            data = None
+            message = "You can't invite more than 10 members"
+            return Response({'status': status, 'data': data, 'message': message})
+
         if User.objects.filter(email =receiver.strip()).first():
             status = False
             data = None
@@ -51,6 +59,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
         if Invitations.objects.filter(email =receiver.strip()).first():
             try:
+                Invitations.objects.filter(email =receiver.strip()).delete()
                 subject = 'Invitation'
                 body = str(request.user) + " sent you an invitation click the link below to accept."
                 email = receiver
