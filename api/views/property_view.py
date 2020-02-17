@@ -14,6 +14,7 @@ from notifications.signals import notify
 
 from api.serializers import *
 from houzes_api import settings
+from houzes_api.settings import FETCH_OWNER_INFO_HOST
 from util.ScrapeHelper import ScrapeHelper
 
 POWER_TRACE_HOST = getattr(settings, "POWER_TRACE_HOST", None)
@@ -637,7 +638,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         message = ""
         status = False
         data = []
-        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address'
+        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-by-address'
         headers = {
             'Content-Type': 'application/json',
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
@@ -798,7 +799,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         status = False
         data = {}
         message = ''
-        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
+        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
         headers = {
             'Content-Type': 'application/json',
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
@@ -838,7 +839,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         status = False
         data = {}
         message = ''
-        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
+        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
         headers = {
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
             'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
@@ -1080,7 +1081,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         status = False
         data = {}
         message = ''
-        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
+        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
         headers = {
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
             'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET

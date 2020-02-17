@@ -7,6 +7,7 @@ from rest_framework.decorators import authentication_classes, permission_classes
 
 from api.models import GetNeighborhood
 from houzes_api import settings
+from houzes_api.settings import FETCH_OWNER_INFO_HOST
 
 FETCH_OWNER_INFO_CLIENT_ID = getattr(settings, "FETCH_OWNER_INFO_CLIENT_ID", None)
 FETCH_OWNER_INFO_CLIENT_SECRET = getattr(settings, "FETCH_OWNER_INFO_CLIENT_SECRET", None)
@@ -35,7 +36,7 @@ def get_owner_info_by_request_id(request_id):
     status = False
     data = {}
     message = ''
-    url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
+    url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
     headers = {
         'client_id': FETCH_OWNER_INFO_CLIENT_ID,
         'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
