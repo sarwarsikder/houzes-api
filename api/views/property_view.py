@@ -1215,13 +1215,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 print(address)
                 fetched_data = PropertyViewSet.get_property_info_by_address(address)
                 if 'response' in fetched_data and fetched_data['response']:
-                    # fetched_data['data']['lat'] != 42.4347571 and fetched_data['data']['lng'] != -83.9849477
-                    lat = float(fetched_data['data']['lat'])
-                    lng = float(fetched_data['data']['lng'])
-                    print(lat, lng)
-                    property_info.latitude = lat
-                    property_info.longitude = lng
-                    Property.objects.filter(id=property_info.id).update(latitude=lat, longitude=lng)
+                    if fetched_data['data']['lat'] != 42.4347571 and fetched_data['data']['lng'] != -83.9849477:
+                        lat = float(fetched_data['data']['lat'])
+                        lng = float(fetched_data['data']['lng'])
+                        print(lat, lng)
+                        property_info.latitude = lat
+                        property_info.longitude = lng
+                        Property.objects.filter(id=property_info.id).update(latitude=lat, longitude=lng)
             except:
                 traceback.print_exc()
                 # return Response({'code': 500, 'message': 'Server Error!'})
