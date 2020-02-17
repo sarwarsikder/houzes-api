@@ -13,7 +13,7 @@ class ScrapeHelper:
 
 def parse_by_regex(test_str):
     try:
-        regex = r"(&code=)([a-z]+)(\")"
+        regex = r"(&code=)([a-z0-9]+)(\")"
         matches = re.finditer(regex, test_str, re.MULTILINE)
         for matchNum, match in enumerate(matches, start=1):
             code = match.group(2)
