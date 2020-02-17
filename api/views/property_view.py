@@ -962,7 +962,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         formatted_request_data= []
         fetch_owner_info = 0
         power_trace = 0
-        url = 'http://58.84.34.65:8080/ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
+        url = settings.FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
         headers = {
             'Content-Type': 'application/json',
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
@@ -991,7 +991,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                         elif power_trace == 0 and fetch_owner_info == 1:
                             get_neighborhood.is_owner_info_requested = True
                         elif power_trace == 0 and fetch_owner_info == 0 :
-                            return {'status': False, 'data': {}, 'message': 'Invalid request'}
+                            return {'status': False, 'data': { 'payment' : True }, 'message': 'Invalid request'}
                         get_neighborhood.latitude = data['latitude']
                         get_neighborhood.longitude = data['longitude']
                         get_neighborhood.save()
@@ -1013,7 +1013,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 if upgrade_profile.coin < required_coin :
                     status = False
                     message = 'Sorry! Insufficient balance'
-                    return ({"status": status, "data": {}, 'message': message})
+                    return ({"status": status, "data": { 'payment' : False }, 'message': message})
                 upgrade_profile.coin = float(upgrade_profile.coin)-required_coin
                 upgrade_profile.save()
 
@@ -1025,12 +1025,12 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     # get_neighborhoods = GetNeighborhood.objects.filter(property=property)
                     status = True
                     message = objectResponse['message']
-                    data = objectResponse['request_id']
+                    # data = objectResponse['request_id']
 
                 else:
                     status = False
                     message = objectResponse['message']
-                    data = {}
+                    # data = {}
             if 'neighbor_id' in requestData:
                 neighbors_id = requestData['neighbor_id']
                 neighbors = GetNeighborhood.objects.filter(id__in = neighbors_id)
@@ -1051,14 +1051,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     print(objectResponse)
                     if objectResponse['status']==200 :
                         status = True
-                        data = {}
+                        # data = {}
                         message = objectResponse['message']
                         neighbors.update(ownership_info_request_id = objectResponse['request_id'], owner_status = 'requested', status='requested', is_owner_info_requested = True)
                         if power_trace == 1:
                             neighbors.update(is_power_trace_requested = True, power_trace_status = 'requested')
                     else:
                         status = False
-                        data = objectResponse['data']
+                        # data = objectResponse['data']
                         message = objectResponse['message']
 
                 if power_trace == 1 and fetch_owner_info == 0:
@@ -1066,15 +1066,15 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     responseData = PropertyViewSet.request_power_trace_again(self,neighbors)
 
                     status = responseData['status']
-                    data = responseData['data']
+                    # data = responseData['data']
                     message = responseData ['message']
 
         except:
             status = False
             message = 'Oops! An error has occured while requesting neighborhood data.'
-            return ({"status": status, "data": {}, 'message': message})
+            return ({"status": status, "data": { 'payment' : True }, 'message': message})
 
-        return ({"status": status, "data": {}, 'message': message})
+        return ({"status": status, "data": {'payment' : True }, 'message': message})
 
     def get_neighborhood_by_request_id_method(self, request_id):
         status = False
