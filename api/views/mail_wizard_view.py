@@ -58,11 +58,11 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             data = res.json()
             response['status'] = True
             response['data'] = data
-            response['message'] = 'Mail wizard templates received successfully'
+            response['message'] = 'Mail templates received successfully'
         except Exception as e:
             print('ex' + str(e))
             response['status'] = False
-            response['message'] = 'Empty mail wizard template'
+            response['message'] = 'Empty mail template'
         return Response(response)
 
     @action(detail=False, methods=['POST'], url_path='neighbor/(?P<id>[\w-]+)')
@@ -311,7 +311,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     'payment': True,
                     'upgrade_info': UserSerializer(manager).data['upgrade_info']
                 }
-                response['message'] = 'Mail wizard sent successfully'
+                response['message'] = 'Mail sent successfully'
 
                 try:
                     mail_wizard_celery_task = MailWizardCeleryTasks()
@@ -332,7 +332,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     'upgrade_info': UserSerializer(manager).data['upgrade_info']
 
                 }
-                response['message'] = 'Mail wizard sending unsuccessful'
+                response['message'] = 'Mail sending unsuccessful'
         except Exception as e:
             print('ex' + str(e))
             response['status'] = False
@@ -340,6 +340,6 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 'payment': True,
                 'upgrade_info': UserSerializer(manager).data['upgrade_info']
             }
-            response['message'] = 'Mail wizard sending unsuccessful'
+            response['message'] = 'Mail sending unsuccessful'
         return Response(response)
 
