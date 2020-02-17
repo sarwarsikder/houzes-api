@@ -265,6 +265,7 @@ CLIENT_SECRET = "NzrpAlEBLOE8RN7bbbFSVAF8Q8lm3DqFgUlwLZ5gS7ribxsiLfBO5F659KjDkfg
 
 # POWER_TRACE_CREDENTIALS
 POWER_TRACE_HOST = "http://powertrace-service.ratoolkit.com:8080/ra-powertrace/"
+# POWER_TRACE_HOST = "http://18.188.43.8:8080/ra-powertrace/"
 POWER_TRACE_CLIENT_ID = "HQARK3QZDPLLBWSMVY0X2C5UJ2B15YQJSIY"
 POWER_TRACE_CLIENT_SECRET = "URBVBVBDDJ2E2JEBJEO84594T546VJVBKJGB"
 
@@ -295,8 +296,9 @@ CELERY_TASK_SERIALIZER = 'json'
 
 WEB_APP_URL='houzes.com'
 
-MAILER_WIZARD_MICRO_SERVICE_URL = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
-
+# MAILER_WIZARD_MICRO_SERVICE_URL = 'http://18.188.43.8:8111/mailer-service/send-mailer-data/'
+# MAILER_WIZARD_MICRO_SERVICE_DOMAIN = 'http://18.188.43.8:8111/'
+MAILER_WIZARD_MICRO_SERVICE_DOMAIN = 'http://powertrace-service.ratoolkit.com:8111/'
 try:
     if APP_ENV is 'DEV':
         from .dev_settings import *

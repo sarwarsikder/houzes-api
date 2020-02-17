@@ -44,7 +44,8 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='all')
     def get_mail_wizard(self, request, *args, **kwargs):
         response = {'status': False, 'message': ''}
-        url = 'http://13.59.67.162:8111/mailer-service/fetch-templates/'
+        url = settings.MAILER_WIZARD_MICRO_SERVICE_DOMAIN+'mailer-service/fetch-templates/'
+        print(url)
         headers = {
             'Content-Type': 'application/json',
         }
@@ -57,11 +58,11 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             data = res.json()
             response['status'] = True
             response['data'] = data
-            response['message'] = 'Mail wizard received successfully'
+            response['message'] = 'Mail wizard templates received successfully'
         except Exception as e:
             print('ex' + str(e))
             response['status'] = False
-            response['message'] = 'Mail wizard received unsuccessful'
+            response['message'] = 'Empty mail wizard template'
         return Response(response)
 
     @action(detail=False, methods=['POST'], url_path='neighbor/(?P<id>[\w-]+)')
@@ -216,7 +217,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
         mailer_response_text = 'TEST RESPONSE'
 
-        url = settings.MAILER_WIZARD_MICRO_SERVICE_URL
+        url = settings.MAILER_WIZARD_MICRO_SERVICE_DOMAIN+'mailer-service/send-mailer-data/'
         headers = {
             'Content-Type': 'application/json',
         }
