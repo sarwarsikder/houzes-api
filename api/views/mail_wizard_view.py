@@ -300,6 +300,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 mailer_wizard_user_info.first_name = self.dict_val(user_info, 'first_name')
                 mailer_wizard_user_info.last_name = self.dict_val(user_info, 'last_name')
                 mailer_wizard_user_info.email = self.dict_val(user_info, 'email')
+                mailer_wizard_user_info.phone_no = self.dict_val(user_info, 'phone_no')
                 mailer_wizard_user_info.address_street = return_address_street
                 mailer_wizard_user_info.address_city = return_address_city
                 mailer_wizard_user_info.address_state = return_address_state
