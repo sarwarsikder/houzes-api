@@ -26,6 +26,7 @@ power_trace_headers = {'client_id': POWER_TRACE_CLIENT_ID,
 FETCH_OWNER_INFO_CLIENT_ID = getattr(settings, "FETCH_OWNER_INFO_CLIENT_ID", None)
 FETCH_OWNER_INFO_CLIENT_SECRET = getattr(settings, "FETCH_OWNER_INFO_CLIENT_SECRET", None)
 
+
 class doubleQuoteDict(dict):
     def __str__(self):
         return json.dumps(self)
@@ -43,14 +44,15 @@ class CustomPagination(pagination.PageNumberPagination):
             'results': data,
         })
 
+
 class PropertiesFilterPagination(pagination.PageNumberPagination):
-    def get_paginated_response(self, data,lat_long):
+    def get_paginated_response(self, data, lat_long):
         return Response({
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
             'count': self.page.paginator.count,
             'results': data,
-            'lat_long' : lat_long
+            'lat_long': lat_long
         })
 
 
@@ -97,7 +99,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             'created_at': property.created_at,
             'updated_at': property.updated_at,
             'power_trace_request_id': property.power_trace_request_id,
-            'user_list_details' : UserListSerializer(property.user_list).data,
+            'user_list_details': UserListSerializer(property.user_list).data,
         }
         return Response(property_representation)
 
@@ -194,8 +196,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
             data = PropertySerializer(property).data
             message = "Property created sucessfully"
             try:
-                user = User.objects.get(id = request.user.id)
-                notify.send(user, recipient=user, verb='uploaded '+property.street+', '+property.city+', '+property.state+' '+property.zip, action_object=property)
+                user = User.objects.get(id=request.user.id)
+                notify.send(user, recipient=user,
+                            verb='uploaded ' + property.street + ', ' + property.city + ', ' + property.state + ' ' + property.zip,
+                            action_object=property)
             except:
                 print('Error in notification')
         except:
@@ -237,7 +241,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='bulk-create')
     def property_bulk_create(self, request, *args, **kwargs):
-        message=''
+        message = ''
         try:
             requestData = request.data
         except:
@@ -251,7 +255,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property_info = Property()
             try:
                 owner_name = entry['owner_firstname'] + " " + entry['owner_lastname']
-                owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + entry['owner_zip']
+                owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + \
+                                entry['owner_zip']
             except:
                 owner_name = None
                 owner_address = None
@@ -269,24 +274,24 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     '[{"company_name" : "' + '",'
                     + '"estate" : "'
                     + '","formatted_address" : {'
-                        + '"city" : '+ '""'
-                        +',"state" :'+'""'
-                        +',"street" : {}'
-                        +',"zip_code" :'+'""'+'}'
-                    +',"formatted_name" : {}'+
-                    ',"full_address" : "'+owner_address+
-                    '","full_name" : "'+owner_name+
-                    '","other_info" : "'+''+'"}]'
+                    + '"city" : ' + '""'
+                    + ',"state" :' + '""'
+                    + ',"street" : {}'
+                    + ',"zip_code" :' + '""' + '}'
+                    + ',"formatted_name" : {}' +
+                    ',"full_address" : "' + owner_address +
+                    '","full_name" : "' + owner_name +
+                    '","other_info" : "' + '' + '"}]'
                 )
             property_info.street = entry['property_street']
             property_info.zip = entry['property_zip']
             property_info.city = entry['property_city']
             property_info.state = entry['property_state']
             property_info.user_list_id = requestData['user_list']
-            rowCounter = rowCounter+1
+            rowCounter = rowCounter + 1
             message = 'Properties uploading.Please wait'
-            if rowCounter>1000:
-                message='Only first 1000 properties will be uploaded to the list'
+            if rowCounter > 1000:
+                message = 'Only first 1000 properties will be uploaded to the list'
                 break
 
             # iterator = 0
@@ -325,7 +330,9 @@ class PropertyViewSet(viewsets.ModelViewSet):
         search = request.GET.get('search')
         print(search)
         if search:
-            property = property.filter(Q(street__icontains=search) | Q(city__icontains=search) | Q(state__icontains=search) | Q(zip__icontains=search))
+            property = property.filter(
+                Q(street__icontains=search) | Q(city__icontains=search) | Q(state__icontains=search) | Q(
+                    zip__icontains=search))
 
         paginator = CustomPagination()
         if page_size:
@@ -344,7 +351,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
         user = User.objects.get(id=request.user.id)
         # property = Property.objects.filter(property_tags__contains=[{'id': int(tagId, 10)}], user_list__user=user)
         property = Property.objects.filter(user_list__user=user)
-        property = property.filter(Q(property_tags__contains=[{'id': str(tagId)}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
+        property = property.filter(
+            Q(property_tags__contains=[{'id': str(tagId)}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
         paginator = CustomPagination()
         if page_size:
             paginator.page_size = page_size
@@ -501,7 +509,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property = property.filter(user_list__id=listId)
         property = property.order_by('-created_at')
         property_lat_lon = property.filter(~Q(latitude=None) | ~Q(longitude=None))
-        property_lat_lon_serializer = PropertyLatLongSerializer(property_lat_lon,many=True)
+        property_lat_lon_serializer = PropertyLatLongSerializer(property_lat_lon, many=True)
         paginator = PropertiesFilterPagination()
         if page_size:
             paginator.page_size = page_size
@@ -530,65 +538,70 @@ class PropertyViewSet(viewsets.ModelViewSet):
             if 'power_trace' in request.data:
                 power_trace = int(request.data['power_trace'])
 
-        user = User.objects.get(id = request.user.id)
+        user = User.objects.get(id=request.user.id)
         original_user = user
-        if user.is_admin == False :
-            user = User.objects.get(id = user.invited_by)
+        if user.is_admin == False:
+            user = User.objects.get(id=user.invited_by)
         upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
-        if not upgrade_profile :
-            messages= []
+        if not upgrade_profile:
+            messages = []
             messages.append('Profile is not upgraded')
-            return JsonResponse({"status":False,
-                                 "data": { "payment" : False,
-                                           "upgrade_info": UserSerializer(user).data['upgrade_info']
-                                    },
+            return JsonResponse({"status": False,
+                                 "data": {"payment": False,
+                                          "upgrade_info": UserSerializer(user).data['upgrade_info']
+                                          },
                                  'message': json.dumps(messages)})
         coin_required = 0
         fetch_owner_info_coin_required = 0
         power_trace_coin_required = 0
         property = Property.objects.get(id=kwargs['id'])
 
-        if upgrade_profile :
-            if fetch_owner_info == 1 :
+        if upgrade_profile:
+            if fetch_owner_info == 1:
                 try:
                     # user = User.objects.get(id=request.user.id)
-                    notify.send(original_user, recipient=original_user, verb='requested to fetch ownership information of '+property.street+', '+property.city+', '+property.state+' '+property.zip, action_object=property)
+                    notify.send(original_user, recipient=original_user,
+                                verb='requested to fetch ownership information of ' + property.street + ', ' + property.city + ', ' + property.state + ' ' + property.zip,
+                                action_object=property)
                 except:
                     print('Error in notification')
-                payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info', plan = upgrade_profile.plan).first()
-                if payment_plan :
+                payment_plan = PaymentPlan.objects.filter(payment_plan_name='fetch-ownership-info',
+                                                          plan=upgrade_profile.plan).first()
+                if payment_plan:
                     fetch_owner_info_coin_required = payment_plan.payment_plan_coin
-            if power_trace == 1 :
+            if power_trace == 1:
                 try:
                     # user = User.objects.get(id=request.user.id)
-                    notify.send(original_user, recipient=original_user, verb='requested to power trace on '+property.street+', '+property.city+', '+property.state+' '+property.zip, action_object=property)
+                    notify.send(original_user, recipient=original_user,
+                                verb='requested to power trace on ' + property.street + ', ' + property.city + ', ' + property.state + ' ' + property.zip,
+                                action_object=property)
                 except:
                     print('Error in notification')
-                payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'power-trace', plan = upgrade_profile.plan).first()
-                if payment_plan :
-                    power_trace_coin_required =  payment_plan.payment_plan_coin
-            if upgrade_profile.coin < fetch_owner_info_coin_required+power_trace_coin_required :
+                payment_plan = PaymentPlan.objects.filter(payment_plan_name='power-trace',
+                                                          plan=upgrade_profile.plan).first()
+                if payment_plan:
+                    power_trace_coin_required = payment_plan.payment_plan_coin
+            if upgrade_profile.coin < fetch_owner_info_coin_required + power_trace_coin_required:
                 messages = []
                 messages.append('Sorry! Insufficient balance')
                 return JsonResponse({"status": False,
-                                     "data": {"payment" : False,
-                                              "upgrade_info" : UserSerializer(user).data['upgrade_info']
-                                      },
+                                     "data": {"payment": False,
+                                              "upgrade_info": UserSerializer(user).data['upgrade_info']
+                                              },
                                      'message': json.dumps(messages)})
-
 
         package_type = 2
         # property = Property.objects.get(id=kwargs['id'])
         property_address = ' '.join([property.street, property.city, property.state, property.zip])
-        fetch_ownership_info_response = {"status": False, 'data': {}, 'message' : ''}
-        power_trace_response = {"status": False, 'data': {}, 'message' : ''}
+        fetch_ownership_info_response = {"status": False, 'data': {}, 'message': ''}
+        power_trace_response = {"status": False, 'data': {}, 'message': ''}
         if fetch_owner_info:
             fetch_ownership_info_response = PropertyViewSet.fetch_ownership_info(self, property)
             if fetch_ownership_info_response['status']:
                 upgrade_profile.coin = upgrade_profile.coin - fetch_owner_info_coin_required
                 upgrade_profile.save()
 
-                payment_plan = PaymentPlan.objects.filter(payment_plan_name = 'fetch-ownership-info').first()
+                payment_plan = PaymentPlan.objects.filter(payment_plan_name='fetch-ownership-info').first()
                 payment_transaction = PaymentTransaction()
                 payment_transaction.property = property
                 payment_transaction.payment_plan = payment_plan
@@ -628,7 +641,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                                       'power_trace': power_trace_response,
                                       "payment": True,
                                       "upgrade_info": UserSerializer(user).data['upgrade_info']
-                                    },
+                                      },
                              'message': json.dumps(property_payment_message)})
 
     def fetch_ownership_info(self, property):
@@ -638,7 +651,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         message = ""
         status = False
         data = []
-        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-by-address'
+        url = FETCH_OWNER_INFO_HOST + 'ownership-micro-service/api/owner-info/get-owner-info-by-address'
         headers = {
             'Content-Type': 'application/json',
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
@@ -767,7 +780,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             requestData = request.body['tags']
 
         property_tags = []
-        if requestData !="":
+        if requestData != "":
             tags = [int(x) for x in requestData.split(',')]
 
             for tag in tags:
@@ -799,7 +812,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         status = False
         data = {}
         message = ''
-        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
+        url = FETCH_OWNER_INFO_HOST + 'ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
         headers = {
             'Content-Type': 'application/json',
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
@@ -839,7 +852,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
         status = False
         data = {}
         message = ''
-        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
+        url = FETCH_OWNER_INFO_HOST + 'ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
         headers = {
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
             'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
@@ -878,12 +891,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         try:
             user = User.objects.get(id=request.user.id)
-            notify.send(user, recipient=user, verb='requested neighborhood information of '+property_data.street+', '+property_data.city+', '+property_data.state+' '+property_data.zip, action_object=property_data)
+            notify.send(user, recipient=user,
+                        verb='requested neighborhood information of ' + property_data.street + ', ' + property_data.city + ', ' + property_data.state + ' ' + property_data.zip,
+                        action_object=property_data)
         except:
             print('Error in notification')
 
-        fetch_ownership_respone_data = PropertyViewSet.request_neighborhood_method(self, request,request_body,
-                                                                                       property_data)
+        fetch_ownership_respone_data = PropertyViewSet.request_neighborhood_method(self, request, request_body,
+                                                                                   property_data)
         return JsonResponse(fetch_ownership_respone_data)
 
     def create_multiple_power_trace(self, get_neighborhood, request):
@@ -952,18 +967,18 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     def request_neighborhood_method(self, request, requestData, property):
         user = User.objects.get(id=request.user.id)
-        original_user =user
+        original_user = user
         if not user.is_admin:
-            user = User.objects.get(id = user.invited_by)
-        upgrade_profile = UpgradeProfile.objects.filter(user = user).first()
+            user = User.objects.get(id=user.invited_by)
+        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
 
         status = False
         data = {}
         message = ''
-        formatted_request_data= []
+        formatted_request_data = []
         fetch_owner_info = 0
         power_trace = 0
-        url = settings.FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
+        url = settings.FETCH_OWNER_INFO_HOST + 'ownership-micro-service/api/owner-info/get-owner-info-by-address-list'
         headers = {
             'Content-Type': 'application/json',
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
@@ -985,42 +1000,47 @@ class PropertyViewSet(viewsets.ModelViewSet):
                         get_neighborhood.city = data['city']
                         get_neighborhood.state = data['state']
                         get_neighborhood.zip = data['zip']
-                        get_neighborhood.requested_by = User.objects.get(id = request.user.id)
+                        get_neighborhood.requested_by = User.objects.get(id=request.user.id)
                         if power_trace == 1:
                             get_neighborhood.is_owner_info_requested = True
                             get_neighborhood.is_power_trace_requested = True
                         elif power_trace == 0 and fetch_owner_info == 1:
                             get_neighborhood.is_owner_info_requested = True
-                        elif power_trace == 0 and fetch_owner_info == 0 :
-                            return {'status': False, 'data': { 'payment' : True }, 'message': 'Invalid request'}
+                        elif power_trace == 0 and fetch_owner_info == 0:
+                            return {'status': False, 'data': {'payment': True}, 'message': 'Invalid request'}
                         get_neighborhood.latitude = data['latitude']
                         get_neighborhood.longitude = data['longitude']
                         get_neighborhood.save()
                         formatted_data = {
-                            "address" : data['address'],
-                            "latitude" : data['latitude'],
+                            "address": data['address'],
+                            "latitude": data['latitude'],
                             "longitude": data['longitude'],
                             "property_id": get_neighborhood.id
                         }
                         formatted_request_data.append(formatted_data)
-                        address_counter = address_counter+1
+                        address_counter = address_counter + 1
                     except:
                         print('EXCEPTION IN REQUEST')
                 required_coin = 0.0
                 if fetch_owner_info == 1:
-                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='fetch-ownership-info', plan=upgrade_profile.plan).first().payment_plan_coin)*address_counter
+                    required_coin = required_coin + float(
+                        PaymentPlan.objects.filter(payment_plan_name='fetch-ownership-info',
+                                                   plan=upgrade_profile.plan).first().payment_plan_coin) * address_counter
                 if power_trace == 1:
-                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='power-trace', plan=upgrade_profile.plan).first().payment_plan_coin)*address_counter
-                if upgrade_profile.coin < required_coin :
+                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='power-trace',
+                                                                                     plan=upgrade_profile.plan).first().payment_plan_coin) * address_counter
+                if upgrade_profile.coin < required_coin:
                     status = False
                     message = 'Sorry! Insufficient balance'
-                    return ({"status": status, "data": { 'payment' : False }, 'message': message})
-                upgrade_profile.coin = float(upgrade_profile.coin)-required_coin
+                    return ({"status": status, "data": {'payment': False}, 'message': message})
+                upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
                 upgrade_profile.save()
 
                 r = requests.post(url=url, json=formatted_request_data, headers=headers)
                 objectResponse = r.json()
-                GetNeighborhood.objects.filter(property=property, status = None).update(ownership_info_request_id = objectResponse['request_id'], owner_status = 'requested', status='requested')
+                GetNeighborhood.objects.filter(property=property, status=None).update(
+                    ownership_info_request_id=objectResponse['request_id'], owner_status='requested',
+                    status='requested')
 
                 if (objectResponse['status']) == 200:
                     # get_neighborhoods = GetNeighborhood.objects.filter(property=property)
@@ -1034,7 +1054,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     # data = {}
             if 'neighbor_id' in requestData:
                 neighbors_id = requestData['neighbor_id']
-                neighbors = GetNeighborhood.objects.filter(id__in = neighbors_id)
+                neighbors = GetNeighborhood.objects.filter(id__in=neighbors_id)
+                address_counter = 0
                 for neighbor in neighbors:
                     formatted_data = {
                         "address": neighbor.neighbor_address,
@@ -1043,45 +1064,63 @@ class PropertyViewSet(viewsets.ModelViewSet):
                         "property_id": neighbor.id
                     }
                     formatted_request_data.append(formatted_data)
+                    address_counter = address_counter + 1
 
-                neighbors.update(is_owner_info_requested = False, is_power_trace_requested = False)
+                # CHECK COIN AND CONSUME COIN
+                required_coin = 0.0
+                if fetch_owner_info == 1:
+                    required_coin = required_coin + float(
+                        PaymentPlan.objects.filter(payment_plan_name='fetch-ownership-info',
+                                                   plan=upgrade_profile.plan).first().payment_plan_coin) * address_counter
+                if power_trace == 1:
+                    required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='power-trace',
+                                                                                     plan=upgrade_profile.plan).first().payment_plan_coin) * address_counter
+                if upgrade_profile.coin < required_coin:
+                    status = False
+                    message = 'Sorry! Insufficient balance'
+                    return ({"status": status, "data": {'payment': False}, 'message': message})
+                upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
+                upgrade_profile.save()
+
+                neighbors.update(is_owner_info_requested=False, is_power_trace_requested=False)
                 if fetch_owner_info == 1:
                     r = requests.post(url=url, json=formatted_request_data, headers=headers)
                     objectResponse = r.json()
                     print('932')
                     print(objectResponse)
-                    if objectResponse['status']==200 :
+                    if objectResponse['status'] == 200:
                         status = True
                         # data = {}
                         message = objectResponse['message']
-                        neighbors.update(ownership_info_request_id = objectResponse['request_id'], owner_status = 'requested', status='requested', is_owner_info_requested = True)
+                        neighbors.update(ownership_info_request_id=objectResponse['request_id'],
+                                         owner_status='requested', status='requested', is_owner_info_requested=True)
                         if power_trace == 1:
-                            neighbors.update(is_power_trace_requested = True, power_trace_status = 'requested')
+                            neighbors.update(is_power_trace_requested=True, power_trace_status='requested')
                     else:
                         status = False
                         # data = objectResponse['data']
                         message = objectResponse['message']
 
                 if power_trace == 1 and fetch_owner_info == 0:
-                    neighbors.update(is_power_trace_requested = True)
-                    responseData = PropertyViewSet.request_power_trace_again(self,neighbors)
+                    neighbors.update(is_power_trace_requested=True)
+                    responseData = PropertyViewSet.request_power_trace_again(self, neighbors)
 
                     status = responseData['status']
                     # data = responseData['data']
-                    message = responseData ['message']
+                    message = responseData['message']
 
         except:
             status = False
             message = 'Oops! An error has occured while requesting neighborhood data.'
-            return ({"status": status, "data": { 'payment' : True }, 'message': message})
+            return ({"status": status, "data": {'payment': True}, 'message': message})
 
-        return ({"status": status, "data": {'payment' : True }, 'message': message})
+        return ({"status": status, "data": {'payment': True}, 'message': message})
 
     def get_neighborhood_by_request_id_method(self, request_id):
         status = False
         data = {}
         message = ''
-        url = FETCH_OWNER_INFO_HOST+'ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
+        url = FETCH_OWNER_INFO_HOST + 'ownership-micro-service/api/owner-info/get-owner-info-from-request-id'
         headers = {
             'client_id': FETCH_OWNER_INFO_CLIENT_ID,
             'client_secret': FETCH_OWNER_INFO_CLIENT_SECRET
@@ -1138,7 +1177,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                         neighbor.ownership_info['property_id'])
                 except:
                     return (
-                        {'status': False, 'data' : {},
+                        {'status': False, 'data': {},
                          'message': 'Request failed! Ownership info is mandatory/required.'})
                 i = i + 1
             ## Powertrace request
@@ -1157,12 +1196,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     get_neighborhoods.update(
                         power_trace_request_id=power_trace_start_by_data_res.json()['data'][0]['trace_requests_id'],
                         power_trace_status='requested')
-                    return { 'status' : True, 'data' :power_trace_request_res.json()['data'], 'message' : power_trace_request_res.json()['message'] }
+                    return {'status': True, 'data': power_trace_request_res.json()['data'],
+                            'message': power_trace_request_res.json()['message']}
                 else:
                     return {'status': False, 'message': 'PowerTrace Failed due to Information parsing failure!',
                             'data': power_trace_start_by_data_res.json()}
             else:
-                return {'status': False, 'message': 'Trace name is already exists!', 'data': power_trace_request_res.json()}
+                return {'status': False, 'message': 'Trace name is already exists!',
+                        'data': power_trace_request_res.json()}
         except:
             traceback.print_exc()
             return {'status': False, 'message': 'Failed to create request! Server Error!'}
@@ -1182,9 +1223,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
                     break
             property.property_tags = tag_list
             property.save()
-            return Response({'status' : True, 'data': PropertySerializer(property).data, 'message' : 'Successfully deleted tag'})
+            return Response(
+                {'status': True, 'data': PropertySerializer(property).data, 'message': 'Successfully deleted tag'})
         except:
-            return Response({'status' : False, 'data': {}, 'message' : 'Error deleting tag'})
+            return Response({'status': False, 'data': {}, 'message': 'Error deleting tag'})
 
     @action(detail=False, methods=['GET'], url_path='fetch-missing-lat-lng/(?P<pk>[\w-]+)')
     def fetch_lat_lng(self, request, *args, **kwargs):
@@ -1228,6 +1270,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 # return Response({'code': 500, 'message': 'Server Error!'})
         UserList.objects.filter(id=list_id).update(fetch_lat_lng=True)
         print("Completed...list_id: " + str(list_id))
+
 
 def update_property_power_trace_info(info_list):
     for info in info_list:
