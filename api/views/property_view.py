@@ -241,6 +241,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='bulk-create')
     def property_bulk_create(self, request, *args, **kwargs):
+        owner_name = None
+        owner_address =None
         message = ''
         try:
             requestData = request.data
@@ -255,7 +257,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
             property_info = Property()
             try:
                 owner_name = entry['owner_firstname'] + " " + entry['owner_lastname']
-                owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + \
+                if entry['owner_city'] == None or entry['owner_city'].strip()=="":
+                    owner_address = None
+                else:
+                    owner_address = entry['owner_street'] + " " + entry['owner_city'] + " " + entry['owner_state'] + " " + \
                                 entry['owner_zip']
             except:
                 owner_name = None
@@ -267,7 +272,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             #     + '","ownerEmail" : "' + entry['email_address'] + '"}]'
             # )
 
-            if owner_name == None or owner_name.strip() == "":
+            if owner_name == None or owner_name.strip() == "" or owner_address == None or owner_address.strip()== "":
                 property_info.owner_info = []
             else:
                 property_info.owner_info = json.loads(
