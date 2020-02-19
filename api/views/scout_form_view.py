@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from api.models import *
 from api.serializers import *
+from api.views.property_view import PropertyViewSet
 from houzes_api import settings
 from houzes_api.util.file_upload import file_upload
 from resizeimage import resizeimage
@@ -48,6 +49,8 @@ def get_tags(request):
 
 @csrf_exempt
 def create_property(request):
+    latitude = None
+    longitude = None
     street = ""
     city = ""
     state = ""
@@ -101,13 +104,21 @@ def create_property(request):
         if 'url' in request.POST:
             url = request.POST['url']
 
+    full_address = street+' '+city+' '+state+' '+zip
+    print('FETCH LAT LNG')
+    property_lat_lng_fetch = PropertyViewSet.get_property_info_by_address(full_address)
+    if property_lat_lng_fetch['response']:
+        latitude = property_lat_lng_fetch['data']['lat']
+        longitude = property_lat_lng_fetch['data']['lng']
+
+
     try:
         scout = Scout.objects.filter(url=url)[0]
         scoutUserList = ScoutUserList.objects.filter(scout=scout)[0]
         user_list = UserList.objects.get(id=scoutUserList.user_list.id)
 
         property = Property(street=street, city=city, state=state, zip=zip, property_tags=property_tags,
-                            owner_info=owner_info, user_list=user_list)
+                            owner_info=owner_info,latitude=latitude,longitude=longitude, user_list=user_list)
         property.save()
 
         status = True

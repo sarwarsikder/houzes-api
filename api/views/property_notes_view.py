@@ -86,8 +86,6 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
         propertyId = kwargs['pk']
         page_size = request.GET.get('limit')
         property = Property.objects.get(id=propertyId)
-        # userId = request.user.id
-        # user = User.objects.get(id = userId)
         propertyNotes = PropertyNotes.objects.filter(property=property).order_by('-id')
 
         paginator = CustomPagination()
