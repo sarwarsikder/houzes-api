@@ -804,7 +804,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             propertySerializer = PropertySerializer(property)
             status = True
             data = propertySerializer.data
-            message = 'Successfully added tags to property'
+            message = 'Property tag updated'
         except:
             status = False
             data = {}
