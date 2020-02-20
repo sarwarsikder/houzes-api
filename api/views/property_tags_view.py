@@ -126,7 +126,7 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                     try:
                         user = User.objects.get(id=request.user.id)
                         notify.send(user, recipient=user,
-                                    verb='tagged a property', action_object=property)
+                                    verb='tagged '+property.street+', '+property.city+', '+property.state+' '+property.zip, action_object=property)
                     except:
                         print('Error in notification')
             except:
