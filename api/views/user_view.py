@@ -245,6 +245,9 @@ class UserViewSet(viewsets.ModelViewSet):
             state = request.data._mutable
             request.data._mutable = True
         if 'password' in request.data:
+            if check_password(request.data['password'],user.password):
+                print('SAME PASSWORD')
+                return Response({'status': False, 'data': {}, 'message': 'Error! You have entered previously used password'})
             request.data['password'] = make_password(request.data['password'])
             if not 'old_password' in request.data:
                 return Response({'status': False, 'data': {}, 'message': 'old password is required'})

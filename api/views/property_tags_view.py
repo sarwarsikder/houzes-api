@@ -98,7 +98,7 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
                         print('DO NOTHING')
                     property.property_tags.append({'id': property_tag})
                     property.save()
-                    message = 'Tag added to the property'
+                    message = 'Property tag updated'
                     status = True
                     # propertySerializer = PropertySerializer(property)
                     # data = propertySerializer.data
