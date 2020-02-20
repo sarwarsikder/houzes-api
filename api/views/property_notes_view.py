@@ -63,6 +63,8 @@ class PropertyNotesViewSet(viewsets.ModelViewSet):
                 data = None
                 return Response({'status': status, 'data': data, 'message': message})
 
+        if len(title)>250:
+            return Response({'status': False, 'data': None, 'message': "Title must not exceed 250 characters"})
         userId = request.user.id
         user = User.objects.get(id=userId)
         property = Property.objects.get(id=propertyId)
