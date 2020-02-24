@@ -33,9 +33,9 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            receiver = request.data['email']
+            receiver = request.data['email'].lower().strip()
         except:
-            receiver = request.body['email']
+            receiver = request.body['email'].lower().strip()
 
         invitation_count = 0
         invitation_count = User.objects.filter(invited_by=request.user.id).count() + Invitations.objects.filter(
@@ -46,7 +46,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             message = "You can't invite more than 10 members"
             return Response({'status': status, 'data': data, 'message': message})
 
-        if User.objects.filter(email=receiver.strip()).first():
+        if User.objects.filter(email=receiver).first():
             status = False
             data = None
             message = 'User already exist'
@@ -58,9 +58,9 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
         invitation_key = generate_shortuuid()
 
-        if Invitations.objects.filter(email=receiver.strip(), user__id=request.user.id).first():
+        if Invitations.objects.filter(email=receiver, user__id=request.user.id).first():
             try:
-                Invitations.objects.filter(email=receiver.strip(), user__id=request.user.id).delete()
+                Invitations.objects.filter(email=receiver, user__id=request.user.id).delete()
                 subject = 'Invitation'
                 body = str(request.user) + " sent you an invitation click the link below to accept."
                 email = receiver
