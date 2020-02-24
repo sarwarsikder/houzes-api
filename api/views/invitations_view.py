@@ -20,6 +20,8 @@ from django.db.models import Sum, DurationField, Count, IntegerField
 from django.utils.dateparse import parse_duration
 
 from api.views.send_email_view import SendEmailViewSet
+import datetime
+import pytz
 
 
 class InvitationsViewSet(viewsets.ModelViewSet):
@@ -177,8 +179,17 @@ class InvitationsViewSet(viewsets.ModelViewSet):
     def total_houzes_filter(self, request, *args, **kwargs):
         start_time = request.GET.get('start_time')
         end_time = request.GET.get('end_time')
-        print(start_time)
-        print(end_time)
+
+        date_format = '%Y-%m-%d'
+
+        unaware_start_time = datetime.datetime.strptime(start_time, date_format)
+        aware_start_time = pytz.utc.localize(unaware_start_time)
+
+        unaware_end_time = datetime.datetime.strptime(end_time, date_format)
+        aware_end_time = pytz.utc.localize(unaware_end_time) + datetime.timedelta(days=1)
+
+        print(aware_start_time)
+        print(aware_end_time)
 
         if User.objects.get(id=request.user.id).is_admin:
             users = User.objects.filter(invited_by=request.user.id)
@@ -186,7 +197,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             for user in users:
                 userLists = UserList.objects.filter(user=user)
                 houzes_count = Property.objects.filter(
-                    Q(user_list__in=userLists) & Q(created_at__range=[start_time, end_time])).count()
+                    Q(user_list__in=userLists) & Q(created_at__range=[aware_start_time, aware_end_time])).count()
                 total_houze = {
                     'user_id': user.id,
                     'user_first_name': user.first_name,
@@ -201,15 +212,22 @@ class InvitationsViewSet(viewsets.ModelViewSet):
     def total_miles_filter(self, request, *args, **kwargs):
         start_time = request.GET.get('start_time')
         end_time = request.GET.get('end_time')
-        print(start_time)
-        print(end_time)
+
+        date_format = '%Y-%m-%d'
+
+        unaware_start_time = datetime.datetime.strptime(start_time, date_format)
+        aware_start_time = pytz.utc.localize(unaware_start_time)
+
+        unaware_end_time = datetime.datetime.strptime(end_time, date_format)
+        aware_end_time = pytz.utc.localize(unaware_end_time) + datetime.timedelta(days=1)
 
         if User.objects.get(id=request.user.id).is_admin:
             users = User.objects.filter(invited_by=request.user.id)
             total_miles = []
             for user in users:
                 length_count = \
-                    History.objects.filter(Q(user=user) & Q(created_at__range=[start_time, end_time])).aggregate(
+                    History.objects.filter(
+                        Q(user=user) & Q(created_at__range=[aware_start_time, aware_end_time])).aggregate(
                         Sum('length'))['length__sum']
                 if (length_count == None):
                     length_count = 0
@@ -233,13 +251,22 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         end_time = request.GET.get('end_time')
         print(start_time)
         print(end_time)
+
+        date_format = '%Y-%m-%d'
+
+        unaware_start_time = datetime.datetime.strptime(start_time, date_format)
+        aware_start_time = pytz.utc.localize(unaware_start_time)
+
+        unaware_end_time = datetime.datetime.strptime(end_time, date_format)
+        aware_end_time = pytz.utc.localize(unaware_end_time) + datetime.timedelta(days=1)
+
         if User.objects.get(id=request.user.id).is_admin:
             users = User.objects.filter(invited_by=request.user.id)
             total_duration = []
             for user in users:
                 durations = History.objects.annotate(
                     diff=ExpressionWrapper(F('end_time') - F('start_time'), output_field=DurationField())).filter(
-                    Q(user=user) & Q(created_at__range=[start_time, end_time]))
+                    Q(user=user) & Q(created_at__range=[aware_start_time, aware_end_time]))
                 duration_count = InvitationsViewSet.datetime_parse(durations.aggregate(Sum('diff')))
 
                 activity = {
