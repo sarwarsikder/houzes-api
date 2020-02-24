@@ -38,14 +38,15 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             receiver = request.body['email']
 
         invitation_count = 0
-        invitation_count = User.objects.filter(invited_by = request.user.id).count()+Invitations.objects.filter(user__id = request.user.id).count()
-        if invitation_count>9:
+        invitation_count = User.objects.filter(invited_by=request.user.id).count() + Invitations.objects.filter(
+            user__id=request.user.id).count()
+        if invitation_count > 9:
             status = False
             data = None
             message = "You can't invite more than 10 members"
             return Response({'status': status, 'data': data, 'message': message})
 
-        if User.objects.filter(email =receiver.strip()).first():
+        if User.objects.filter(email=receiver.strip()).first():
             status = False
             data = None
             message = 'User already exist'
@@ -57,9 +58,9 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
         invitation_key = generate_shortuuid()
 
-        if Invitations.objects.filter(email =receiver.strip()).first():
+        if Invitations.objects.filter(email=receiver.strip(), user__id=request.user.id).first():
             try:
-                Invitations.objects.filter(email =receiver.strip()).delete()
+                Invitations.objects.filter(email=receiver.strip(), user__id=request.user.id).delete()
                 subject = 'Invitation'
                 body = str(request.user) + " sent you an invitation click the link below to accept."
                 email = receiver
@@ -99,7 +100,8 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if User.objects.get(id=request.user.id).is_admin:
-            users = UserSerializer(User.objects.filter(Q(invited_by=request.user.id ) | Q(id=request.user.id)), many= True)
+            users = UserSerializer(User.objects.filter(Q(invited_by=request.user.id) | Q(id=request.user.id)),
+                                   many=True)
             unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=request.user.id),
                                                              many=True)
             dict = {
@@ -108,7 +110,8 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             }
         else:
             user = User.objects.get(id=request.user.id)
-            users = UserSerializer(User.objects.filter(Q(invited_by=user.invited_by) | Q(id=user.invited_by)), many=True)
+            users = UserSerializer(User.objects.filter(Q(invited_by=user.invited_by) | Q(id=user.invited_by)),
+                                   many=True)
             unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=user.invited_by),
                                                              many=True)
             dict = {
@@ -171,7 +174,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             return Response(activities)
 
     @action(detail=False, url_path='total-houzes/filter')
-    def total_houzes_filter(self,request, *args, **kwargs):
+    def total_houzes_filter(self, request, *args, **kwargs):
         start_time = request.GET.get('start_time')
         end_time = request.GET.get('end_time')
         print(start_time)
@@ -182,7 +185,8 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             total_houzes = []
             for user in users:
                 userLists = UserList.objects.filter(user=user)
-                houzes_count = Property.objects.filter(Q(user_list__in=userLists) & Q(created_at__range=[start_time,end_time])).count()
+                houzes_count = Property.objects.filter(
+                    Q(user_list__in=userLists) & Q(created_at__range=[start_time, end_time])).count()
                 total_houze = {
                     'user_id': user.id,
                     'user_first_name': user.first_name,
@@ -194,7 +198,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             return Response(total_houzes)
 
     @action(detail=False, url_path='total-miles/filter')
-    def total_miles_filter(self,request, *args, **kwargs):
+    def total_miles_filter(self, request, *args, **kwargs):
         start_time = request.GET.get('start_time')
         end_time = request.GET.get('end_time')
         print(start_time)
@@ -204,7 +208,9 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             users = User.objects.filter(invited_by=request.user.id)
             total_miles = []
             for user in users:
-                length_count = History.objects.filter(Q(user=user) & Q(created_at__range=[start_time,end_time])).aggregate(Sum('length'))['length__sum']
+                length_count = \
+                    History.objects.filter(Q(user=user) & Q(created_at__range=[start_time, end_time])).aggregate(
+                        Sum('length'))['length__sum']
                 if (length_count == None):
                     length_count = 0
 
@@ -214,15 +220,15 @@ class InvitationsViewSet(viewsets.ModelViewSet):
                     'user_id': user.id,
                     'user_first_name': user.first_name,
                     'user_last_name': user.last_name,
-                    'user_photo' : user.photo,
+                    'user_photo': user.photo,
                     'total_miles': length_count
                 }
                 total_miles.append(total_mile)
 
-            return Response(total_miles )
+            return Response(total_miles)
 
     @action(detail=False, url_path='total-duration/filter')
-    def total_duration_filter(self,request, *args, **kwargs):
+    def total_duration_filter(self, request, *args, **kwargs):
         start_time = request.GET.get('start_time')
         end_time = request.GET.get('end_time')
         print(start_time)
@@ -231,10 +237,9 @@ class InvitationsViewSet(viewsets.ModelViewSet):
             users = User.objects.filter(invited_by=request.user.id)
             total_duration = []
             for user in users:
-
                 durations = History.objects.annotate(
                     diff=ExpressionWrapper(F('end_time') - F('start_time'), output_field=DurationField())).filter(
-                    Q(user=user) & Q(created_at__range=[start_time,end_time]))
+                    Q(user=user) & Q(created_at__range=[start_time, end_time]))
                 duration_count = InvitationsViewSet.datetime_parse(durations.aggregate(Sum('diff')))
 
                 activity = {
@@ -247,7 +252,6 @@ class InvitationsViewSet(viewsets.ModelViewSet):
                 total_duration.append(activity)
 
             return Response(total_duration)
-
 
     def datetime_parse(value):
         data = value['diff__sum']
