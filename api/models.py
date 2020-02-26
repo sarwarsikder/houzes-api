@@ -397,8 +397,9 @@ class PaymentPlan(models.Model):
 class UpgradeProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    # wallet = models.DecimalField(max_digits=8, decimal_places=2, null=True)
     plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
+    subscriptionId = models.CharField(max_length=500, null=True, default=None)
+    refId = models.CharField(max_length=500, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
