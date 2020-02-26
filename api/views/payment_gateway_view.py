@@ -10,6 +10,7 @@ import sys
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import createTransactionController
 from django.http import JsonResponse
+from authorizenet.constants import constants
 from rest_framework.decorators import api_view
 from houzes_api import settings
 
@@ -133,6 +134,7 @@ def charge_credit_card(request):
     # Create the controller
     createtransactioncontroller = createTransactionController(
         createtransactionrequest)
+    createtransactioncontroller.setenvironment(constants.PRODUCTION)
     createtransactioncontroller.execute()
 
     # response = createtransactioncontroller.getresponse()

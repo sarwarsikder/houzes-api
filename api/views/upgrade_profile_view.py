@@ -7,6 +7,7 @@ from authorizenet.apicontrollers import ARBCreateSubscriptionController
 from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from authorizenet.constants import constants
 
 from api.models import *
 from api.serializers import *
@@ -211,6 +212,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         request.subscription = subscription
         # Creating and executing the controller
         controller = ARBCreateSubscriptionController(request)
+        controller.setenvironment(constants.PRODUCTION)
         controller.execute()
         # Getting the response
         response = controller.getresponse()
