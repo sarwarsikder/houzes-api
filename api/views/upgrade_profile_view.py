@@ -172,8 +172,9 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         expirationDate = expiration_date
         subscriptionName = plan.plan_name
 
-        amount = float(plan.plan_coin)
-
+        # amount = float(plan.plan_coin)
+        amount = 1
+        totalOccurrences =1
         days = 30
         startDate = datetime.now()
         # Setting the merchant details
@@ -186,7 +187,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         paymentschedule.interval.length = days
         paymentschedule.interval.unit = apicontractsv1.ARBSubscriptionUnitEnum.days
         paymentschedule.startDate = startDate
-        paymentschedule.totalOccurrences = 9999
+        paymentschedule.totalOccurrences = totalOccurrences
         paymentschedule.trialOccurrences = 0
         # Giving the credit card info
         creditcard = apicontractsv1.creditCardType()
