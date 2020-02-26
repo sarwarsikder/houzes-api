@@ -5,6 +5,7 @@ from datetime import datetime
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import ARBCreateSubscriptionController
 from django.http import JsonResponse
+from authorizenet.constants import constants
 from rest_framework import viewsets
 from rest_framework.decorators import action
 
@@ -211,6 +212,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         request.subscription = subscription
         # Creating and executing the controller
         controller = ARBCreateSubscriptionController(request)
+        controller.setenvironment(constants.PRODUCTION)
         controller.execute()
         # Getting the response
         response = controller.getresponse()
