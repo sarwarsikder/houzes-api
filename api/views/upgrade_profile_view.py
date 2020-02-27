@@ -214,6 +214,18 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         billto = apicontractsv1.nameAndAddressType()
         billto.firstName = firstName
         billto.lastName = lastName
+
+        #Set the customer's identifying information
+        customerData = apicontractsv1.customerType()
+        customerData.type = "individual"
+        customerData.id = str(upgrade_profile.user.id)
+        customerData.email = User.objects.get(id = upgrade_profile.user.id).email
+
+        # Create order information
+        order = apicontractsv1.orderType()
+        order.invoiceNumber = generate_shortuuid()
+        order.description = "HouZes profile upgrade"
+
         # Setting subscription details
         subscription = apicontractsv1.ARBSubscriptionType()
         subscription.name = subscriptionName
@@ -222,6 +234,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         subscription.amount = Decimal(amount).quantize(TWOPLACES)
         subscription.trialAmount = Decimal('0.00')
         subscription.billTo = billto
+        subscription.order = order
+        subscription.customer = customerData
         subscription.payment = payment
 
         # Creating the request
@@ -237,6 +251,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         json_response = to_dict(response)
         print(json_response)
         return (json_response)
+
 
 def to_dict(element):
     ret = {}

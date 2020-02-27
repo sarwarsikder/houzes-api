@@ -2,6 +2,7 @@ import re
 import traceback
 
 from authorizenet import apicontractsv1
+from authorizenet.constants import constants
 from authorizenet.apicontrollers import createTransactionController, ARBGetSubscriptionController
 from houzes_api import settings
 
@@ -13,7 +14,7 @@ AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY = getattr(settings, "AUTHORIZE_D
 class CheckSubscription:
     def get_subscription_status(self, subscriptionId):
         try:
-            print(":::::::::::::SUBSCRIPTION CHECK:::::::::::::::::::")
+            print(":::::::::::::SUBSCRIPTION CHECK:::::::::::::::::::"+subscriptionId)
             merchantAuth = apicontractsv1.merchantAuthenticationType()
             merchantAuth.name = AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME
             merchantAuth.transactionKey = AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY
@@ -24,6 +25,7 @@ class CheckSubscription:
             getSubscription.includeTransactions = True
 
             getSubscriptionController = ARBGetSubscriptionController(getSubscription)
+            getSubscriptionController.setenvironment(constants.PRODUCTION)
             getSubscriptionController.execute()
 
             response = getSubscriptionController.getresponse()

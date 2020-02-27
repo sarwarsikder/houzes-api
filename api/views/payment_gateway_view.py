@@ -65,6 +65,28 @@ def charge_credit_card(request):
         payment = apicontractsv1.paymentType()
         payment.creditCard = creditCard
 
+        # Create order information
+        order = apicontractsv1.orderType()
+        order.invoiceNumber = generate_shortuuid()
+        order.description = "HouZes wallet fill up"
+
+        # Set the customer's Bill To address
+        customerAddress = apicontractsv1.customerAddressType()
+        customerAddress.firstName = card_name
+        customerAddress.lastName = ''
+        # customerAddress.company = "REAL ACQUISITIONS"
+        # customerAddress.address = "14 Main Street"
+        # customerAddress.city = "Pecan Springs"
+        # customerAddress.state = "TX"
+        # customerAddress.zip = "44628"
+        # customerAddress.country = "USA"
+
+        # Set the customer's identifying information
+        customerData = apicontractsv1.customerDataType()
+        customerData.type = "individual"
+        customerData.id = str(request.user.id)
+        customerData.email = request.user.email
+
         # Create a transactionRequestType object and add the previous objects to it.
         transactionrequest = apicontractsv1.transactionRequestType()
         transactionrequest.transactionType = "authCaptureTransaction"
@@ -79,6 +101,9 @@ def charge_credit_card(request):
         transactionrequest.payment = payment
         transactionrequest.x_po_num = generate_shortuuid()
         transactionrequest.x_duplicate_window = 0
+        transactionrequest.order = order
+        transactionrequest.customer = customerData
+        transactionrequest.billTo = customerAddress
 
         # Assemble the complete transaction request
         createtransactionrequest = apicontractsv1.createTransactionRequest()
