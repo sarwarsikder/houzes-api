@@ -1,15 +1,14 @@
 import re
+import traceback
 from _decimal import Decimal
 from datetime import datetime
 
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import ARBCreateSubscriptionController
-from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from authorizenet.constants import constants
-
-from api.models import *
+from authorization.views.checkSubscription import CheckSubscription
 from api.serializers import *
 from rest_framework.response import Response
 from houzes_api import settings as AUTHORIZE_DOT_NET_CONFIG
@@ -17,13 +16,13 @@ from houzes_api import settings as AUTHORIZE_DOT_NET_CONFIG
 AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME = getattr(AUTHORIZE_DOT_NET_CONFIG, 'AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME', None)
 AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY = getattr(AUTHORIZE_DOT_NET_CONFIG, "AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY", None)
 
+
 class UpgradeProfileViewSet(viewsets.ModelViewSet):
     queryset = UpgradeProfile.objects.all()
     serializer_class = UpgradeProfileSerializer
 
     def create(self, request, *args, **kwargs):
         response_data = {'status': False, 'data': {}, 'message' :''}
-        card_name = None
         try:
             plan_id = request.data['plan']
             card_number = request.data['card_number']
@@ -42,7 +41,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
 
         try:
             plan = Plans.objects.get(id = plan_id)
-        except :
+        except Exception as e:
+            traceback.print_exc()
             response_data['status'] = False
             response_data['message'] = 'This package is currently not available'
             return Response(response_data)
@@ -55,7 +55,22 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         upgrade_profile = UpgradeProfile.objects.filter(user = user).first()
         # MONTHLY SUBSCRIPTION GOES HERE
         subscription_response = UpgradeProfileViewSet.create_subscription(self,upgrade_profile,plan_id,card_number,expiration_date)
-        if(subscription_response['messages']['resultCode'] == 'Error'):
+        try:
+            subscriptionId = subscription_response["subscriptionId"]
+            if not CheckSubscription.get_subscription_status(self,subscriptionId):
+                response_data['status'] = False
+                response_data['data'] = {}
+                response_data['message'] = 'This transaction is not approved'
+                return Response(response_data)
+
+        except Exception as exc:
+            response_data['status'] = False
+            response_data['data'] = {}
+            response_data['message'] = 'This transaction is not approved. '+str(exc)
+            return Response(response_data)
+
+
+        if subscription_response['messages']['resultCode'] == 'Error':
             response_data['status'] = False
             response_data['data'] = {}
             response_data['message'] = subscription_response['messages']['message']['text']
@@ -173,7 +188,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         subscriptionName = plan.plan_name
 
         # amount = float(plan.plan_coin)
-        amount = 1
+        amount = 0.15
         totalOccurrences =1
         days = 30
         startDate = datetime.now()
@@ -203,10 +218,12 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         subscription = apicontractsv1.ARBSubscriptionType()
         subscription.name = subscriptionName
         subscription.paymentSchedule = paymentschedule
-        subscription.amount = amount
+        TWOPLACES = Decimal(10) ** -2
+        subscription.amount = Decimal(amount).quantize(TWOPLACES)
         subscription.trialAmount = Decimal('0.00')
         subscription.billTo = billto
         subscription.payment = payment
+
         # Creating the request
         request = apicontractsv1.ARBCreateSubscriptionRequest()
         request.merchantAuthentication = merchantAuth
