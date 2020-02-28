@@ -212,7 +212,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 #           fail_silently=False
                 #           )
                 subject = "HouZes email verification"
-                body = "please confirm your email by clicking the link below"
+                body = "Please confirm your email by clicking the link below."
                 url = "https://" + settings.WEB_APP_URL + '/verify-email/' + str(code)
                 SendEmailViewSet.send_email_view(self, subject, body, email, first_name + ' ' + last_name, url)
 

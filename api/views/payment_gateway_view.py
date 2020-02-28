@@ -68,7 +68,7 @@ def charge_credit_card(request):
         # Create order information
         order = apicontractsv1.orderType()
         order.invoiceNumber = generate_shortuuid()
-        order.description = "HouZes wallet fill up"
+        order.description = "HouZes wallet recharge"
 
         # Set the customer's Bill To address
         customerAddress = apicontractsv1.customerAddressType()

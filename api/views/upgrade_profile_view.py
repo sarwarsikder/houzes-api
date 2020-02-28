@@ -5,6 +5,7 @@ from datetime import datetime
 
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import ARBCreateSubscriptionController, ARBCancelSubscriptionController
+from notifications.signals import notify
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from authorizenet.constants import constants
@@ -124,6 +125,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
                 billing_card_info.is_save = is_save
                 billing_card_info.save()
 
+            notify.send(user, recipient=user, verb='upgraded the plan', action_object=upgrade_profile)
+
             response_data['status'] = True
             response_data['data'] = upgrade_profile_serializer.data
             response_data['message'] = '“Congratulations” Profile is upgraded. Start driving & adding HouZes'
@@ -145,6 +148,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             upgrade_history.plan = plan
             upgrade_history.transaction_coin = plan.plan_coin
             upgrade_history.save()
+
+            notify.send(user, recipient=user, verb='upgraded the plan', action_object=upgrade_profile)
 
             response_data['status'] = True
             response_data['data'] = upgrade_profile_serializer.data

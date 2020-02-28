@@ -89,8 +89,8 @@ class ScoutViewSet(viewsets.ModelViewSet):
             status = True
             data = scoutSerializer.data
             message = "New scout/s created"
-            subject = 'Invitaion To Scout'
-            body = user.first_name+' '+user.last_name+' has sent you an invitation to scout from HouZes.Click the link below to accept the invitaion'
+            subject = 'Invitation To Scout'
+            body = user.first_name+' '+user.last_name+' has sent you an invitation to scout from HouZes. Click the link below to accept the invitaion.'
             SendEmailViewSet.send_email_view(self,subject,body,email,first_name+' '+last_name,"https://"+url)
         except:
             status = False
