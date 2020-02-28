@@ -88,6 +88,10 @@ def create_property(request):
             owner_info = body['owner_info']
         if 'url' in body:
             url = body['url']
+        if 'latitude' in body:
+            latitude = body['latitude']
+        if 'longitude' in body:
+            longitude = body['longitude']
 
     except:  # when passing form data
         if 'street' in request.POST:
@@ -105,17 +109,10 @@ def create_property(request):
             owner_info = request.POST['owner_info']
         if 'url' in request.POST:
             url = request.POST['url']
-    try:
-        full_address = street+' '+city+' '+state+' '+zip
-        print('FETCH LAT LNG')
-        property_lat_lng_fetch = PropertyViewSet.get_property_info_by_address(full_address)
-        if property_lat_lng_fetch['response']:
-            latitude = property_lat_lng_fetch['data']['lat']
-            longitude = property_lat_lng_fetch['data']['lng']
-
-    except:
-        print("::::::::::::EXCEPTION WHILE FETCHING LAT LNG::::::::::::::::::")
-        traceback.print_exc()
+        if 'latitude' in request.POST:
+            latitude = request.POST['latitude']
+        if 'longitude' in request.POST:
+            longitude = request.POST['longitude']
 
     try:
         scout = Scout.objects.filter(url=url)[0]
