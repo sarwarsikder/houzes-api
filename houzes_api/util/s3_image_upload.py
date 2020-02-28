@@ -24,7 +24,16 @@ def image_upload(img_file, file_path, file_name, with_thumb):
                 elif exif[orientation] == 8:
                     im = im.rotate(90, expand=True)
             buf = io.BytesIO()
-            im.save(buf, format="png", optimize = True, quality = 70)
+
+            basewidth = 800
+            with im as image:
+                width, height = image.size
+                if basewidth < width:
+                    wpercent = (basewidth / float(im.size[0]))
+                    hsize = int((float(im.size[1]) * float(wpercent)))
+                    im = im.resize((basewidth, hsize), Image.ANTIALIAS)
+
+            im.save(buf, format="png", optimize=True, quality=70)
             byte_im = buf.getvalue()
             full_img_path = file_path + file_name
             s3_file_obj = default_storage.open(full_img_path, 'wb')
