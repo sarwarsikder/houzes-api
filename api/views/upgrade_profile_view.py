@@ -2,6 +2,7 @@ import re
 import traceback
 from _decimal import Decimal
 from datetime import datetime
+import calendar
 
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import ARBCreateSubscriptionController, ARBCancelSubscriptionController, \
@@ -57,8 +58,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         upgrade_profile = UpgradeProfile.objects.filter(user = user).first()
 
         #CHARGE FOR FIRST MONTH
-        # first_month_amount = float(plan.plan_coin)
-        first_month_amount = 0.15
+        first_month_amount = float(plan.plan_coin)
+        # first_month_amount = 0.15
         charge_for_first_month_response = UpgradeProfileViewSet.charge_for_first_month(self, card_number, expiration_date, first_month_amount, card_code, card_name,user)
         if charge_for_first_month_response['messages']['resultCode'] == 'Error':
             response_data['status'] = False
@@ -202,11 +203,11 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         expirationDate = expiration_date
         subscriptionName = plan.plan_name
 
-        # amount = float(plan.plan_coin)
-        amount = 0.15
-        totalOccurrences =1
+        amount = float(plan.plan_coin)
+        # amount = 0.15
+        totalOccurrences =9999
         days = 30
-        startDate = datetime.now()
+        startDate = datetime.now() + calendar.monthrange(datetime.now().year, datetime.now().month)[1]
         # Setting the merchant details
         merchantAuth = apicontractsv1.merchantAuthenticationType()
         merchantAuth.name = AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME

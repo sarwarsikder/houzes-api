@@ -44,7 +44,7 @@ def charge_credit_card(request):
         amount = request.data['amount']
         card_name = request.data['card_name']
 
-        amount = 0.15
+        # amount = 0.15
         manager = User.objects.get(id=request.user.id)
         if manager.is_admin == False:
             manager = User.objects.get(id=manager.invited_by)
