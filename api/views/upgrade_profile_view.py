@@ -4,7 +4,8 @@ from _decimal import Decimal
 from datetime import datetime
 
 from authorizenet import apicontractsv1
-from authorizenet.apicontrollers import ARBCreateSubscriptionController, ARBCancelSubscriptionController
+from authorizenet.apicontrollers import ARBCreateSubscriptionController, ARBCancelSubscriptionController, \
+    createTransactionController
 from notifications.signals import notify
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -54,6 +55,20 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             return Response(response_data)
 
         upgrade_profile = UpgradeProfile.objects.filter(user = user).first()
+
+        #CHARGE FOR FIRST MONTH
+        # first_month_amount = float(plan.plan_coin)
+        first_month_amount = 0.15
+        charge_for_first_month_response = UpgradeProfileViewSet.charge_for_first_month(self, card_number, expiration_date, first_month_amount, card_code, card_name,user)
+        if charge_for_first_month_response['messages']['resultCode'] == 'Error':
+            response_data['status'] = False
+            response_data['message'] = 'This transaction is not approved'
+            return Response(response_data)
+        elif charge_for_first_month_response['messages']['resultCode'] == 'Ok':
+            if charge_for_first_month_response['transactionResponse']['responseCode']!='1':
+                response_data['status'] = False
+                response_data['message'] = 'This transaction is not approved'
+                return Response(response_data)
 
         # IF SUBSCRIPTION EXISTS CANCEL THE SUBSCRIPTION
         if upgrade_profile.subscriptionId:
@@ -270,6 +285,77 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         json_response = to_dict(response)
         print(json_response)
         return json_response
+
+    def charge_for_first_month(self, card_number, expiration_date, amount, card_code, card_name,user):
+        merchantAuth = apicontractsv1.merchantAuthenticationType()
+        merchantAuth.name = AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME
+        merchantAuth.transactionKey = AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY
+
+        # Create the payment data for a credit card
+        creditCard = apicontractsv1.creditCardType()
+        creditCard.cardNumber = card_number
+        creditCard.expirationDate = expiration_date
+        creditCard.cardCode = card_code
+
+        # Add the payment data to a paymentType object
+        payment = apicontractsv1.paymentType()
+        payment.creditCard = creditCard
+
+        # Create order information
+        order = apicontractsv1.orderType()
+        order.invoiceNumber = generate_shortuuid()
+        order.description = "HouZes first month subscription"
+
+        # Set the customer's Bill To address
+        customerAddress = apicontractsv1.customerAddressType()
+        customerAddress.firstName = card_name
+        customerAddress.lastName = ''
+        # customerAddress.company = "REAL ACQUISITIONS"
+        # customerAddress.address = "14 Main Street"
+        # customerAddress.city = "Pecan Springs"
+        # customerAddress.state = "TX"
+        # customerAddress.zip = "44628"
+        # customerAddress.country = "USA"
+
+        # Set the customer's identifying information
+        customerData = apicontractsv1.customerDataType()
+        customerData.type = "individual"
+        customerData.id = str(user.id)
+        customerData.email = user.email
+
+        # Create a transactionRequestType object and add the previous objects to it.
+        transactionrequest = apicontractsv1.transactionRequestType()
+        transactionrequest.transactionType = "authCaptureTransaction"
+        TWOPLACES = Decimal(10) ** -2
+        transactionrequest.amount = Decimal(amount).quantize(TWOPLACES)
+        print(transactionrequest.amount)
+
+        # order = apicontractsv1.orderType()
+        # order.invoiceNumber = generate_shortuuid()
+        # transactionrequest.order=order
+
+        transactionrequest.payment = payment
+        transactionrequest.x_po_num = generate_shortuuid()
+        transactionrequest.x_duplicate_window = 0
+        transactionrequest.order = order
+        transactionrequest.customer = customerData
+        transactionrequest.billTo = customerAddress
+
+        # Assemble the complete transaction request
+        createtransactionrequest = apicontractsv1.createTransactionRequest()
+        createtransactionrequest.merchantAuthentication = merchantAuth
+        createtransactionrequest.refId = "MerchantID-0001"
+        createtransactionrequest.transactionRequest = transactionrequest
+        # Create the controller
+        createtransactioncontroller = createTransactionController(
+            createtransactionrequest)
+        createtransactioncontroller.setenvironment(constants.PRODUCTION)
+        createtransactioncontroller.execute()
+
+        response = createtransactioncontroller.getresponse()
+        payment_response = to_dict(response)
+        print(payment_response)
+        return payment_response
 
 def to_dict(element):
     ret = {}
