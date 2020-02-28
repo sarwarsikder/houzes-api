@@ -4,7 +4,7 @@ from _decimal import Decimal
 from datetime import datetime
 
 from authorizenet import apicontractsv1
-from authorizenet.apicontrollers import ARBCreateSubscriptionController
+from authorizenet.apicontrollers import ARBCreateSubscriptionController, ARBCancelSubscriptionController
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from authorizenet.constants import constants
@@ -53,6 +53,10 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             return Response(response_data)
 
         upgrade_profile = UpgradeProfile.objects.filter(user = user).first()
+
+        # IF SUBSCRIPTION EXISTS CANCEL THE SUBSCRIPTION
+        if upgrade_profile.subscriptionId:
+            UpgradeProfileViewSet.cancel_subscription(self, upgrade_profile)
         # MONTHLY SUBSCRIPTION GOES HERE
         subscription_response = UpgradeProfileViewSet.create_subscription(self,upgrade_profile,plan_id,card_number,expiration_date)
         try:
@@ -99,15 +103,6 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             upgrade_history.transaction_coin = plan.plan_coin
             upgrade_history.save()
 
-            # billing_card_info = BillingCardInfo()
-            # billing_card_info.user = user
-            # billing_card_info.card_name = None
-            # billing_card_info.card_number = card_number
-            # billing_card_info.card_code = card_code
-            # billing_card_info.exp_date = expiration_date
-            # billing_card_info.is_save = is_save
-            # billing_card_info.card_name = card_name
-            # billing_card_info.save()
 
             if BillingCardInfo.objects.filter(user__id=user.id, card_number=card_number).first():
                 if is_save:
@@ -250,8 +245,26 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         response = controller.getresponse()
         json_response = to_dict(response)
         print(json_response)
-        return (json_response)
+        return json_response
 
+    def cancel_subscription(self, upgrade_profile):
+        merchantAuth = apicontractsv1.merchantAuthenticationType()
+        merchantAuth.name = AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME
+        merchantAuth.transactionKey = AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY
+
+        request = apicontractsv1.ARBCancelSubscriptionRequest()
+        request.merchantAuthentication = merchantAuth
+        request.refId = "cancel-subs"
+        request.subscriptionId = upgrade_profile.subscriptionId
+
+        controller = ARBCancelSubscriptionController(request)
+        controller.setenvironment(constants.PRODUCTION)
+        controller.execute()
+
+        response = controller.getresponse()
+        json_response = to_dict(response)
+        print(json_response)
+        return json_response
 
 def to_dict(element):
     ret = {}
