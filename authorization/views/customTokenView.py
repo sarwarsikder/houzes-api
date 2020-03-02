@@ -30,6 +30,8 @@ class CustomTokenView(OAuthLibMixin, View):
     @method_decorator(sensitive_post_parameters("password"))
     def post(self, request, *args, **kwargs):
         print(":::::::::SIGN IN IS WORKING:::::::::::::::::")
+        request.POST._mutable = True
+        request.POST['username'] = request.POST['username'].lower().strip()
         url, headers, body, status = self.create_token_response(request)
         if status == 200:
             access_token = json.loads(body).get("access_token")

@@ -320,9 +320,9 @@ class UserViewSet(viewsets.ModelViewSet):
         status = False
         message = ""
         try:
-            email = request.data['username']
+            email = request.data['username'].lower().strip()
         except:
-            email = request.data['username']
+            email = request.data['username'].lower().strip()
         if User.objects.filter(email=email).count() > 0:
             user = User.objects.filter(email=email)
             if user[0].is_active == False:
