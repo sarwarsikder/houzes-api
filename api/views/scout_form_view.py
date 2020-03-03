@@ -18,6 +18,8 @@ from PIL import Image
 from io import BytesIO
 import time
 
+from houzes_api.util.s3_image_upload import image_upload
+
 
 @csrf_exempt
 def check_url(request):
@@ -88,6 +90,10 @@ def create_property(request):
             owner_info = body['owner_info']
         if 'url' in body:
             url = body['url']
+        if 'latitude' in body:
+            latitude = body['latitude']
+        if 'longitude' in body:
+            longitude = body['longitude']
 
     except:  # when passing form data
         if 'street' in request.POST:
@@ -105,17 +111,10 @@ def create_property(request):
             owner_info = request.POST['owner_info']
         if 'url' in request.POST:
             url = request.POST['url']
-    try:
-        full_address = street+' '+city+' '+state+' '+zip
-        print('FETCH LAT LNG')
-        property_lat_lng_fetch = PropertyViewSet.get_property_info_by_address(full_address)
-        if property_lat_lng_fetch['response']:
-            latitude = property_lat_lng_fetch['data']['lat']
-            longitude = property_lat_lng_fetch['data']['lng']
-
-    except:
-        print("::::::::::::EXCEPTION WHILE FETCHING LAT LNG::::::::::::::::::")
-        traceback.print_exc()
+        if 'latitude' in request.POST:
+            latitude = request.POST['latitude']
+        if 'longitude' in request.POST:
+            longitude = request.POST['longitude']
 
     try:
         scout = Scout.objects.filter(url=url)[0]
@@ -146,24 +145,34 @@ def photo_multiple_upload(request, id):
     property = Property.objects.get(id=property_id)
     images_data = request.FILES
     propertyPhotos = []
+    s3_url = None
+    thumb_s3_url = None
     for image_data in images_data.values():
-        print(image_data)
-        print(image_data.__dict__)
-        file_path = "photos/property_photos/{}/{}/{}".format(str(user.id), property_id,
-                                                             str(time.time()).replace('.', '_') + '.jpg')
-        s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
-        file_upload(image_data, file_path)
+        # print(image_data)
+        # print(image_data.__dict__)
+        # file_path = "photos/property_photos/{}/{}/{}".format(str(user.id), property_id,
+        #                                                      str(time.time()).replace('.', '_') + '.jpg')
+        # s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME, file_path)
+        # file_upload(image_data, file_path)
+        #
+        # thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user.id), property_id,
+        #                                                            str(time.time()).replace('.', '_') + '_thumb.jpg')
+        # thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,
+        #                                                           thumb_file_path)
+        # with Image.open(image_data) as image:
+        #     thumb = resizeimage.resize_cover(image, [150, 150])
+        #     thumb_byte = BytesIO()
+        #     thumb.save(thumb_byte, format=thumb.format)
+        #     thumb_image = thumb_byte.getvalue()
+        #     file_upload(thumb_image, thumb_file_path)
 
-        thumb_file_path = "photos/property_photos/{}/{}/{}".format(str(user.id), property_id,
-                                                                   str(time.time()).replace('.', '_') + '_thumb.jpg')
-        thumb_s3_url = "https://s3.{}.amazonaws.com/{}/{}".format(settings.AWS_REGION, settings.S3_BUCKET_NAME,
-                                                                  thumb_file_path)
-        with Image.open(image_data) as image:
-            thumb = resizeimage.resize_cover(image, [150, 150])
-            thumb_byte = BytesIO()
-            thumb.save(thumb_byte, format=thumb.format)
-            thumb_image = thumb_byte.getvalue()
-            file_upload(thumb_image, thumb_file_path)
+        s3_path_prefix = "photos/property_photos/"
+        file_name = generate_shortuuid() + str(time.time()) + '.png'
+        img_data = image_upload(image_data, s3_path_prefix, file_name, True)
+        if img_data['status']:
+            s3_url = img_data['full_img_url']
+            thumb_s3_url = img_data['thumb_url']
+
         propertyPhoto = PropertyPhotos()
         propertyPhoto.user = user
         propertyPhoto.property = property

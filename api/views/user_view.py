@@ -212,7 +212,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 #           fail_silently=False
                 #           )
                 subject = "HouZes email verification"
-                body = "please confirm your email by clicking the link below"
+                body = "Please confirm your email by clicking the link below."
                 url = "https://" + settings.WEB_APP_URL + '/verify-email/' + str(code)
                 SendEmailViewSet.send_email_view(self, subject, body, email, first_name + ' ' + last_name, url)
 
@@ -273,7 +273,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 request.data['photo'] = full_img_path
                 request.data['photo_thumb'] = thumb_img_path
             else:
-                return Response({'status': True, 'data': {}, 'message': img_data["msg"]})
+                return Response({'status': False, 'data': {}, 'message': img_data["msg"]})
 
         if not request.data._mutable:
             request.data._mutable = state
@@ -320,9 +320,9 @@ class UserViewSet(viewsets.ModelViewSet):
         status = False
         message = ""
         try:
-            email = request.data['username']
+            email = request.data['username'].lower().strip()
         except:
-            email = request.data['username']
+            email = request.data['username'].lower().strip()
         if User.objects.filter(email=email).count() > 0:
             user = User.objects.filter(email=email)
             if user[0].is_active == False:

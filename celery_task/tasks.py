@@ -6,6 +6,7 @@ import datetime
 from api.models import *
 from api.serializers import UserSerializer
 from houzes_api.celery_app import app
+from houzes_api import  settings
 
 
 @app.task()
@@ -91,7 +92,7 @@ def send_mail_wizard_to_property(mail_wizard: MailWizardInfo):
     prop_address1 = [property.street, property.city, property.state, property.zip]
     separator = ', '
 
-    url = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
+    url = settings.MAILER_WIZARD_MICRO_SERVICE_DOMAIN + 'mailer-service/send-mailer-data/'
     headers = {
         'Content-Type': 'application/json',
     }
@@ -185,7 +186,7 @@ def send_mail_wizard_to_neighbor(mail_wizard: MailWizardInfo):
     prop_address1 = [get_neighborhood.street, get_neighborhood.city, get_neighborhood.state, get_neighborhood.zip]
     separator = ', '
 
-    url = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
+    url = settings.MAILER_WIZARD_MICRO_SERVICE_DOMAIN + 'mailer-service/send-mailer-data/'
     headers = {
         'Content-Type': 'application/json',
     }

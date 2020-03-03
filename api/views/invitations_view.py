@@ -83,7 +83,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
         try:
             subject = 'Invitation'
-            body = str(request.user) + " sent you an invitation, click the below link to accept."
+            body = str(request.user) + " sent you an invitation. Click the below link to accept."
             email = receiver
             url = 'https://' + settings.WEB_APP_URL + '/team-invite/' + str(invitation_key)
             SendEmailViewSet.send_email_view(self, subject, body, email, 'concern', url)
