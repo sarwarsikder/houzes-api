@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from django.contrib import admin
+from houzes_api.admin import admin_site
 from django.urls import path, include
 from rest_framework.documentation import include_docs_urls
 from api.views import error_handler
@@ -9,7 +9,7 @@ from authorization.views.customTokenView import CustomTokenView
 from authorization.views.customConvertTokenView import CustomConvertTokenView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin_site.urls),
     path('api/', include('api.urls')),
     url(r'^docs/', include_docs_urls(title='HOUZES API',
                                      authentication_classes=[],

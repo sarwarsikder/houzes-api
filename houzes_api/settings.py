@@ -40,7 +40,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
+    'houzes_api.apps.MyAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -57,7 +58,7 @@ INSTALLED_APPS = [
     'whitenoise',
     'notifications',
     'celery_task',
-    'django_celery_beat',
+    'django_celery_beat'
 ]
 APP_ENV = 'PROD'  # PROD, DEV
 

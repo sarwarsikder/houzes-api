@@ -377,6 +377,8 @@ class Plans(models.Model):
     class Meta:
         db_table = 'plans'
 
+    def __str__(self):
+        return self.plan_name
 
 class PaymentPlan(models.Model):
     payment_plan_name = models.CharField(max_length=500, null=True)
@@ -515,8 +517,3 @@ class UserFirebase(models.Model):
     class Meta:
         db_table = 'user_firebase'
 
-
-admin.site.register(User)
-admin.site.register(UserSockets)
-admin.site.register(UserLocation)
-admin.site.register(UserDriver)
