@@ -1,4 +1,8 @@
+import datetime
 import json
+import traceback
+
+import pytz
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -12,6 +16,7 @@ from api.models import *
 from authorization.views import *
 from authorization.views.checkSubscription import CheckSubscription as cs
 from authorization.views.downgradeProfile import DowngradeProfile as dp
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class CustomTokenView(OAuthLibMixin, View):
@@ -45,16 +50,17 @@ class CustomTokenView(OAuthLibMixin, View):
 
         for k, v in headers.items():
             response[k] = v
+        user = User.objects.get(id=token.user.id)
+        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+
         try:
             print('::::::::::USER ID :::::::::::::::::')
-            user = User.objects.get(id=token.user.id)
-            upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
             if upgrade_profile:
                 if upgrade_profile.subscriptionId != None:
                     print(upgrade_profile.subscriptionId)
-                    if not cs.get_subscription_status(self,upgrade_profile.subscriptionId):
+                    if not cs.get_subscription_status(self, upgrade_profile.subscriptionId):
                         # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
-                        dp.downgrade(self,upgrade_profile, user)
+                        dp.downgrade(self, upgrade_profile, user)
 
 
 
@@ -62,5 +68,16 @@ class CustomTokenView(OAuthLibMixin, View):
                 print("::::::::::INVALID USER::::::::::")
         except:
             print('EXCEPTION OCCURED WHILE CHECKING SUBSCRIPTION')
+
+        try:
+            print('::::::::::::::CHECKING FOR EXPIRATION DATE::::::::::::::::')
+            if upgrade_profile:
+                if upgrade_profile.expire_at != None:
+                    utc = pytz.UTC
+                    if utc.localize(datetime.datetime.now()) >= upgrade_profile.expire_at:
+                        dp.downgrade(self, upgrade_profile, user)
+
+        except:
+            print(traceback.print_exc())
         print(response)
         return response

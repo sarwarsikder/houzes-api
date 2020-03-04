@@ -28,7 +28,7 @@ class AdminUserModel(admin.ModelAdmin):
 
 
 class UpgradeProfileModel(admin.ModelAdmin):
-    fields = ['user', 'plan', 'coin', ]
+    fields = ['user', 'plan', 'coin', 'expire_at' ]
     readonly_fields = ['user']
     list_display = ['user', 'coin', 'plan', 'first_name', 'last_name', 'phone_number']
     list_select_related = ['plan']

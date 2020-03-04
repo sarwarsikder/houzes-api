@@ -1,4 +1,8 @@
+import datetime
 import json
+import traceback
+
+import pytz
 from braces.views import CsrfExemptMixin
 from oauth2_provider.models import AccessToken
 from oauth2_provider.settings import oauth2_settings
@@ -39,20 +43,34 @@ class CustomConvertTokenView(CsrfExemptMixin, OAuthLibMixin, APIView):
 
         for k, v in headers.items():
             response[k] = v
+
+        user = AccessToken.objects.filter(token=response.data['access_token']).first().user
+        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+
         try:
-            user = AccessToken.objects.filter(token=response.data['access_token']).first().user
-            upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
             if upgrade_profile:
                 print('::::::::::IF UPGRADE PROFILE:::::::::::::')
                 if upgrade_profile.subscriptionId != None:
                     print(upgrade_profile.subscriptionId)
-                    if not cs.get_subscription_status(self,upgrade_profile.subscriptionId):
+                    if not cs.get_subscription_status(self, upgrade_profile.subscriptionId):
                         # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
-                        dp.downgrade(self,upgrade_profile, user)
+                        dp.downgrade(self, upgrade_profile, user)
 
             else:
                 print("::::::::::INVALID USER::::::::::")
         except:
             print('EXCEPTION OCCURED WHILE CHECKING SUBSCRIPTION')
+        try:
+            print('::::::::::::::CHECKING FOR EXPIRATION DATE::::::::::::::::')
+            if upgrade_profile:
+                if upgrade_profile.expire_at != None:
+                    utc = pytz.UTC
+                    if utc.localize(datetime.datetime.now()) >= upgrade_profile.expire_at:
+                        dp.downgrade(self, upgrade_profile, user)
+
+        except Exception as exc:
+            print(':::::::::::::EXCEPTION OCCURED WHILE CHECKING EXPIRATION DATE:::::::::::::')
+            print('exception :' + str(exc))
+            print(traceback.print_exc())
         print(response)
         return response

@@ -402,6 +402,7 @@ class UpgradeProfile(models.Model):
     plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
     subscriptionId = models.CharField(max_length=500, null=True, default=None)
     refId = models.CharField(max_length=500, null=True, default=None)
+    expire_at = models.DateTimeField(default=None, null = True, blank = True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
