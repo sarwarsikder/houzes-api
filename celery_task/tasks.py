@@ -81,7 +81,7 @@ def send_mail_wizard_to_property(mail_wizard: MailWizardInfo):
         return response
 
     full_name = property.owner_info[0]['full_name']
-    full_address = property.owner_info[0]['full_address']
+    mailing_street = property.owner_info[0]['formatted_address']['street']['formatted_full_street_name']
     mailing_city = property.owner_info[0]['formatted_address']['city']
     mailing_state = property.owner_info[0]['formatted_address']['state']
     mailing_zip = property.owner_info[0]['formatted_address']['zip_code']
@@ -121,7 +121,7 @@ def send_mail_wizard_to_property(mail_wizard: MailWizardInfo):
         "rec_data": [
             {
                 "full_name": full_name.strip(),
-                "mailing_address1": full_address.strip(),
+                "mailing_address1": mailing_street.strip(),
                 "mailing_city": mailing_city.strip(),
                 "mailing_state": mailing_state.strip(),
                 "mailing_zip": mailing_zip.strip(),
@@ -175,7 +175,7 @@ def send_mail_wizard_to_neighbor(mail_wizard: MailWizardInfo):
         return response
 
     full_name = get_neighborhood.ownership_info['owner_info']['full_name']
-    full_address = get_neighborhood.ownership_info['owner_info']['full_address']
+    mailing_street = get_neighborhood.ownership_info['owner_info']['formatted_address']['street']['formatted_full_street_name']
     mailing_city = get_neighborhood.ownership_info['owner_info']['formatted_address']['city']
     mailing_state = get_neighborhood.ownership_info['owner_info']['formatted_address']['state']
     mailing_zip = get_neighborhood.ownership_info['owner_info']['formatted_address']['zip_code']
@@ -215,7 +215,7 @@ def send_mail_wizard_to_neighbor(mail_wizard: MailWizardInfo):
         "rec_data": [
             {
                 "full_name": full_name.strip(),
-                "mailing_address1": full_address.strip(),
+                "mailing_address1": mailing_street.strip(),
                 "mailing_city": mailing_city.strip(),
                 "mailing_state": mailing_state.strip(),
                 "mailing_zip": mailing_zip.strip(),

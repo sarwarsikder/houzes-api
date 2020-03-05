@@ -28,7 +28,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             return Response(response)
 
         full_name = property.owner_info[0]['full_name']
-        full_address = property.owner_info[0]['full_address']
+        mailing_street = property.owner_info[0]['formatted_address']['street']['formatted_full_street_name']
         mailing_city = property.owner_info[0]['formatted_address']['city']
         mailing_state = property.owner_info[0]['formatted_address']['state']
         mailing_zip = property.owner_info[0]['formatted_address']['zip_code']
@@ -38,7 +38,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         item_id = request.data['tem_item_id']
         subs_id = request.data['subs_id']
         mail_count_target = request.data['mail_count']
-        return self.hit_mailer_wizard(user, property, full_name, full_address, mailing_city, mailing_state, mailing_zip,
+        return self.hit_mailer_wizard(user, property, full_name, mailing_street, mailing_city, mailing_state, mailing_zip,
                                       user_info, item_id, subs_id, mail_count_target, False)
 
     @action(detail=False, url_path='all')
@@ -77,7 +77,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             return Response(response)
 
         full_name = get_neighborhood.ownership_info['owner_info']['full_name']
-        full_address = get_neighborhood.ownership_info['owner_info']['full_address']
+        mailing_street = get_neighborhood.ownership_info['owner_info']['formatted_address']['street']['formatted_full_street_name']
         mailing_city = get_neighborhood.ownership_info['owner_info']['formatted_address']['city']
         mailing_state = get_neighborhood.ownership_info['owner_info']['formatted_address']['state']
         mailing_zip = get_neighborhood.ownership_info['owner_info']['formatted_address']['zip_code']
@@ -88,7 +88,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         subs_id = request.data['subs_id']
         mail_count_target = request.data['mail_count']
 
-        return self.hit_mailer_wizard(user, get_neighborhood, full_name, full_address, mailing_city, mailing_state, mailing_zip,
+        return self.hit_mailer_wizard(user, get_neighborhood, full_name, mailing_street, mailing_city, mailing_state, mailing_zip,
                                       user_info, item_id, subs_id, mail_count_target, True)
         # prop_address1 = [get_neighborhood.street, get_neighborhood.city, get_neighborhood.state, get_neighborhood.zip]
         # separator = ', '
@@ -200,7 +200,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             return dict_obj[key]
         return ""
 
-    def hit_mailer_wizard(self, user, requested_property, full_name, full_address, mailing_city, mailing_state, mailing_zip,
+    def hit_mailer_wizard(self, user, requested_property, full_name, mailing_street, mailing_city, mailing_state, mailing_zip,
                           user_info, item_id, subs_id, mail_count_target, is_neighbor):
 
         response = {'status': False, 'data': {}, 'message': ''}
@@ -246,7 +246,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             "rec_data": [
                 {
                     "full_name": full_name.strip(),
-                    "mailing_address1": full_address.strip(),
+                    "mailing_address1": mailing_street.strip(),
                     "mailing_city": mailing_city.strip(),
                     "mailing_state": mailing_state.strip(),
                     "mailing_zip": mailing_zip.strip(),
