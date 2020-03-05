@@ -10,9 +10,9 @@ class MyAdminSite(admin.AdminSite):
 
 
 class AdminUserModel(admin.ModelAdmin):
-    fields = ['first_name', 'last_name', 'email', 'phone_number', 'is_active']
-    readonly_fields = ['email']
-    list_display = ['email', 'first_name', 'last_name', 'phone_number']
+    fields = ['first_name', 'last_name', 'email', 'phone_number', 'is_active', 'created_at']
+    readonly_fields = ['email', 'created_at']
+    list_display = ['email', 'first_name', 'last_name', 'phone_number', 'created_at']
     list_filter = ['email', ]
     search_fields = ['email', 'first_name', 'last_name', ]
     actions_on_top = False
@@ -28,9 +28,9 @@ class AdminUserModel(admin.ModelAdmin):
 
 
 class UpgradeProfileModel(admin.ModelAdmin):
-    fields = ['user', 'plan', 'coin', 'expire_at' ]
-    readonly_fields = ['user']
-    list_display = ['user', 'coin', 'plan', 'first_name', 'last_name', 'phone_number']
+    fields = ['user', 'plan', 'coin', 'expire_at', 'created_at']
+    readonly_fields = ['user', 'created_at']
+    list_display = ['user', 'coin', 'plan', 'first_name', 'last_name', 'phone_number', 'created_at']
     list_select_related = ['plan']
     list_filter = ['user', ]
     search_fields = ['user__email', 'user__first_name', 'user__last_name']
@@ -60,6 +60,7 @@ class UpgradeProfileModel(admin.ModelAdmin):
     last_name.admin_order_field = 'user__last_name'
     phone_number.short_description = 'Phone Number'
     phone_number.admin_order_field = 'user__phone_number'
+
 
 
 admin_site = MyAdminSite()
