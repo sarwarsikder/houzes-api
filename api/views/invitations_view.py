@@ -101,7 +101,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         return Response({'status': status, 'data': data, 'message': message})
 
     def list(self, request, *args, **kwargs):
-        if User.objects.get(id=request.user.id).is_admin:
+        if User.objects.get(id=request.user.id).is_team_admin:
             users = UserSerializer(User.objects.filter(Q(invited_by=request.user.id) | Q(id=request.user.id)),
                                    many=True)
             unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=request.user.id),
@@ -138,7 +138,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='activity')
     def team_activity(self, request, *args, **kwargs):
-        if User.objects.get(id=request.user.id).is_admin:
+        if User.objects.get(id=request.user.id).is_team_admin:
             users = User.objects.filter(invited_by=request.user.id)
             activities = []
             for user in users:
@@ -191,7 +191,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         print(aware_start_time)
         print(aware_end_time)
 
-        if User.objects.get(id=request.user.id).is_admin:
+        if User.objects.get(id=request.user.id).is_team_admin:
             users = User.objects.filter(invited_by=request.user.id)
             total_houzes = []
             for user in users:
@@ -221,7 +221,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         unaware_end_time = datetime.datetime.strptime(end_time, date_format)
         aware_end_time = pytz.utc.localize(unaware_end_time) + datetime.timedelta(days=1)
 
-        if User.objects.get(id=request.user.id).is_admin:
+        if User.objects.get(id=request.user.id).is_team_admin:
             users = User.objects.filter(invited_by=request.user.id)
             total_miles = []
             for user in users:
@@ -260,7 +260,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
         unaware_end_time = datetime.datetime.strptime(end_time, date_format)
         aware_end_time = pytz.utc.localize(unaware_end_time) + datetime.timedelta(days=1)
 
-        if User.objects.get(id=request.user.id).is_admin:
+        if User.objects.get(id=request.user.id).is_team_admin:
             users = User.objects.filter(invited_by=request.user.id)
             total_duration = []
             for user in users:
@@ -291,7 +291,7 @@ class InvitationsViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path='list')
     def team_list(self, request, *args, **kwargs):
-        if User.objects.get(id=request.user.id).is_admin:
+        if User.objects.get(id=request.user.id).is_team_admin:
             users = UserSerializer(User.objects.filter(invited_by=request.user.id), many=True)
             unregistered_invitations = InvitationsSerializer(Invitations.objects.filter(user_id=request.user.id),
                                                              many=True)

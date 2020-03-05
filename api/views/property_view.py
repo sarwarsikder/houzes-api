@@ -545,7 +545,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
 
         user = User.objects.get(id=request.user.id)
         original_user = user
-        if user.is_admin == False:
+        if user.is_team_admin == False:
             user = User.objects.get(id=user.invited_by)
         upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
         if not upgrade_profile:
@@ -973,7 +973,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     def request_neighborhood_method(self, request, requestData, property):
         user = User.objects.get(id=request.user.id)
         original_user = user
-        if not user.is_admin:
+        if not user.is_team_admin:
             user = User.objects.get(id=user.invited_by)
         upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
 

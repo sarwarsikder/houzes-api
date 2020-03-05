@@ -135,7 +135,7 @@ def send_mail_wizard_to_property(mail_wizard: MailWizardInfo):
     print(PARAMS)
     try:
         manager = user
-        if not manager.is_admin:
+        if not manager.is_team_admin:
             manager = User.objects.get(id=manager.invited_by)
         r = requests.post(url=url, json=PARAMS, headers=headers)
         if r.status_code == 200:
@@ -229,7 +229,7 @@ def send_mail_wizard_to_neighbor(mail_wizard: MailWizardInfo):
     print(PARAMS)
     try:
         manager = user
-        if not manager.is_admin:
+        if not manager.is_team_admin:
             manager = User.objects.get(id=manager.invited_by)
         r = requests.post(url=url, json=PARAMS, headers=headers)
         if r.status_code == 200:

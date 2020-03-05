@@ -124,7 +124,7 @@ def user_post_save(sender, instance, created, update_fields, **kwargs):
             user = User.objects.get(id=instance.id)
             print("user post save : ")
             print(user.__dict__)
-            if user.is_admin:
+            if user.is_team_admin:
                 upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
                 if not upgrade_profile :
                     upgrade_profile = UpgradeProfile()

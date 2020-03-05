@@ -50,7 +50,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             response_data['message'] = 'This package is currently not available'
             return Response(response_data)
         user = User.objects.get(id = request.user.id)
-        if user.is_admin == False :
+        if user.is_team_admin == False :
             response_data['status'] = False
             response_data['message'] = 'This feature is only available for team leader'
             return Response(response_data)

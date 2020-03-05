@@ -46,7 +46,7 @@ def charge_credit_card(request):
 
         # amount = 0.15
         manager = User.objects.get(id=request.user.id)
-        if manager.is_admin == False:
+        if manager.is_team_admin == False:
             manager = User.objects.get(id=manager.invited_by)
 
         # Create a merchantAuthenticationType object with authentication details

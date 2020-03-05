@@ -74,7 +74,8 @@ class UserViewSet(viewsets.ModelViewSet):
         phone_number = None
         invited_by = None
         is_active = False
-        is_admin = False
+        is_team_admin = False
+
         photo = None
         photo_thumb = None
 
@@ -130,9 +131,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 invited_by = request.data['invited_by']
             if 'is_admin' in request.data:
                 if isinstance(request.data['is_admin'], str):
-                    is_admin = True
+                    is_team_admin = True
                 else:
-                    is_admin = request.data['is_admin']
+                    is_team_admin = request.data['is_admin']
             print(email)
             print(password)
             print(first_name)
@@ -183,7 +184,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         try:
             user = User(email=email, password=password, first_name=first_name, last_name=last_name,
-                        phone_number=phone_number, invited_by=invited_by, is_active=is_active, is_admin=is_admin,
+                        phone_number=phone_number, invited_by=invited_by, is_active=is_active, is_team_admin=is_team_admin,
                         photo=photo, photo_thumb=photo_thumb)
             print(user)
             # user.save()
@@ -197,7 +198,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
             if invited_by == None :
                 # Email verification task starts here
-                user.is_admin = True
+                user.is_team_admin = True
                 user.save()
                 code = generate_shortuuid()
                 userVerifications = UserVerifications(code=code, user=user, is_used=False, verification_type='email')
@@ -297,7 +298,7 @@ class UserViewSet(viewsets.ModelViewSet):
             user = User.objects.get(id=userVerifications.user.id)
             print(user)
             user.is_active = True
-            user.is_admin = True
+            user.is_team_admin = True
             user.save()
 
             status = True

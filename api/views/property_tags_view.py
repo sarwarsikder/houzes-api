@@ -28,7 +28,7 @@ class PropertyTagsViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         # queryset = PropertyTags.objects.all().order_by('-id')
         user = User.objects.get(id = request.user.id)
-        if user.is_admin == False:
+        if user.is_team_admin == False:
             user = User.objects.get(id = user.invited_by)
         queryset = PropertyTags.objects.filter(Q(user = user) | Q(user = None)).order_by('-id')
         serializer = PropertyTagsSerializer(queryset, many=True)

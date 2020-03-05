@@ -103,7 +103,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
         response = {'status': False, 'data': {}, 'message': ''}
         manager = user
-        if not manager.is_admin:
+        if not manager.is_team_admin:
             manager = User.objects.get(id=manager.invited_by)
         return_address_street = self.dict_val(user_info, 'address_street')
         return_address_city = self.dict_val(user_info, 'address_city')

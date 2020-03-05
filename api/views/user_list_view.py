@@ -172,7 +172,7 @@ class UserListViewSet(viewsets.ModelViewSet):
             tag_id = int(kwargs['id'])
         except:
             tag_id = kwargs['id']
-        if user.is_admin == False:
+        if user.is_team_admin == False:
             user = User.objects.get(id=user.invited_by)
         try:
             property_tag = PropertyTags.objects.get(id=tag_id)

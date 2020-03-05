@@ -19,7 +19,7 @@ class CustomPagination(pagination.PageNumberPagination):
 def get_all_notifications(request):
     user = User.objects.get(id=request.user.id)
     notifications = Notifier.objects.none()
-    if user.is_admin == True:
+    if user.is_team_admin == True:
         members = User.objects.filter(Q(Q(invited_by=user.id)|Q(id=user.id)))
         notifications = Notifier.objects.filter(recipient__in=members)
     else :

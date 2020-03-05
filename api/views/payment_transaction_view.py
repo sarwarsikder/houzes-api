@@ -10,7 +10,7 @@ class PaymentTransactionViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         user = User.objects.get(id = request.user.id)
-        if user.is_admin == False:
+        if user.is_team_admin == False:
             return Response({})
         members = User.objects.filter(invited_by=user.id)
         members |= User.objects.filter(id = request.user.id)
