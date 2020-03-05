@@ -1,3 +1,4 @@
+import pytz
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 import requests
@@ -90,109 +91,6 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
 
         return self.hit_mailer_wizard(user, get_neighborhood, full_name, mailing_street, mailing_city, mailing_state, mailing_zip,
                                       user_info, item_id, subs_id, mail_count_target, True)
-        # prop_address1 = [get_neighborhood.street, get_neighborhood.city, get_neighborhood.state, get_neighborhood.zip]
-        # separator = ', '
-        #
-        # url = 'http://13.59.67.162:8111/mailer-service/send-mailer-data/'
-        # headers = {
-        #     'Content-Type': 'application/json',
-        # }
-        # PARAMS = {
-        #     "user_id": user.id,
-        #     "list_id": get_neighborhood.id,
-        #     "response_text": text_body.strip(),
-        #     "user_info": {
-        #         "firstName": user.first_name,
-        #         "lastName": user.last_name,
-        #         "email": user.email,
-        #         "proofEmail": "",
-        #         "compName": "",
-        #         "website": "",
-        #         "telephoneNo": ""
-        #     },
-        #     "letter_info": {
-        #         "type": "Letter",
-        #         "item_id": item_id,
-        #         "paper_id": "7",
-        #         "ink_id": "11",
-        #         "envelope_id": "21",
-        #         "postage_id": "5"
-        #     },
-        #     "is_imported": False,
-        #     "rec_data": [
-        #         {
-        #             "full_name": full_name.strip(),
-        #             "mailing_address1": full_address.strip(),
-        #             "mailing_city": mailing_city.strip(),
-        #             "mailing_state": mailing_state.strip(),
-        #             "mailing_zip": mailing_zip.strip(),
-        #             "prop_address1": separator.join(prop_address1),
-        #             "prop_city": get_neighborhood.city,
-        #             "prop_state": get_neighborhood.state,
-        #             "prop_zip": get_neighborhood.zip
-        #         },
-        #     ]
-        # }
-        #
-        # try:
-        #     manager = user
-        #     if not manager.is_admin:
-        #         manager = User.objects.get(id=manager.invited_by)
-        #     upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
-        #     required_coin = 0.0
-        #     required_coin = required_coin + float(PaymentPlan.objects.filter(payment_plan_name='mailer-wizard',
-        #                                                                      plan=upgrade_profile.plan).first().payment_plan_coin)*mail_count_target
-        #     if upgrade_profile.coin < required_coin:
-        #         response['status'] = False
-        #         response['data'] = {
-        #             'payment': False,
-        #             'upgrade_info': UserSerializer(manager).data['upgrade_info']
-        #         }
-        #         response['message'] = 'Mail wizard sending unsuccessful due to insufficient balance'
-        #         return Response(response)
-        #     upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
-        #     upgrade_profile.save()
-        #     r = requests.post(url=url, json=PARAMS, headers=headers)
-        #     if r.status_code == 200:
-        #         mailWizardSubsType = MailWizardSubsType.objects.filter(id=subs_id).first()
-        #
-        #         mailWizardInfo = MailWizardInfo(property=None, neighbor=get_neighborhood, sender=user,
-        #                                         subs_type=mailWizardSubsType,
-        #                                         item_id=item_id,
-        #                                         mail_count_target=mail_count_target)
-        #         mailWizardInfo.save()
-        #
-        #         response['status'] = True
-        #         response['data'] = {
-        #             'payment': True,
-        #             'upgrade_info': UserSerializer(manager).data['upgrade_info']
-        #         }
-        #         response['message'] = 'Mail wizard sent successfully'
-        #
-        #         try:
-        #             mailWizardCeleryTask = MailWizardCeleryTasks()
-        #             mailWizardCeleryTask.status = 0
-        #             mailWizardCeleryTask.run_at = datetime.datetime.now()
-        #             mailWizardCeleryTask.mail_wizard_info = mailWizardInfo
-        #             mailWizardCeleryTask.save()
-        #         except:
-        #             print('Schedular insert error')
-        #     else:
-        #         response['status'] = False
-        #         response['data'] = {
-        #             'payment': False,
-        #             'upgrade_info': UserSerializer(manager).data['upgrade_info']
-        #         }
-        #         response['message'] = 'Mail wizard sending unsuccessful'
-        # except Exception as e:
-        #     print('ex' + str(e))
-        #     response['status'] = False
-        #     response['data'] = {
-        #         'payment': True,
-        #         'upgrade_info': UserSerializer(manager).data['upgrade_info']
-        #     }
-        #     response['message'] = 'Mail wizard sending unsuccessful'
-        # return Response(response)
 
     @staticmethod
     def dict_val(dict_obj, key):
@@ -261,7 +159,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 },
             ]
         }
-
+        print(request_json)
         try:
             upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
             required_coin = 0.0
@@ -317,7 +215,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 try:
                     mail_wizard_celery_task = MailWizardCeleryTasks()
                     mail_wizard_celery_task.status = 0
-                    mail_wizard_celery_task.run_at = datetime.datetime.now()
+                    mail_wizard_celery_task.run_at = pytz.UTC.localize(datetime.datetime.now())
                     mail_wizard_celery_task.mail_wizard_info = mail_wizard_info
                     mail_wizard_celery_task.save()
 

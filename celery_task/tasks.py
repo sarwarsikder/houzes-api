@@ -132,7 +132,7 @@ def send_mail_wizard_to_property(mail_wizard: MailWizardInfo):
             },
         ]
     }
-
+    print(PARAMS)
     try:
         manager = user
         if not manager.is_admin:
@@ -226,7 +226,7 @@ def send_mail_wizard_to_neighbor(mail_wizard: MailWizardInfo):
             },
         ]
     }
-
+    print(PARAMS)
     try:
         manager = user
         if not manager.is_admin:
