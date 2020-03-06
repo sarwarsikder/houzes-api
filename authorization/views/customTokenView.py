@@ -50,7 +50,11 @@ class CustomTokenView(OAuthLibMixin, View):
 
         for k, v in headers.items():
             response[k] = v
-        user = User.objects.get(id=token.user.id)
+        try:
+            user = User.objects.get(id=token.user.id)
+        except Exception as exc:
+            print(exc)
+            return response
         upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
 
         try:
