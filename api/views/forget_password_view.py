@@ -45,7 +45,7 @@ class ForgetPasswordViewSet(viewsets.ModelViewSet):
                 body = "Click this link below to create a new password."
                 url = "https://" + settings.WEB_APP_URL + "/forget-password/" +str(link_key)
                 name = user.first_name + ' '+user.last_name
-                SendEmailViewSet.send_email_view(self, subject, body, email, name, url)
+                SendEmailViewSet.send_email_view(self, subject, body, email, ' '+name, url)
                 status = True
                 forgetPassword = ForgetPassword(user=user, link_key=link_key)
                 forgetPassword.save()
