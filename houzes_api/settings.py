@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+# from datetime import timezone, timedelta
+import datetime
+import jwt
 
 default_headers = (
     'x-requested-with',
@@ -133,7 +136,8 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.facebook.FacebookOAuth2',
     # Google OAuth2
     'social_core.backends.google.GoogleOAuth2',
-
+    # Apple OAuth2
+    'social_core.backends.apple.AppleIdAuth',
     # django-rest-framework-social-oauth2
     'rest_framework_social_oauth2.backends.DjangoOAuth2',
 )
@@ -229,7 +233,11 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
 ]
-
+SOCIAL_AUTH_APPLE_ID_CLIENT = 'com.ra.houzes-ios'  # Your client_id com.application.your, aka "Service ID"
+SOCIAL_AUTH_APPLE_ID_TEAM = 'XQWWX24964'  # Your Team ID, ie K2232113
+SOCIAL_AUTH_APPLE_ID_KEY = 'KU8QV63Q7V'  # Your Key ID, ie Y2P99J3N81K
+SOCIAL_AUTH_APPLE_ID_SCOPE = ['email', 'name']
+SOCIAL_AUTH_APPLE_ID_EMAIL_AS_USERNAME = True  # If you want to use email as username
 
 # nadim's key
 AWS_ACCESS_KEY = "AKIAIHTBVHHY6BGFFMIQ"
@@ -294,8 +302,7 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
-
-WEB_APP_URL='houzes.com'
+WEB_APP_URL = 'houzes.com'
 
 # MAILER_WIZARD_MICRO_SERVICE_URL = 'http://18.188.43.8:8111/mailer-service/send-mailer-data/'
 # MAILER_WIZARD_MICRO_SERVICE_DOMAIN = 'http://18.188.43.8:8111/'
