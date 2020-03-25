@@ -1,22 +1,18 @@
-import json
+import datetime
+import os
 
 import jwt
 import requests
-import datetime
-
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from oauth2_provider.views.mixins import OAuthLibMixin
-from rest_framework.decorators import permission_classes, api_view
-from rest_framework.permissions import AllowAny
-from rest_framework.views import APIView
-
-from houzes_api import settings
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny
 from social_core.backends.oauth import BaseOAuth2
 from social_core.utils import handle_http_errors
-from braces.views import CsrfExemptMixin
-from django.utils import timezone
+
+from houzes_api import settings
+from api.models import *
 
 
 class AppleOAuth2(BaseOAuth2):
@@ -44,7 +40,8 @@ class AppleOAuth2(BaseOAuth2):
         # body = json.loads(body_unicode)
         # print(body)
         # access_token = body['access_token']
-        access_token = 'c10439e13dfed4538bb99e75c0a109749.0.ntqv.pYksPFnbJABytXC9gf3iQw'
+        access_token = 'c0b268acca7e64c04a1a9074dbbe28718.0.ntqv.K3_ckZWPd4yGTrgkRzm7ew'
+        # access_token = 'eyJraWQiOiI4NkQ4OEtmIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLnJhLmhvdXplcy1pb3MiLCJleHAiOjE1ODUwNjgyNTcsImlhdCI6MTU4NTA2NzY1Nywic3ViIjoiMDAwMzA1LjgyODYzZjliYTBkMjRmNTZhM2VlOTRmOGI0YWZhMzFmLjA5NTkiLCJjX2hhc2giOiJJdDB2cEx6WU9Ha0p3d2NwSmdmRWhBIiwiZW1haWwiOiJ3b3Jrc3BhY2VpbmZvdGVjaEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6InRydWUiLCJhdXRoX3RpbWUiOjE1ODUwNjc2NTcsIm5vbmNlX3N1cHBvcnRlZCI6dHJ1ZX0.bNRvdAxsNYa0ccAFaDm1ooPw_8gb9wmiUdaxNvDeEIjMWUjR5pwgj3BiYIOYeK3Jg7NXiNWN3D4esT6FwdtwPqEo1IkUKD-FW-KM4R5ChFKA7owE8C5bKvudYFUBgoxthysFe7BaTQsrvKJNkJYSh_slgdT7OfoZZm-TxMNKoI8FuXLwu5oSzXIa5s1KRwir4qQXlXUpRRif1T5kX-iXRP_pNeakn7bmzgjn2OtA_BlYDxwNhkjzqSgrkEFdcppvxTMAhsBpQJhWoUm0eO2g0SPRmBPKkNxbieg_f5HJlmhnY_YS1ntMTcM7d_A2ybO8uxPLVoxdCt-wRTfrPBYVug'
         print(':::::::::::::::::::PRINTING ACCESS TOKEN:::::::::::::::::::')
         print(access_token)
         response_data = {}
@@ -61,6 +58,7 @@ class AppleOAuth2(BaseOAuth2):
         }
 
         res = requests.post(AppleOAuth2.ACCESS_TOKEN_URL, data=data, headers=headers)
+        print(res)
         response_dict = res.json()
         print('::::::::::::::::APPLE RESPONSE:::::::::::::::')
         print(response_data)
@@ -90,13 +88,14 @@ class AppleOAuth2(BaseOAuth2):
     def get_key_and_secret(self):
         print("::::::::::::::GET KEY & SECRET:::::::::::::::")
         headers = {
-            'kid': settings.SOCIAL_AUTH_APPLE_ID_KEY
+            'kid': settings.SOCIAL_AUTH_APPLE_ID_KEY,
+            'alg': 'ES256'
         }
         print('::::::::PRINTING HEADERS:::::::')
         print(headers)
         payload = {
             'iss': settings.SOCIAL_AUTH_APPLE_ID_TEAM,
-            'iat': timezone.now(),
+            'iat': timezone.now() - datetime.timedelta(days=1),
             'exp': timezone.now() + datetime.timedelta(days=180),
             'aud': 'https://appleid.apple.com',
             'sub': settings.SOCIAL_AUTH_APPLE_ID_CLIENT,
@@ -126,3 +125,29 @@ def token_conversion(request, *args, **kwargs):
     }
     AppleOAuth2.do_auth(AppleOAuth2, request, *args, **kwargs)
     return JsonResponse(json_response)
+
+
+@csrf_exempt
+@permission_classes([AllowAny])
+def apple_login(request, *args, **kwargs):
+    user_id = request.POST.get('user_id')
+    code = request.POST.get("code")
+    res = requests.get("http://localhost:60061/apple-login?code=" + code)
+    return JsonResponse({"success": res.text})
+
+
+def create_account(email, first_name=None, last_name=None):
+    user = User.objects.filter(email=email).first()
+    if user:
+        print("USER EXIST")
+    else:
+        User.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            invited_by=None,
+            photo=None,
+            photo_thumb=None,
+            is_active=True,
+            is_team_admin=True
+        )
