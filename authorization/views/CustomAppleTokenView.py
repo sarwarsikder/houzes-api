@@ -1,26 +1,21 @@
 import datetime
-import json
 import re
 import traceback
 
-import jwt
 import oauth2_provider
-import pytz
-import requests
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
-# from social_core.backends.oauth import BaseOAuth2
-# from social_core.utils import handle_http_errors
 
 from api.models import *
-from houzes_api import settings
+from authorization.views import AppleEmail
 
-from authorization.views.checkSubscription import CheckSubscription as cs
-from authorization.views.downgradeProfile import DowngradeProfile as dp
+
+# from social_core.backends.oauth import BaseOAuth2
+# from social_core.utils import handle_http_errors
 
 
 # class AppleOAuth2(BaseOAuth2):
@@ -139,39 +134,18 @@ from authorization.views.downgradeProfile import DowngradeProfile as dp
 @permission_classes([AllowAny])
 def apple_login(request, *args, **kwargs):
     user_id = request.POST.get('user_id')
-    email = request.POST.get('email')
+    # email = request.POST.get('email')
     code = request.POST.get("code")
-    # res = requests.get("http://localhost:60061/apple-login?code=" + code)
-    # if res.status_code == 200 and res.text.startswith("{"):
-    #     res_text = json.loads(res.text)
-    #     print(res_text)
-        # res_text={
-        #     "data": {
-        #         "iss": "https://appleid.apple.com",
-        #         "aud": "com.ra.houzes-ios",
-        #         "exp": 1585121719.0,
-        #         "iat": 1585121119.0,
-        #         "sub": "000305.82863f9ba0d24f56a3ee94f8b4afa31f.0959",
-        #         "at_hash": "50bv6OpyuXrotwta--HF3A",
-        #         "email": "workspaceinfotech@gmail.com",
-        #         "email_verified": "true",
-        #         "auth_time": 1585121095.0,
-        #         "nonce_supported": True
-        #     },
-        #     "status": True,
-        #     "message": "success"
-        # }
-    if email!=None and email!="":
+    email = AppleEmail.get_email(code)
+    print("--------------------------------")
+    print(email)
+    if email != None and email != "":
         if not is_email_vaild(email):
             return JsonResponse({"status": False, "data": None, "message": "Invalid email"})
         return JsonResponse(create_account(email))
-    # if email:
-    #     return JsonResponse(create_account(res_text["data"]["email"]))
     else:
         print('::::::::::RESPONSE FALSE:::::::')
-        return JsonResponse({"status": False, "data" : None, "message" : "Invalid credential"})
-    # else:
-    #     return JsonResponse({"status": False, "data" : None, "message" : "Invalid credential"})
+        return JsonResponse({"status": False, "data": None, "message": "Invalid credential"})
 
 
 def create_account(email, first_name='Unknown', last_name='User'):
@@ -186,7 +160,7 @@ def create_account(email, first_name='Unknown', last_name='User'):
                 first_name=email.split('@')[0],
                 last_name='',
                 email=email,
-                password = make_password(generate_shortuuid()),
+                password=make_password(generate_shortuuid()),
                 invited_by=None,
                 photo=None,
                 photo_thumb=None,
@@ -205,19 +179,20 @@ def create_account(email, first_name='Unknown', last_name='User'):
             # source_refresh_token_id=None
         )
         data = {
-            'access_token' : access_token.token,
-            'expires_in' : str(access_token.expires),
-            'token_type' : 'Bearer',
-            'scope' : access_token.scope,
-            'refresh_token' : None
-         }
+            'access_token': access_token.token,
+            'expires_in': str(access_token.expires),
+            'token_type': 'Bearer',
+            'scope': access_token.scope,
+            'refresh_token': None
+        }
         # subscription_checking(user)
-        return {'status' : True, 'data': data, 'message' : 'log in successful'}
+        return {'status': True, 'data': data, 'message': 'log in successful'}
     except Exception as exc:
         print(':::::::::::::EXCEPTION OCCURED:::::::::::::')
         print('exception :' + str(exc))
         print(traceback.print_exc())
-        return {'status' : False, 'data' : None, 'message' : 'Invalid credentials'}
+        return {'status': False, 'data': None, 'message': 'Invalid credentials'}
+
 
 # def subscription_checking(user):
 #     upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
@@ -248,7 +223,6 @@ def create_account(email, first_name='Unknown', last_name='User'):
 #
 #     except:
 #         print(traceback.print_exc())
-
 
 
 # for validating an Email

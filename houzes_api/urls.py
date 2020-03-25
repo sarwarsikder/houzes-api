@@ -12,7 +12,6 @@ from authorization.views.customConvertTokenView import CustomConvertTokenView
 from authorization.views import CustomAppleTokenView
 
 
-# os.popen('java -jar apple-sign.jar')
 urlpatterns = [
     path('admin/', admin_site.urls),
     path('api/', include('api.urls')),
