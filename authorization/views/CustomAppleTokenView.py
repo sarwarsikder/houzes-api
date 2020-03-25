@@ -135,43 +135,44 @@ from authorization.views import AppleEmail
 def apple_login(request, *args, **kwargs):
     try:
         user_id = request.POST.get('user_id')
-        code = request.POST.get("code")
-        email_temp = AppleEmail.get_email(code)
-        if email_temp == None:
-            aui = AppleUserId.objects.filter(user_id=user_id)
-            if len(aui) > 0:
-                email = aui[0].email
-                aui[0].code = code
+        if user_id != None:
+            code = request.POST.get("code")
+            email_temp = AppleEmail.get_email(code)
+            if email_temp == None:
+                aui = AppleUserId.objects.filter(user_id=user_id)
+                if len(aui) > 0:
+                    email = aui[0].email
+                    aui[0].code = code
+                else:
+                    aui = AppleUserId()
+                    aui.user_id = user_id
+                    aui.code = code
+                    while True:
+                        te = AppleEmail.generate_random_emails()
+                        if len(User.objects.filter(email=te)) == 0:
+                            aui.email = te
+                            break;
+                    aui.save()
+                    email = aui.email
             else:
+                email = email_temp
                 aui = AppleUserId()
                 aui.user_id = user_id
                 aui.code = code
-                while True:
-                    te = AppleEmail.generate_random_emails()
-                    if len(User.objects.filter(email=te)) == 0:
-                        aui.email = te
-                        break;
+                aui.email = email
                 aui.save()
-                email = aui.email
-        else:
-            email = email_temp
-            aui = AppleUserId()
-            aui.user_id = user_id
-            aui.code = code
-            aui.email = email
-            aui.save()
 
-        print(email)
-        if email != None and email != "":
-            if not is_email_vaild(email):
-                return JsonResponse({"status": False, "data": None, "message": "Invalid email"})
-            return JsonResponse(create_account(email))
-        else:
-            print('::::::::::RESPONSE FALSE:::::::')
-            return JsonResponse({"status": False, "data": None, "message": "Invalid credential"})
+            print(email)
+            if email != None and email != "":
+                if not is_email_vaild(email):
+                    return JsonResponse({"status": False, "data": None, "message": "Invalid email"})
+                return JsonResponse(create_account(email))
+            else:
+                print('::::::::::RESPONSE FALSE:::::::')
+                return JsonResponse({"status": False, "data": None, "message": "Invalid credential"})
     except Exception as ex:
         print(str(ex))
-        return JsonResponse({"status": False, "data": None, "message": "Something went wrong"})
+    return JsonResponse({"status": False, "data": None, "message": "Something went wrong"})
 
 
 def create_account(email, first_name='Unknown', last_name='User'):
