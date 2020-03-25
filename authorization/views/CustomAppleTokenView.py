@@ -1,5 +1,5 @@
 import datetime
-import os
+import json
 
 import jwt
 import requests
@@ -11,8 +11,8 @@ from rest_framework.permissions import AllowAny
 from social_core.backends.oauth import BaseOAuth2
 from social_core.utils import handle_http_errors
 
-from houzes_api import settings
 from api.models import *
+from houzes_api import settings
 
 
 class AppleOAuth2(BaseOAuth2):
@@ -133,7 +133,11 @@ def apple_login(request, *args, **kwargs):
     user_id = request.POST.get('user_id')
     code = request.POST.get("code")
     res = requests.get("http://localhost:60061/apple-login?code=" + code)
-    return JsonResponse({"success": res.text})
+    if res.status_code == 200 and res.text.startswith("{"):
+        res_text = json.loads(res.text)
+        return JsonResponse(res_text)
+    else:
+        return JsonResponse({"success": False})
 
 
 def create_account(email, first_name=None, last_name=None):
