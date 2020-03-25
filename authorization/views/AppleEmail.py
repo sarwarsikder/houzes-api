@@ -59,7 +59,7 @@ def get_one_random_domain(domains):
 
 
 def get_one_random_name(letters):
-    return ''.join(random.choice(letters) for i in range(8))
+    return ''.join(random.choice(letters) for i in range(12))
 
 
 def generate_random_emails():
