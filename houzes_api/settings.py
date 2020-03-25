@@ -137,7 +137,7 @@ AUTHENTICATION_BACKENDS = (
     # Google OAuth2
     'social_core.backends.google.GoogleOAuth2',
     # Apple OAuth2
-    'social_core.backends.apple.AppleIdAuth',
+    # 'social_core.backends.apple.AppleIdAuth',
     # django-rest-framework-social-oauth2
     'rest_framework_social_oauth2.backends.DjangoOAuth2',
 )

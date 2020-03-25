@@ -16,7 +16,7 @@ os.popen('java -jar apple-sign.jar')
 urlpatterns = [
     path('admin/', admin_site.urls),
     path('api/', include('api.urls')),
-    path('auth/convert-apple-token/', CustomAppleTokenView.token_conversion, name='convert_apple_token'),
+    # path('auth/convert-apple-token/', CustomAppleTokenView.token_conversion, name='convert_apple_token'),
     path('auth/apple-login/', CustomAppleTokenView.apple_login, name='apple_login'),
     url(r'^docs/', include_docs_urls(title='HOUZES API',
                                      authentication_classes=[],
