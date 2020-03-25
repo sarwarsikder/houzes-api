@@ -46,3 +46,21 @@ def get_email(code):
         print("-------------------token error---------------")
         print(str(ex))
     return None
+
+
+import random
+
+domains = ["hotmail.com", "gmail.com", "aol.com", "mail.com", "mail.kz", "yahoo.com"]
+letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
+
+
+def get_one_random_domain(domains):
+    return random.choice(domains)
+
+
+def get_one_random_name(letters):
+    return ''.join(random.choice(letters) for i in range(20))
+
+
+def generate_random_emails():
+    return get_one_random_name(letters) + '@houzes.com'

@@ -1,8 +1,6 @@
 import shortuuid
 from django.conf import settings
-from django.contrib import admin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
 
@@ -81,6 +79,17 @@ class PropertyTags(models.Model):
 
     class Meta:
         db_table = 'property_tags'
+
+
+class AppleUserId(models.Model):
+    user_id = models.CharField(max_length=255, primary_key=True)
+    email = models.CharField(max_length=255, null=True)
+    code = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'apple_users'
 
 
 #
@@ -381,6 +390,7 @@ class Plans(models.Model):
     def __str__(self):
         return self.plan_name
 
+
 class PaymentPlan(models.Model):
     payment_plan_name = models.CharField(max_length=500, null=True)
     payment_plan_coin = models.DecimalField(max_digits=10, decimal_places=2, null=True)
@@ -403,7 +413,7 @@ class UpgradeProfile(models.Model):
     plan = models.ForeignKey(Plans, on_delete=models.CASCADE)
     subscriptionId = models.CharField(max_length=500, null=True, default=None)
     refId = models.CharField(max_length=500, null=True, default=None)
-    expire_at = models.DateTimeField(default=None, null = True, blank = True)
+    expire_at = models.DateTimeField(default=None, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -518,4 +528,3 @@ class UserFirebase(models.Model):
 
     class Meta:
         db_table = 'user_firebase'
-
