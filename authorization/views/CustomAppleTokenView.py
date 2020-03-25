@@ -184,7 +184,7 @@ def create_account(email, first_name='Unknown', last_name='User'):
         if not user:
             print("::::::::::::USER DOESN'T EXIST::::::::::::")
             user = User.objects.create(
-                first_name=email.split('@')[0],
+                first_name='N/A',
                 last_name='',
                 email=email,
                 password=make_password(generate_shortuuid()),
