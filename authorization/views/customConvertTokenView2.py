@@ -53,7 +53,7 @@ class CustomConvertTokenView2(CsrfExemptMixin, OAuthLibMixin, APIView):
         else:
             print('NOTHING HAPPENED')
 
-        if not user:
+        if not user and request.data['type']=='sign-in':
             res["message"] = "User does not exist"
             return JsonResponse(res)
         # Use the rest framework `.data` to fake the post body of the django request.
