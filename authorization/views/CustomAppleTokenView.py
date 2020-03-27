@@ -173,7 +173,7 @@ def apple_login(request, *args, **kwargs):
                 elif user_type == "IN":
                     user = User.objects.filter(email=aui.email).first()
                     if not user:
-                        res_message = "Sign in is not allow here."
+                        res_message = "User doesn't exist"
                     else:
                         return JsonResponse(create_account(aui.email))
             else:
