@@ -13,11 +13,10 @@ from authorization.views.customTokenView import CustomTokenView
 from authorization.views.customConvertTokenView import CustomConvertTokenView
 from authorization.views import CustomAppleTokenView
 
-
 urlpatterns = [
     path('admin/', admin_site.urls),
     path('api/', include('api.urls')),
-    # path('auth/convert-apple-token/', CustomAppleTokenView.token_conversion, name='convert_apple_token'),
+    path('auth/apple/jwt/', CustomAppleTokenView.apple_jwt, name='apple_jwt'),
     path('auth/apple-login/', CustomAppleTokenView.apple_login, name='apple_login'),
     url(r'^docs/', include_docs_urls(title='HOUZES API',
                                      authentication_classes=[],

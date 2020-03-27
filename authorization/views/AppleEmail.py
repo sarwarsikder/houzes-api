@@ -61,6 +61,8 @@ def get_one_random_domain(domains):
 def get_one_random_name(letters):
     return ''.join(random.choice(letters) for i in range(12))
 
+def get_one_random_text(leng):
+    return ''.join(random.choice(letters) for i in range(leng))
 
 def generate_random_emails():
     return get_one_random_name(letters) + '@houzes.com'

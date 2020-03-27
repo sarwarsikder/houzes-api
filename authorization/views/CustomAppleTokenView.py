@@ -132,55 +132,62 @@ from authorization.views import AppleEmail
 
 @csrf_exempt
 @permission_classes([AllowAny])
-def apple_login(request, *args, **kwargs):
-    try:
-        user_id = request.POST.get('user_id')
-        if user_id != None:
-            code = request.POST.get("code")
-            email_temp = AppleEmail.get_email(code)
-            if email_temp == None:
-                aui = AppleUserId.objects.filter(user_id=user_id)
-                if len(aui) > 0:
-                    email = aui[0].email
-                    aui[0].code = code
-                else:
-                    aui = AppleUserId()
-                    aui.user_id = user_id
-                    aui.code = code
-                    while True:
-                        te = AppleEmail.generate_random_emails()
-                        if len(User.objects.filter(email=te)) == 0:
-                            aui.email = te
-                            break;
-                    aui.save()
-                    email = aui.email
-            else:
-                email = email_temp
-                aui = AppleUserId()
-                aui.user_id = user_id
-                aui.code = code
-                aui.email = email
-                aui.save()
+def apple_jwt(request, *args, **kwargs):
+    user_id = request.GET.get('user_id')
+    if user_id != None:
+        if len(AppleUserId.objects.filter(user_id=user_id)) > 0:
+            tuser = AppleUserId.objects.filter(user_id=user_id)[0]
+            tuser.jwt_token = AppleEmail.get_one_random_text(20)
+            tuser.save()
+        else:
+            tuser = AppleUserId()
+            tuser.user_id = user_id
+            tuser.code = ""
+            tuser.jwt_token = AppleEmail.get_one_random_text(20)
+            while True:
+                te = AppleEmail.generate_random_emails()
+                if len(User.objects.filter(email=te)) == 0:
+                    tuser.email = te
+                    break;
+            tuser.save()
+        return JsonResponse({"status": True, "data": tuser.jwt_token, "message": "Success"})
+    return JsonResponse({"status": False, "data": None, "message": "Invalid user data"})
 
-            print(email)
-            if email != None and email != "":
-                if not is_email_vaild(email):
-                    return JsonResponse({"status": False, "data": None, "message": "Invalid email"})
-                return JsonResponse(create_account(email))
+
+@csrf_exempt
+@permission_classes([AllowAny])
+def apple_login(request, *args, **kwargs):
+    res_message = "Something went wrong"
+    try:
+        code = request.POST.get('code')
+        user_id = request.POST.get('user_id')
+        jwt_token = request.POST.get('jwt_token')
+        user_type = request.POST.get('type')
+        if user_id != None:
+            aui = AppleUserId.objects.get(user_id=user_id)
+            if aui.jwt_token == jwt_token:
+                aui.code = code
+                aui.save()
+                if user_type == "UP":
+                    return JsonResponse(create_account(aui.email))
+                elif user_type == "IN":
+                    user = User.objects.filter(email=aui.email).first()
+                    if not user:
+                        res_message = "Sign in is not allow here."
+                    else:
+                        return JsonResponse(create_account(aui.email))
             else:
-                print('::::::::::RESPONSE FALSE:::::::')
-                return JsonResponse({"status": False, "data": None, "message": "Invalid credential"})
+                res_message = "Invalid credentials"
     except Exception as ex:
         print(str(ex))
-    return JsonResponse({"status": False, "data": None, "message": "Something went wrong"})
+        res_message = "User not found"
+    return JsonResponse({"status": False, "data": None, "message": res_message})
 
 
 def create_account(email, first_name='Unknown', last_name='User'):
     try:
         user = User.objects.filter(email=email).first()
         application = oauth2_provider.models.get_application_model().objects.all().first()
-        # if user:
-        #     print("::::::::::::USER EXIST::::::::::::::")
         if not user:
             print("::::::::::::USER DOESN'T EXIST::::::::::::")
             user = User.objects.create(
@@ -203,7 +210,6 @@ def create_account(email, first_name='Unknown', last_name='User'):
             user_id=user.id,
             created=timezone.now(),
             updated=timezone.now()
-            # source_refresh_token_id=None
         )
         data = {
             'access_token': access_token.token,
@@ -212,7 +218,6 @@ def create_account(email, first_name='Unknown', last_name='User'):
             'scope': access_token.scope,
             'refresh_token': None
         }
-        # subscription_checking(user)
         return {'status': True, 'data': data, 'message': 'log in successful'}
     except Exception as exc:
         print(':::::::::::::EXCEPTION OCCURED:::::::::::::')

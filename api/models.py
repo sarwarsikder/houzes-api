@@ -85,6 +85,7 @@ class AppleUserId(models.Model):
     user_id = models.CharField(max_length=255, primary_key=True)
     email = models.CharField(max_length=255, null=True)
     code = models.TextField()
+    jwt_token = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
