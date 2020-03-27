@@ -53,7 +53,7 @@ class CustomConvertTokenView2(CsrfExemptMixin, OAuthLibMixin, APIView):
         else:
             print('NOTHING HAPPENED')
 
-        if not user and request.data['type']=='sign-in':
+        if not user:
             res["message"] = "User does not exist"
             return JsonResponse(res)
         # Use the rest framework `.data` to fake the post body of the django request.
@@ -63,47 +63,44 @@ class CustomConvertTokenView2(CsrfExemptMixin, OAuthLibMixin, APIView):
         # print(request.backend.do_auth(request.data.))
         url, headers, body, status = self.create_token_response(request._request)
         response = Response(data=json.loads(body), status=status)
-
         for k, v in headers.items():
             response[k] = v
 
-        user = AccessToken.objects.filter(token=response.data['access_token']).first().user
-        upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
-
-        try:
-            if upgrade_profile:
-                print('::::::::::IF UPGRADE PROFILE:::::::::::::')
-                if upgrade_profile.subscriptionId != None:
-                    print(upgrade_profile.subscriptionId)
-                    if not cs.get_subscription_status(self, upgrade_profile.subscriptionId):
-                        # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
-                        dp.downgrade(self, upgrade_profile, user)
-
-            else:
-                print("::::::::::INVALID USER::::::::::")
-        except:
-            print('EXCEPTION OCCURED WHILE CHECKING SUBSCRIPTION')
-        try:
-            print('::::::::::::::CHECKING FOR EXPIRATION DATE::::::::::::::::')
-            if upgrade_profile:
-                if upgrade_profile.expire_at != None:
-                    utc = pytz.UTC
-                    if utc.localize(datetime.datetime.now()) >= upgrade_profile.expire_at:
-                        dp.downgrade(self, upgrade_profile, user)
-
-        except Exception as exc:
-            print(':::::::::::::EXCEPTION OCCURED WHILE CHECKING EXPIRATION DATE:::::::::::::')
-            print('exception :' + str(exc))
-            print(traceback.print_exc())
-        print(response)
         if status==200:
+            user = AccessToken.objects.filter(token=response.data['access_token']).first().user
+            upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+
+            try:
+                if upgrade_profile:
+                    print('::::::::::IF UPGRADE PROFILE:::::::::::::')
+                    if upgrade_profile.subscriptionId != None:
+                        print(upgrade_profile.subscriptionId)
+                        if not cs.get_subscription_status(self, upgrade_profile.subscriptionId):
+                            # IF SUBSCRIPTION STATUS IS FALSE DOWNGRADE PROFILE
+                            dp.downgrade(self, upgrade_profile, user)
+
+                else:
+                    print("::::::::::INVALID USER::::::::::")
+            except:
+                print('EXCEPTION OCCURED WHILE CHECKING SUBSCRIPTION')
+            try:
+                print('::::::::::::::CHECKING FOR EXPIRATION DATE::::::::::::::::')
+                if upgrade_profile:
+                    if upgrade_profile.expire_at != None:
+                        utc = pytz.UTC
+                        if utc.localize(datetime.datetime.now()) >= upgrade_profile.expire_at:
+                            dp.downgrade(self, upgrade_profile, user)
+
+            except Exception as exc:
+                print(':::::::::::::EXCEPTION OCCURED WHILE CHECKING EXPIRATION DATE:::::::::::::')
+                print('exception :' + str(exc))
+                print(traceback.print_exc())
+            print(response)
             res["status"] = True
             res["data"] = response.data
             res["message"] = "Sign in successful"
-            # res = {
-            #     "status" : True,
-            #     "data" : response.data,
-            #     "message" : "Sign in successful"
-            # }
-
+        else:
+            res["status"] = False
+            res['data'] = json.loads(body)
+            res['message'] = 'Error signing in'
         return JsonResponse(res)
