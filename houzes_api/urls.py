@@ -1,6 +1,8 @@
 import os
 
 from django.conf.urls import url
+
+from authorization.views.customConvertTokenView2 import CustomConvertTokenView2
 from houzes_api.admin import admin_site
 from django.urls import path, include
 from rest_framework.documentation import include_docs_urls
@@ -22,6 +24,8 @@ urlpatterns = [
                                      permission_classes=[])),
     url(r'^o/token', CustomTokenView.as_view()),
     url(r'^auth/convert-token/?$', CustomConvertTokenView.as_view(), name="convert_token"),
+    url(r'^auth/convert-token-review/?$', CustomConvertTokenView2.as_view(), name="convert_token_review"),
+
     # url(r'^auth/convert-apple-token/?$', CustomAppleTokenView.AppleOAuth2.as_view(), name="convert_apple_token"),
 
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
