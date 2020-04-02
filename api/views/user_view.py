@@ -120,10 +120,11 @@ class UserViewSet(viewsets.ModelViewSet):
             if 'phone_number' in request.data:
                 phone_number = request.data['phone_number']
                 if phone_number == "":
-                    status = False
-                    data = None
-                    message = "Phone Number is required"
-                    return Response({'status': status, 'data': data, 'message': message})
+                    phone_number = None
+                #     status = False
+                #     data = None
+                #     message = "Phone Number is required"
+                #     return Response({'status': status, 'data': data, 'message': message})
             print(request.data)
             # if 'is_active' in request.data:
             #     is_active = request.data['is_active']
@@ -140,7 +141,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(last_name)
             print(phone_number)
 
-            if email == None or password == None or first_name == None or last_name == None or phone_number == None:
+            if email == None or password == None or first_name == None or last_name == None:
                 status = False
                 message = "Please provide all the required fields correctly"
                 data = None

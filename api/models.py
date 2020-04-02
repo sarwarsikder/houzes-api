@@ -35,7 +35,7 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
     email = models.CharField(max_length=255, null=False, unique=True)
-    phone_number = models.CharField(max_length=255, null=False)
+    phone_number = models.CharField(max_length=255, null=True, default=None)
     invited_by = models.IntegerField(null=True)
     photo = models.TextField(null=True)
     photo_thumb = models.TextField(null=True, default=None)
