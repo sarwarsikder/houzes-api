@@ -1,3 +1,4 @@
+import csv
 import json
 import threading
 import traceback
@@ -1275,6 +1276,38 @@ class PropertyViewSet(viewsets.ModelViewSet):
                 # return Response({'code': 500, 'message': 'Server Error!'})
         UserList.objects.filter(id=list_id).update(fetch_lat_lng=True)
         print("Completed...list_id: " + str(list_id))
+
+    @action(detail=False, methods=['GET'], url_path='export/user/(?P<id>[\w-]+)')
+    def export_CSV(self, request, *args, **kwargs):
+        tagIds = None
+        listId = None
+
+        user = User.objects.get(id=kwargs['id'])
+        properties = Property.objects.filter(user_list__user=user)
+        tagIds = request.GET.getlist('tag')
+        listId = request.GET.get('list')
+
+        print(tagIds)
+
+        print('working')
+        # page_size = request.GET.get('limit')
+        if tagIds != None:
+            for tagId in tagIds:
+                properties = properties.filter(
+                    Q(property_tags__contains=[{'id': tagId}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
+        if listId != None:
+            properties = properties.filter(user_list__id=listId)
+        properties = properties.order_by('-created_at')
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Street', 'City', 'State', 'Zip'])
+        for property in properties:
+            writer.writerow([property.street, property.city, property.state, property.zip])
+
+        return response
 
 
 def update_property_power_trace_info(info_list):
