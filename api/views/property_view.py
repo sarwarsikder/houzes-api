@@ -1303,9 +1303,31 @@ class PropertyViewSet(viewsets.ModelViewSet):
         response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['Street', 'City', 'State', 'Zip'])
+        writer.writerow(['Street', 'City', 'State', 'Zip', 'Owner first name', 'Owner last name', 'Owner street', 'Owner city', 'Owner state', 'Owner zip'])
         for property in properties:
-            writer.writerow([property.street, property.city, property.state, property.zip])
+            owner_first_name = ""
+            owner_last_name = ""
+            owner_street = ""
+            owner_city = ""
+            owner_state = ""
+            owner_zip = ""
+            try:
+                if len(property.owner_info)>0:
+                    owner_first_name = "" if property.owner_info[0]['formatted_name']==None else property.owner_info[0]['formatted_name']['first_name']
+                    owner_last_name = "" if property.owner_info[0]['formatted_name']== None else property.owner_info[0]['formatted_name']['last_name']
+            except:
+                traceback.print_exc()
+            try:
+                if len(property.owner_info)>0:
+                    owner_city = "" if property.owner_info[0]["formatted_address"]==None else property.owner_info[0]["formatted_address"]["city"]
+                    owner_state = "" if property.owner_info[0]["formatted_address"] == None else property.owner_info[0]["formatted_address"]["state"]
+                    owner_zip = "" if property.owner_info[0]["formatted_address"] == None else property.owner_info[0]["formatted_address"]["zip_code"]
+                    owner_street = "" if property.owner_info[0]["formatted_address"] == None else property.owner_info[0]["formatted_address"]["street"]["formatted_full_street_name"]
+
+
+            except:
+                traceback.print_exc()
+            writer.writerow([property.street, property.city, property.state, property.zip, owner_first_name, owner_last_name, owner_street, owner_city, owner_state, owner_zip])
 
         return response
 
