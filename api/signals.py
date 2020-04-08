@@ -1,3 +1,5 @@
+import traceback
+
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -139,8 +141,16 @@ def user_post_save(sender, instance, created, update_fields, **kwargs):
                     print("upgrade profile not found")
             else:
                 print("user is not admin")
-    except :
-        print('Error while user post save')
+
+            user_list = UserList()
+            user_list.name = "default list"
+            user_list.user = user
+            user_list.is_default = True
+            user_list.save()
+
+    except:
+        traceback.print_exc()
+        print('Error while user post save user')
 
 # @receiver(pre_save, sender=Property)
 # def property_pre_save(sender, instance, created, update_fields, **kwargs):

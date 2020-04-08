@@ -147,6 +147,7 @@ class UserList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     leads_count = models.IntegerField(default=0, null=False)
     fetch_lat_lng = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

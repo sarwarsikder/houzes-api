@@ -60,6 +60,10 @@ class UserListViewSet(viewsets.ModelViewSet):
         else:
             try:
                 user_list = UserList.objects.get(id=user_list_id)
+                if user_list.is_default:
+                    status=False
+                    message="You can not delete your default list"
+                    return Response({'status': status, 'message': message})
                 status = True
                 message = "List is deleted"
                 #If user_list delete scout delete
@@ -129,6 +133,11 @@ class UserListViewSet(viewsets.ModelViewSet):
             return Response({'status': status, 'data': data, 'message': message})
         try:
             userList = UserList.objects.get(id = kwargs['pk'])
+            if userList.is_default:
+                status = False
+                data = {}
+                message = 'You can not push your default list'
+                return Response({'status': status, 'data': data, 'message': message})
             if userList.user.id != request.user.id:
                 status = False
                 data = {}
