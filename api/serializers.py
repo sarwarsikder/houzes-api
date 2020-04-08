@@ -532,3 +532,23 @@ class ClusterViewByListSerializer(serializers.ModelSerializer):
             'property_tags' : instance.property_tags,
         }
         return representation
+
+class LoadListPropertySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = 'id,latitude,longitude,property_tags'
+
+
+    def to_representation(self, instance):
+        tags = []
+        for tag in instance.property_tags:
+            property_tags = PropertyTags.objects.get(id=tag['id'])
+            print(PropertyTagsSerializer(property_tags).data)
+            tags.append(PropertyTagsSerializer(property_tags).data)
+        representation = {
+            "id": instance.id,
+            "latitude" : instance.latitude,
+            "longitude" : instance.longitude,
+            'property_tags' : tags,
+        }
+        return representation
