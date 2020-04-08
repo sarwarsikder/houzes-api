@@ -60,7 +60,7 @@ class UserSerializer(serializers.ModelSerializer):
             'photo_thumb' : instance.photo_thumb,
             'is_active' : instance.is_active,
             'is_admin' : instance.is_team_admin,
-            'thinker' : True,
+            'thinker' : False,
             'upgrade_info' : {
                 'is_team_invitable' : is_team_invitable,
                 'amount' : float(amount),
