@@ -46,9 +46,21 @@ class UserViewSet(viewsets.ModelViewSet):
                                                                         device_version=user_firebase.device_version,
                                                                         user_id=user_firebase.user_id)
                 user_firebase.save()
+            default_user_list = UserList.objects.filter(user=user, is_default = True).first()
+            print(default_user_list)
+            if not default_user_list:
+                user_list = UserList()
+                user_list.name = user.first_name+'452'
+                user_list.user = user
+                user_list.is_default = True
+                user_list.save()
+                print("USER LIST IS SAVED")
         except:
+            traceback.print_exc()
             print("-----------")
+            print("USER LIST IS SAVE EXCEPTION")
         return JsonResponse(serializer.data, safe=False)
+
 
     def generate_shortuuid(self):
         shortuuid.set_alphabet("abcdefghijklmnopqrstuvwxyz0123456789")

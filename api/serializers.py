@@ -1,3 +1,5 @@
+import traceback
+
 from rest_framework import serializers
 from rest_framework.relations import PrimaryKeyRelatedField
 from notifications.models import Notification
@@ -22,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
         power_trace = 0.0
         owner_info = 0.0
         mailer_wizard = 0.0
+        default_user_list = None
 
         if instance.is_team_admin:
             upgrade = instance.upgrade
@@ -47,7 +50,12 @@ class UserSerializer(serializers.ModelSerializer):
         paymentPlanMailerWizard = PaymentPlan.objects.filter(payment_plan_name = 'mailer-wizard', plan=plan).first()
         if paymentPlanMailerWizard :
             mailer_wizard = paymentPlanMailerWizard.payment_plan_coin
-
+        try:
+            if UserList.objects.filter(user=User.objects.get(id = instance.id),is_default=True).first():
+                default_user_list = UserListSerializer(UserList.objects.filter(user=User.objects.get(id = instance.id),is_default=True).first()).data
+        except:
+            print("EXCEPTION IN  DEFAULT USER LIST FIELD IN USER SERIALIZER")
+            print(traceback.print_exc())
         representation = {
             'id' : instance.id,
             'last_login' : instance.last_login,
@@ -69,6 +77,7 @@ class UserSerializer(serializers.ModelSerializer):
                 'mailer_wizard' : float(mailer_wizard),
                 'plan' : PlanSerializer(plan).data
             },
+            'default_list' : default_user_list,
             'created_at': instance.created_at,
             'updated_at' : instance.updated_at
         }
