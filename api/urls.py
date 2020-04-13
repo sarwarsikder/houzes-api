@@ -106,7 +106,8 @@ urlpatterns = [
     path('login/token', user_token_view.get_token),
     path('apple-payment-gateway/', apple_payment_gateway_view.apple_payment_gateway, name='apple-payment-gateway'),
     path('apple-upgrade-profile/', apple_upgrade_profile_view.apple_upgrade_profile, name='apple-upgrade-profile'),
-    path('export-csv/csv-properties/', export_csv_view.get_csv_properties, name='get-csv-properties')
+    path('export-csv/csv-properties/', export_csv_view.get_csv_properties, name='get-csv-properties'),
+    path('export-csv/download-csv/', export_csv_view.download_CSV, name='download-csv')
 
 ]
 

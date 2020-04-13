@@ -8,27 +8,19 @@ from api.models import *
 
 
 @api_view(['GET'])
-def export_CSV(request,**kwargs):
-    tagIds = None
-    listId = None
+def download_CSV(request,**kwargs):
+    propertyIds = None
+    propertyIds = request.GET.getlist('id')
 
-    user = User.objects.get(id=kwargs['id'])
-    properties = Property.objects.filter(user_list__user=user)
-    tagIds = request.GET.getlist('tag')
-    listId = request.GET.get('list')
-
-    print(tagIds)
+    print(propertyIds)
 
     print('working')
-    # page_size = request.GET.get('limit')
-    if tagIds != None:
-        for tagId in tagIds:
-            properties = properties.filter(
-                Q(property_tags__contains=[{'id': tagId}]) | Q(property_tags__contains=[{'id': int(tagId, 10)}]))
-    if listId != None:
-        properties = properties.filter(user_list__id=listId)
-    properties = properties.order_by('-created_at')
-
+    if propertyIds != None:
+        properties = Property.objects.filter(id__in= propertyIds)
+        properties = properties.order_by('-created_at')
+    else:
+        properties = Property.objects.none()
+    print(properties)
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
