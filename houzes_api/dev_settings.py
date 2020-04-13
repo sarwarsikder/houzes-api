@@ -4,10 +4,10 @@ CORS_ORIGIN_ALLOW_ALL = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'houzes_local_1',
+        'NAME': 'houzes_staging',
         'USER': 'postgres',
-        'PASSWORD': 'wsit9748',
-        'HOST': 'localhost',
+        'PASSWORD': 'wsit97480',
+        'HOST': 'houzes-dev-db.cacdyf2lutyz.us-east-1.rds.amazonaws.com',
         'PORT': '5432',
     },
 }

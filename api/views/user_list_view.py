@@ -4,6 +4,7 @@ from rest_framework import viewsets, filters, pagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import threading
+from django.http import HttpResponse, JsonResponse
 
 from api.serializers import *
 from api.models import *
@@ -229,26 +230,31 @@ class UserListViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path='load-list')
     def load_list(self, request, *args, **kwargs):
+        load_list_response = {}
         user = User.objects.get(id=request.user.id)
         # IF USER IS AN ADMIN
         if user.is_team_admin == True:
             users = User.objects.filter(Q(id=request.user.id) | Q(invited_by=request.user.id))
             user_list = UserList.objects.filter(user__in=users).order_by('-created_at')
+            for u in users:
+                load_list_response[u.id]= UserListSerializer(UserList.objects.filter(user=u).order_by('-created_at'), many=True).data
+            # return JsonResponse(load_list_response)
         #IF USER IS A MEMBER
         else:
-            user_list = UserList.objects.filter(user=user).order_by('-created_at')
-
-        page_size = request.GET.get('limit')
-
-        paginator = CustomPagination()
-        if page_size:
-            paginator.page_size = page_size
-        else:
-            paginator.page_size = 10
-        # paginator.offset = 0
-        result_page = paginator.paginate_queryset(user_list, request)
-        serializer = UserListSerializer(result_page, many=True)
-        return paginator.get_paginated_response(data=serializer.data)
+            load_list_response[user.id] = UserListSerializer(UserList.objects.filter(user=user).order_by('-created_at'),
+                                                          many=True).data
+        return JsonResponse(load_list_response)
+        # page_size = request.GET.get('limit')
+        #
+        # paginator = CustomPagination()
+        # if page_size:
+        #     paginator.page_size = page_size
+        # else:
+        #     paginator.page_size = 10
+        # # paginator.offset = 0
+        # result_page = paginator.paginate_queryset(user_list, request)
+        # serializer = UserListSerializer(result_page, many=True)
+        # return paginator.get_paginated_response(data=serializer.data)
 
     @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/load-list/properties')
     def get_properties_in_load_list(self, request, *args, **kwargs):
