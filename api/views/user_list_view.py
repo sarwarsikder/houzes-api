@@ -239,12 +239,14 @@ class UserListViewSet(viewsets.ModelViewSet):
             # user_list = UserList.objects.filter(user__in=users).order_by('-created_at')
             for u in users:
                 load_list_json = {}
-                load_list_json[u.id]= UserListSerializer(UserList.objects.filter(user=u).order_by('-created_at'), many=True).data
+                load_list_json["member_id"] = u.id
+                load_list_json["list"]= UserListSerializer(UserList.objects.filter(user=u).order_by('-created_at'), many=True).data
                 load_list_response.append(load_list_json)
         #IF USER IS A MEMBER
         else:
             load_list_json = {}
-            load_list_json[user.id] = UserListSerializer(UserList.objects.filter(user=user).order_by('-created_at'),
+            load_list_json["member_id"] = user.id
+            load_list_json["list"] = UserListSerializer(UserList.objects.filter(user=user).order_by('-created_at'),
                                                           many=True).data
             load_list_response.append(load_list_json)
         return JsonResponse(load_list_response,safe=False)
