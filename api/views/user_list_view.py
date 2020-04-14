@@ -230,20 +230,24 @@ class UserListViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path='load-list')
     def load_list(self, request, *args, **kwargs):
-        load_list_response = {}
+        load_list_response = []
+
         user = User.objects.get(id=request.user.id)
         # IF USER IS AN ADMIN
         if user.is_team_admin == True:
             users = User.objects.filter(Q(id=request.user.id) | Q(invited_by=request.user.id))
-            user_list = UserList.objects.filter(user__in=users).order_by('-created_at')
+            # user_list = UserList.objects.filter(user__in=users).order_by('-created_at')
             for u in users:
-                load_list_response[u.id]= UserListSerializer(UserList.objects.filter(user=u).order_by('-created_at'), many=True).data
-            # return JsonResponse(load_list_response)
+                load_list_json = {}
+                load_list_json[u.id]= UserListSerializer(UserList.objects.filter(user=u).order_by('-created_at'), many=True).data
+                load_list_response.append(load_list_json)
         #IF USER IS A MEMBER
         else:
-            load_list_response[user.id] = UserListSerializer(UserList.objects.filter(user=user).order_by('-created_at'),
+            load_list_json = {}
+            load_list_json[user.id] = UserListSerializer(UserList.objects.filter(user=user).order_by('-created_at'),
                                                           many=True).data
-        return JsonResponse(load_list_response)
+            load_list_response.append(load_list_json)
+        return JsonResponse(load_list_response,safe=False)
 
     @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/load-list/properties')
     def get_properties_in_load_list(self, request, *args, **kwargs):
