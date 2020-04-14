@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 import threading
 from django.http import HttpResponse, JsonResponse
-
+from math import radians, cos, sin, asin, sqrt
 from api.serializers import *
 from api.models import *
 
@@ -244,21 +244,47 @@ class UserListViewSet(viewsets.ModelViewSet):
             load_list_response[user.id] = UserListSerializer(UserList.objects.filter(user=user).order_by('-created_at'),
                                                           many=True).data
         return JsonResponse(load_list_response)
-        # page_size = request.GET.get('limit')
-        #
-        # paginator = CustomPagination()
-        # if page_size:
-        #     paginator.page_size = page_size
-        # else:
-        #     paginator.page_size = 10
-        # # paginator.offset = 0
-        # result_page = paginator.paginate_queryset(user_list, request)
-        # serializer = UserListSerializer(result_page, many=True)
-        # return paginator.get_paginated_response(data=serializer.data)
 
     @action(detail=False, methods=['GET'], url_path='(?P<pk>[\w-]+)/load-list/properties')
     def get_properties_in_load_list(self, request, *args, **kwargs):
+        given_lat = request.GET.get('latitude')
+        given_lng = request.GET.get('longitude')
+        print(type(given_lat))
+        print(given_lng)
         user_list = UserList.objects.get(id=kwargs['pk'])
         properties = Property.objects.filter(user_list=user_list)
-        load_list_property_serializer = LoadListPropertySerializer(properties, many=True)
+        properties_filtered_id = []
+        for property in properties:
+            if given_lat and given_lng:
+                given_lat = float(given_lat)
+                given_lng = float(given_lng)
+                if self.check_if_within_area(property.longitude, property.latitude, given_lng, given_lat):
+                    properties_filtered_id.append(property.id)
+            else:
+                properties_filtered_id.append(property.id)
+        properties_filtered = Property.objects.filter(id__in=properties_filtered_id)
+
+        print(properties_filtered)
+
+        load_list_property_serializer = LoadListPropertySerializer(properties_filtered, many=True)
         return Response(load_list_property_serializer.data)
+
+    def check_if_within_area(self,lon1, lat1, lon2, lat2):
+        """
+        Calculate the great circle distance between two points 
+        on the earth (specified in decimal degrees)
+        """
+        # convert decimal degrees to radians
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+        # haversine formula
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+        c = 2 * asin(sqrt(a))
+        r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+        distance = 2
+        if c * r<=distance:
+            return True
+        else:
+            return False
