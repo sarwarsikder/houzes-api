@@ -294,3 +294,10 @@ class UserListViewSet(viewsets.ModelViewSet):
             return True
         else:
             return False
+
+    @action(detail=False, methods=['GET'], url_path='load-list/user/(?P<id>[\w-]+)')
+    def load_list_by_user(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.user.id)
+        user_list = UserList.objects.filter(user=user)
+        user_list_serializer = UserListSerializer(user_list, many=True).data
+        return JsonResponse(user_list_serializer, safe=False)
