@@ -1,5 +1,6 @@
 import datetime
 
+import pytz
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,6 +11,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.utils import json
 import time
+
+from api.views.user_list_view import UserListViewSet
 from houzes_api import settings
 from django.forms.models import model_to_dict
 
@@ -434,3 +437,31 @@ class HistoryViewSet(viewsets.ModelViewSet):
         result_page = paginator.paginate_queryset(properties, request)
         serializer = TeamVisitedPropertySerializer(result_page, many=True)
         return paginator.get_paginated_response(data=serializer.data)
+
+    @action(detail=False,methods=['GET'],url_path='previous-drives/user/(?P<id>[\w-]+)')
+    def get_previous_drives_within_my_area(self,request,*args,**kwargs):
+        given_lat = request.GET.get('latitude')
+        given_lng = request.GET.get('longitude')
+        requested_user = User.objects.get(id = request.user.id)
+        user = User.objects.get(id=kwargs['id'])
+
+        month_count = int(request.GET.get('month'))
+        end_time = datetime.datetime.today().strftime('%Y-%m-%d')
+
+        unaware_end_time = datetime.datetime.strptime(end_time, '%Y-%m-%d')
+        aware_start_time = pytz.utc.localize(unaware_end_time) - datetime.timedelta(days=month_count*30)
+        aware_end_time = pytz.utc.localize(unaware_end_time) + datetime.timedelta(days=1)
+
+        print(aware_start_time)
+        print(aware_end_time)
+        histories = History.objects.filter(~Q(end_time=None)& Q(created_at__range=[aware_start_time, aware_end_time]), user=user)
+        histories_filtered_id = []
+        for history in histories:
+            if given_lat and given_lng:
+                given_lat = float(given_lat)
+                given_lng = float(given_lng)
+                if UserListViewSet.check_if_within_area(self, history.start_point_longitude, history.start_point_latitude, given_lng, given_lat):
+                    histories_filtered_id.append(history.id)
+        histories_filtered = History.objects.filter(id__in=histories_filtered_id).order_by('-id')
+        history_serializer = HistorySerializer(histories_filtered, many=True).data
+        return JsonResponse(history_serializer, safe=False)
