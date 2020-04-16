@@ -464,4 +464,6 @@ class HistoryViewSet(viewsets.ModelViewSet):
                     histories_filtered_id.append(history.id)
         histories_filtered = History.objects.filter(id__in=histories_filtered_id).order_by('-id')
         history_serializer = HistorySerializer(histories_filtered, many=True).data
-        return JsonResponse(history_serializer, safe=False)
+        # return JsonResponse(history_serializer, safe=False)
+
+        return Response(history_serializer)
