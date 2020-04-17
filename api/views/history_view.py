@@ -29,6 +29,16 @@ class CustomPagination(pagination.PageNumberPagination):
             'results': data,
         })
 
+class HistoriesFilterPagination(pagination.PageNumberPagination):
+    def get_paginated_response(self, data, polylines):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': self.page.paginator.count,
+            'results': data,
+            'polylines': polylines
+        })
+
 
 class HistoryViewSet(viewsets.ModelViewSet):
     queryset = History.objects.all()
@@ -467,3 +477,52 @@ class HistoryViewSet(viewsets.ModelViewSet):
         # return JsonResponse(history_serializer, safe=False)
 
         return Response(history_serializer)
+
+
+    @action(detail=False,methods=['GET'],url_path='web/member')
+    def get_history_list_by_member_for_web(self,request,*args,**kwargs):
+        try :
+            members = [int(x) for x in request.GET.get('members').split(',')]
+        except:
+            return Response({'status': False,'message': 'Please provide a valid data'})
+
+        given_lat = request.GET.get('latitude')
+        given_lng = request.GET.get('longitude')
+
+        page_size = request.GET.get('limit')
+        month_count = request.GET.get('month')
+        polylines = []
+        if month_count:
+            month_count = int(month_count)
+            end_time = datetime.datetime.today().strftime('%Y-%m-%d')
+            unaware_end_time = datetime.datetime.strptime(end_time, '%Y-%m-%d')
+            aware_start_time = pytz.utc.localize(unaware_end_time) - datetime.timedelta(days=month_count*30)
+            aware_end_time = pytz.utc.localize(unaware_end_time) + datetime.timedelta(days=1)
+            histories = History.objects.filter(~Q(end_time=None) & Q(created_at__range=[aware_start_time, aware_end_time]),user__in = members).order_by('-id')
+        else:
+            histories = History.objects.filter(~Q(end_time=None), user__in=members).order_by('-id')
+        histories_filtered_id = []
+        if given_lat and given_lng:
+            given_lat = float(given_lat)
+            given_lng = float(given_lng)
+            for history in histories:
+                if UserListViewSet.check_if_within_area(self, history.start_point_longitude, history.start_point_latitude, given_lng, given_lat):
+                    histories_filtered_id.append(history.id)
+                    if month_count:
+                        polyline = {
+                            'id' : history.id,
+                            'polylines' : history.polylines,
+                            'user': history.user.id
+                        }
+                        polylines.append(polyline)
+            histories_filtered = History.objects.filter(id__in=histories_filtered_id).order_by('-id')
+        else:
+            histories_filtered = histories
+        paginator = HistoriesFilterPagination()
+        if page_size:
+            paginator.page_size = page_size
+        else:
+            paginator.page_size = 10
+        result_page = paginator.paginate_queryset(histories_filtered, request)
+        serializer = HistorySerializer(result_page, many=True)
+        return paginator.get_paginated_response(data=serializer.data, polylines=polylines)
