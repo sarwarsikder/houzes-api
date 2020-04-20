@@ -289,7 +289,7 @@ class UserListViewSet(viewsets.ModelViewSet):
         a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
         c = 2 * asin(sqrt(a))
         r = 6371 # Radius of earth in kilometers. Use 3956 for miles
-        distance = 2
+        distance = 3.21869
         if c * r<=distance:
             return True
         else:
@@ -299,6 +299,6 @@ class UserListViewSet(viewsets.ModelViewSet):
     def load_list_by_user(self, request, *args, **kwargs):
         requested_user = User.objects.get(id=request.user.id)
         user = User.objects.get(id=kwargs['id'])
-        user_list = UserList.objects.filter(user=user)
+        user_list = UserList.objects.filter(user=user).order_by('-created_at')
         user_list_serializer = UserListSerializer(user_list, many=True).data
         return JsonResponse(user_list_serializer, safe=False)

@@ -474,9 +474,17 @@ class HistoryViewSet(viewsets.ModelViewSet):
                     histories_filtered_id.append(history.id)
         histories_filtered = History.objects.filter(id__in=histories_filtered_id).order_by('-id')
         history_serializer = HistorySerializer(histories_filtered, many=True).data
-        # return JsonResponse(history_serializer, safe=False)
 
-        return Response(history_serializer)
+        history_details = HistoryDetail.objects.filter(history__id__in=histories_filtered_id)
+        property_filtered = Property.objects.none()
+        property_filtered_id = []
+        for history_detail in history_details:
+            property_filtered_id.append(history_detail.property.id)
+        property_filtered = Property.objects.filter(id__in=property_filtered_id)
+        load_list_property_serializer = LoadListPropertySerializer(property_filtered, many=True).data
+
+        return Response({ "histories" : history_serializer,
+                          "properties" : load_list_property_serializer})
 
 
     @action(detail=False,methods=['GET'],url_path='web/member')
