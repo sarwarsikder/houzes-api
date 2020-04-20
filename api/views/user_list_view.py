@@ -264,7 +264,8 @@ class UserListViewSet(viewsets.ModelViewSet):
             if given_lat and given_lng:
                 given_lat = float(given_lat)
                 given_lng = float(given_lng)
-                if self.check_if_within_area(property.longitude, property.latitude, given_lng, given_lat):
+                if self.check_if_within_area(property.longitude, property.latitude, given_lng, given_lat, 0.124274):
+                    # if self.check_if_within_area(property.longitude, property.latitude, given_lng, given_lat, 3.21869):
                     properties_filtered_id.append(property.id)
             else:
                 properties_filtered_id.append(property.id)
@@ -275,13 +276,14 @@ class UserListViewSet(viewsets.ModelViewSet):
         load_list_property_serializer = LoadListPropertySerializer(properties_filtered, many=True)
         return Response(load_list_property_serializer.data)
 
-    def check_if_within_area(self,lon1, lat1, lon2, lat2):
+    def check_if_within_area(self,lon1, lat1, lon2, lat2, distance):
         """
         Calculate the great circle distance between two points 
         on the earth (specified in decimal degrees)
         """
         # convert decimal degrees to radians
         lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+        print(distance)
 
         # haversine formula
         dlon = lon2 - lon1
@@ -289,7 +291,6 @@ class UserListViewSet(viewsets.ModelViewSet):
         a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
         c = 2 * asin(sqrt(a))
         r = 6371 # Radius of earth in kilometers. Use 3956 for miles
-        distance = 3.21869
         if c * r<=distance:
             return True
         else:
