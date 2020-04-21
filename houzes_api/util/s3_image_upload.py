@@ -10,6 +10,8 @@ def image_upload(img_file, file_path, file_name, with_thumb):
     try:
         if file_path and file_name:
             im = Image.open(img_file)
+            im.verify()
+            im.load()
 
             for orientation in ExifTags.TAGS.keys():
                 if ExifTags.TAGS[orientation] == 'Orientation':
