@@ -470,8 +470,8 @@ class HistoryViewSet(viewsets.ModelViewSet):
             if given_lat and given_lng:
                 given_lat = float(given_lat)
                 given_lng = float(given_lng)
-                if UserListViewSet.check_if_within_area(self, history.start_point_longitude, history.start_point_latitude, given_lng, given_lat,0.124274):
-                # if UserListViewSet.check_if_within_area(self, history.start_point_longitude, history.start_point_latitude, given_lng, given_lat,3.21869):
+                # if UserListViewSet.check_if_within_area(self, history.start_point_longitude, history.start_point_latitude, given_lng, given_lat,0.124274):
+                if UserListViewSet.check_if_within_area(self, history.start_point_longitude, history.start_point_latitude, given_lng, given_lat,3.21869):
                     histories_filtered_id.append(history.id)
         histories_filtered = History.objects.filter(id__in=histories_filtered_id).order_by('-id')
         history_serializer = HistorySerializer(histories_filtered, many=True).data
