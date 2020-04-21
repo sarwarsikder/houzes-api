@@ -14,15 +14,15 @@ def image_upload(img_file, file_path, file_name, with_thumb):
             for orientation in ExifTags.TAGS.keys():
                 if ExifTags.TAGS[orientation] == 'Orientation':
                     break
-            if im._getexif() is not None:
-                exif = dict(im._getexif().items())
+                if im._getexif() is not None:
+                    exif = dict(im._getexif().items())
 
-                if exif[orientation] == 3:
-                    im = im.rotate(180, expand=True)
-                elif exif[orientation] == 6:
-                    im = im.rotate(270, expand=True)
-                elif exif[orientation] == 8:
-                    im = im.rotate(90, expand=True)
+                    if exif[orientation] == 3:
+                        im = im.rotate(180, expand=True)
+                    elif exif[orientation] == 6:
+                        im = im.rotate(270, expand=True)
+                    elif exif[orientation] == 8:
+                        im = im.rotate(90, expand=True)
             buf = io.BytesIO()
 
             basewidth = 800
