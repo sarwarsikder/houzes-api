@@ -154,15 +154,11 @@ class PropertyPhotosViewSet(viewsets.ModelViewSet):
             #     thumb.save(thumb_byte, format=thumb.format)
             #     thumb_image = thumb_byte.getvalue()
             #     file_upload(thumb_image, thumb_file_path)
+            propertyPhoto = PropertyPhotos.objects.create(user=user,property=property,photo_url=s3_url,thumb_photo_url = thumb_s3_url)
+            propertyPhotos.append(propertyPhoto)
 
-            print(img_data)
-            return Response(
-                {'status': True, 'data': None, 'message': 'Property photos uploaded'})
-        #     propertyPhoto = PropertyPhotos.objects.create(user=user,property=property,photo_url=s3_url,thumb_photo_url = thumb_s3_url)
-        #     propertyPhotos.append(propertyPhoto)
-        #
-        # propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
-        # return Response({'status':True,'data': propertyPhotosSerializer.data,'message':'Property photos uploaded'})
+        propertyPhotosSerializer = PropertyPhotosSerializer(propertyPhotos, many=True)
+        return Response({'status':True,'data': propertyPhotosSerializer.data,'message':'Property photos uploaded'})
 
     def destroy(self, request, *args, **kwargs):
         photo_id = kwargs['pk']
