@@ -21,32 +21,39 @@ def image_upload(img_file, file_path, file_name, with_thumb):
                 if im._getexif() is not None:
                     exif = dict(im._getexif().items())
 
-                    if exif[orientation] == 3:
-                        im = im.rotate(180, expand=True)
-                    elif exif[orientation] == 6:
-                        im = im.rotate(270, expand=True)
-                    elif exif[orientation] == 8:
-                        im = im.rotate(90, expand=True)
-
                     # if exif[orientation] == 3:
-                    #     im = im.transpose(PIL.Image.ROTATE_180)
+                    #     im = im.rotate(180, expand=True)
                     # elif exif[orientation] == 6:
-                    #     im = im.transpose(PIL.Image.ROTATE_270)
+                    #     im = im.rotate(270, expand=True)
                     # elif exif[orientation] == 8:
-                    #     im = im.transpose(PIL.Image.ROTATE_90)
+                    #     im = im.rotate(90, expand=True)
+
+                    if exif[orientation] == 3:
+                        im = im.transpose(PIL.Image.ROTATE_180)
+                    elif exif[orientation] == 6:
+                        im = im.transpose(PIL.Image.ROTATE_270)
+                    elif exif[orientation] == 8:
+                        im = im.transpose(PIL.Image.ROTATE_90)
 
             except (AttributeError, KeyError, IndexError):
                 # cases: image don't have getexif
                 pass
 
             buf = io.BytesIO()
-            basewidth = 800
-            with im as image:
-                width, height = image.size
-                if basewidth < width:
-                    wpercent = (basewidth / float(im.size[0]))
-                    hsize = int((float(im.size[1]) * float(wpercent)))
-                    im = im.resize((basewidth, hsize), Image.ANTIALIAS)
+
+            width, height = im.size
+            if height < width and width > 800:
+                basewidth = 800
+                wpercent = (basewidth / float(im.size[0]))
+                hsize = int((float(im.size[1]) * float(wpercent)))
+                im = im.resize((basewidth, hsize), Image.ANTIALIAS)
+
+            elif height > width and height > 800:
+                baseheight = 800
+                wpercent = (baseheight / float(im.size[1]))
+                vsize = int((float(im.size[0]) * float(wpercent)))
+                im = im.resize((vsize, baseheight), Image.ANTIALIAS)
+
 
             im.save(buf, format="png", optimize=True, quality=70)
             byte_im = buf.getvalue()
