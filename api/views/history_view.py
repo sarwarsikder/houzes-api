@@ -30,13 +30,14 @@ class CustomPagination(pagination.PageNumberPagination):
         })
 
 class HistoriesFilterPagination(pagination.PageNumberPagination):
-    def get_paginated_response(self, data, polylines):
+    def get_paginated_response(self, data, polylines, property):
         return Response({
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
             'count': self.page.paginator.count,
             'results': data,
-            'polylines': polylines
+            'polylines': polylines,
+            'property' : property
         })
 
 
@@ -527,6 +528,16 @@ class HistoryViewSet(viewsets.ModelViewSet):
             histories_filtered = History.objects.filter(id__in=histories_filtered_id).order_by('-id')
         else:
             histories_filtered = histories
+
+        history_details = HistoryDetail.objects.filter(history__id__in=histories_filtered_id)
+        property_filtered = Property.objects.none()
+        property_filtered_id = []
+        for history_detail in history_details:
+            property_filtered_id.append(history_detail.property.id)
+        property_filtered = Property.objects.filter(id__in=property_filtered_id)
+        property_lat_long_serializer = PropertyLatLongSerializer(property_filtered, many=True).data
+
+
         paginator = HistoriesFilterPagination()
         if page_size:
             paginator.page_size = page_size
@@ -534,4 +545,4 @@ class HistoryViewSet(viewsets.ModelViewSet):
             paginator.page_size = 10
         result_page = paginator.paginate_queryset(histories_filtered, request)
         serializer = HistorySerializer(result_page, many=True)
-        return paginator.get_paginated_response(data=serializer.data, polylines=polylines)
+        return paginator.get_paginated_response(data=serializer.data, polylines=polylines, property=property_lat_long_serializer)
