@@ -147,7 +147,7 @@ class HistoryViewSet(viewsets.ModelViewSet):
             return Response({'status': status, 'data': data, 'message': message})
         status = True
         data = historySerializer.data
-        message = "Started driving"
+        message = "Start Driving. Click & hold any property to add to list"
         return Response({'status': status, 'data': data, 'message': message})
 
     @action(detail=False,methods=['POST'],url_path='(?P<pk>[\w-]+)/end-driving')
