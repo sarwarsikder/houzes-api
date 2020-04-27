@@ -1248,9 +1248,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
     def get_property_info_by_address(address):
         print(address)
         url = 'https://www.mapdevelopers.com/data.php?operation=geocode'
+        param = ScrapeHelper.get_lcode_lid()
         data = {'address': address,
-                'region': 'USA',
-                'code': ScrapeHelper.get_code()}
+                'region': 'UK',
+                'code': ScrapeHelper.get_code(),
+                'lcode': param[0],
+                'lid' : param[1]
+                }
         res = requests.post(url, data=data)
         print(res.json())
         return res.json()
