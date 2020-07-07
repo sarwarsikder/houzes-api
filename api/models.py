@@ -549,6 +549,8 @@ class UserFirebase(models.Model):
 class CouponUser(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     affiliate_user = models.ForeignKey(AffliateUser, on_delete=models.SET_NULL, null=True, default=None)
+    discount = models.FloatField(null=True)
+    commission = models.FloatField(null=True)
     activity_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:

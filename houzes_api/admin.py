@@ -1,5 +1,7 @@
 from django.contrib import admin
 from rangefilter.filter import DateRangeFilter
+import csv
+from django.http import HttpResponse
 
 from api.models import User, UpgradeProfile, AffliateUser, CouponUser, Setting
 
@@ -90,13 +92,14 @@ class AffliateUserModel(admin.ModelAdmin):
 
 class CouponUserModel(admin.ModelAdmin):
     fields = ['email', 'first_name', 'last_name', 'code', 'activity_date']
-    list_display = ['email', 'fullname', 'affiliate_user_name', 'code', 'activity_date']
+    list_display = ['email', 'fullname', 'affiliate_user_name', 'user_discount', 'affiliate_commission', 'code', 'activity_date']
     list_filter = (
         ('activity_date', DateRangeFilter),
     )
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'affiliate_user__code', 'affiliate_user__first_name', 'affiliate_user__last_name']
-    actions_on_top = False
-    actions_on_bottom = True
+    actions = ['export_as_csv']
+    actions_on_top = True
+    actions_on_bottom = False
     list_per_page = 10
     list_max_show_all = 20
 
@@ -118,8 +121,30 @@ class CouponUserModel(admin.ModelAdmin):
     def code(self, obj):
         return obj.affiliate_user.code
 
+    def user_discount(self, obj):
+        return obj.discount
+
+    def affiliate_commission(self, obj):
+        return obj.commission
+
     def affiliate_user_name(self, obj):
         return obj.affiliate_user.first_name + ' ' + obj.affiliate_user.last_name
+
+    def export_as_csv(self, request, queryset):
+        field_names = self.list_display
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename={}.csv'.format('coupon_user')
+        writer = csv.writer(response)
+
+        writer.writerow(field_names)
+        for s in queryset:
+            fullname = s.user.first_name + ' ' + s.user.last_name
+            affiliate_user_name = s.affiliate_user.first_name + ' ' + s.affiliate_user.last_name
+            activity_date = s.activity_date.strftime("%Y-%m-%d")
+            writer.writerow([s.user.email, fullname, affiliate_user_name, s.discount, s.commission, s.affiliate_user.code, activity_date])
+        return response
+
+    export_as_csv.short_description = "Export as CSV"
 
 
 class SettingModel(admin.ModelAdmin):
