@@ -66,8 +66,8 @@ class UpgradeProfileModel(admin.ModelAdmin):
 
 
 class AffliateUserModel(admin.ModelAdmin):
-    fields = ['email', 'first_name', 'last_name', 'phone_number', 'code']
-    list_display = ['email', 'first_name', 'last_name', 'code', 'phone_number', 'created_at']
+    fields = ['email', 'first_name', 'last_name', 'phone_number', 'code', 'is_active']
+    list_display = ['email', 'first_name', 'last_name', 'code', 'phone_number', 'is_active', 'created_at']
     list_filter = ['email', ]
     search_fields = ['email', 'first_name', 'last_name', 'phone_number', 'code']
     actions_on_top = False
@@ -92,7 +92,7 @@ class AffliateUserModel(admin.ModelAdmin):
 
 class CouponUserModel(admin.ModelAdmin):
     fields = ['email', 'first_name', 'last_name', 'code', 'activity_date']
-    list_display = ['email', 'fullname', 'affiliate_user_name', 'user_discount', 'affiliate_commission', 'code', 'activity_date']
+    list_display = ['email', 'fullname', 'affiliate_user_name', 'total_amount', 'user_discount', 'affiliate_commission', 'code', 'activity_date']
     list_filter = (
         ('activity_date', DateRangeFilter),
     )
@@ -141,7 +141,7 @@ class CouponUserModel(admin.ModelAdmin):
             fullname = s.user.first_name + ' ' + s.user.last_name
             affiliate_user_name = s.affiliate_user.first_name + ' ' + s.affiliate_user.last_name
             activity_date = s.activity_date.strftime("%Y-%m-%d")
-            writer.writerow([s.user.email, fullname, affiliate_user_name, s.discount, s.commission, s.affiliate_user.code, activity_date])
+            writer.writerow([s.user.email, fullname, affiliate_user_name, s.total_amount, s.discount, s.commission, s.affiliate_user.code, activity_date])
         return response
 
     export_as_csv.short_description = "Export as CSV"

@@ -11,6 +11,7 @@ class AffliateUser(models.Model):
     last_name = models.CharField(max_length=255, null=True)
     phone_number = models.CharField(max_length=255, null=True, default=None)
     code = models.CharField(max_length=8, null=False, unique=True)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -551,6 +552,7 @@ class CouponUser(models.Model):
     affiliate_user = models.ForeignKey(AffliateUser, on_delete=models.SET_NULL, null=True, default=None)
     discount = models.FloatField(null=True)
     commission = models.FloatField(null=True)
+    total_amount = models.FloatField(null=True)
     activity_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
