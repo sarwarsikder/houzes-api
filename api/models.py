@@ -5,6 +5,19 @@ from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
 
 
+class AffliateUser(models.Model):
+    email = models.CharField(max_length=255, null=False, unique=True)
+    first_name = models.CharField(max_length=255, null=True)
+    last_name = models.CharField(max_length=255, null=True)
+    phone_number = models.CharField(max_length=255, null=True, default=None)
+    code = models.CharField(max_length=8, null=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'affiliate_user'
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None):
         user = self.model(
@@ -46,6 +59,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_team_admin = models.BooleanField(default=True)
+    affiliate_user = models.ForeignKey(AffliateUser, on_delete=models.SET_NULL, null=True, default=None)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -530,3 +544,20 @@ class UserFirebase(models.Model):
 
     class Meta:
         db_table = 'user_firebase'
+
+
+class CouponUser(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    affiliate_user = models.ForeignKey(AffliateUser, on_delete=models.SET_NULL, null=True, default=None)
+    activity_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'coupon_user'
+
+
+class Settings(models.Model):
+    key = models.CharField(max_length=50, null=True)
+    value = models.CharField(max_length=255, null=True)
+
+    class Meta:
+        db_table = 'Settings'

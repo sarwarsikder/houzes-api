@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'whitenoise',
     'notifications',
     'celery_task',
-    'django_celery_beat'
+    'django_celery_beat',
+    'rangefilter'
 ]
 APP_ENV = 'PROD'  # PROD, DEV
 
