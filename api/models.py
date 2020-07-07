@@ -555,9 +555,9 @@ class CouponUser(models.Model):
         db_table = 'coupon_user'
 
 
-class Settings(models.Model):
+class Setting(models.Model):
     key = models.CharField(max_length=50, null=True)
-    value = models.CharField(max_length=255, null=True)
+    value = models.FloatField(null=True)
 
     class Meta:
-        db_table = 'Settings'
+        db_table = 'setting'

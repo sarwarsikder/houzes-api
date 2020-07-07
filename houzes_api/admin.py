@@ -1,7 +1,7 @@
 from django.contrib import admin
 from rangefilter.filter import DateRangeFilter
 
-from api.models import User, UpgradeProfile, AffliateUser, CouponUser
+from api.models import User, UpgradeProfile, AffliateUser, CouponUser, Setting
 
 
 class MyAdminSite(admin.AdminSite):
@@ -122,9 +122,41 @@ class CouponUserModel(admin.ModelAdmin):
         return obj.affiliate_user.first_name + ' ' + obj.affiliate_user.last_name
 
 
+class SettingModel(admin.ModelAdmin):
+    fields = ['key', 'value']
+    list_display = ['key_name', 'key_value']
+    search_fields = ['key']
+    readonly_fields = ['key']
+    actions_on_top = False
+    actions_on_bottom = True
+    list_per_page = 10
+    list_max_show_all = 20
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def key_name(self, obj):
+        return obj.key
+
+    def key_value(self, obj):
+        if obj.value:
+            return str(obj.value) + ' %'
+        else:
+            return obj.value
+
+    key_name.short_description = 'Key Name'
+    key_value.short_description = 'Value (%)'
+
 
 admin_site = MyAdminSite()
 admin_site.register(User, AdminUserModel)
 admin_site.register(UpgradeProfile, UpgradeProfileModel)
 admin_site.register(AffliateUser, AffliateUserModel)
 admin_site.register(CouponUser, CouponUserModel)
+admin_site.register(Setting, SettingModel)
