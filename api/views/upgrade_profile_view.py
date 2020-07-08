@@ -97,6 +97,9 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             response_data['message'] = subscription_response['messages']['message']['text']
             return Response(response_data)
 
+        # Save applied coupon details
+
+
         if upgrade_profile:
             upgrade_profile.coin = float(upgrade_profile.coin)+0
             upgrade_profile.plan = plan
@@ -195,6 +198,24 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
 
         return Response(upgrade_profile_serializer.data)
 
+    def get_coupon_details(self, user, amount):
+        response = {}
+        try:
+            response['success'] = False
+            default_discount = Setting.objects.filter(key='discount').first().value
+            default_commission = Setting.objects.filter(key='commission').first().value
+            if user.affiliate_user and user.affiliate_user.is_active:
+                total_discount = (float(amount)/100)*float(default_discount)
+                total_commission = (float(amount)/100)*float(default_commission)
+                total_amount = amount - total_discount
+                response['success'] = True
+                response['discount'] = total_discount
+                response['commission'] = total_commission
+                response['total_amount'] = total_amount
+        except Exception as e:
+            response['success'] = False
+        return response
+
     def create_subscription(self,upgrade_profile,plan_id,card_number,expiration_date):
         plan = Plans.objects.get(id = plan_id)
         firstName = User.objects.get(id=upgrade_profile.user.id).first_name
@@ -204,6 +225,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         subscriptionName = plan.plan_name
 
         amount = float(plan.plan_coin)
+        total_amount = amount
         # amount = 0.15
         totalOccurrences =9999
         days = 30
@@ -242,6 +264,11 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         order.invoiceNumber = generate_shortuuid()
         order.description = "HouZes profile upgrade"
 
+        # Get Coupon details
+        coupon_reponse = UpgradeProfileViewSet.get_coupon_details(self, upgrade_profile.user, amount)
+        if coupon_reponse['success']:
+            amount = coupon_reponse['amount']
+
         # Setting subscription details
         subscription = apicontractsv1.ARBSubscriptionType()
         subscription.name = subscriptionName
@@ -265,6 +292,18 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         # Getting the response
         response = controller.getresponse()
         json_response = to_dict(response)
+        if coupon_reponse['success']:
+            total_discount = coupon_reponse['discount']
+            total_commission = coupon_reponse['commission']
+            coupon_user_form = {
+                'user_id': upgrade_profile.user.id,
+                'affiliate_user_id': upgrade_profile.user.affiliate_user_id,
+                'discount': total_discount,
+                'commission': total_commission,
+                'total_amount': total_amount,
+                'activity_date': datetime.now()
+            }
+            coupon_user = CouponUser.objects.create(**coupon_user_form)
         print(json_response)
         return json_response
 
