@@ -96,7 +96,7 @@ class CouponUserModel(admin.ModelAdmin):
     list_filter = (
         ('activity_date', DateRangeFilter), 'affiliate_user__email',
     )
-    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'affiliate_user__code', 'affiliate_user__first_name', 'affiliate_user__last_name']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'affiliate_user__code', 'affiliate_user__first_name', 'affiliate_user__last_name', 'affiliate_user__email', 'plan__plan_name']
     actions = ['export_as_csv']
     actions_on_top = True
     actions_on_bottom = False

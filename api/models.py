@@ -6,7 +6,7 @@ from django.db import models
 
 
 class AffliateUser(models.Model):
-    email = models.CharField(max_length=255, null=False, unique=True)
+    email = models.CharField(verbose_name="Affiliate User", max_length=255, null=False, unique=True)
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
     phone_number = models.CharField(max_length=255, null=True, default=None)
