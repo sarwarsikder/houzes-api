@@ -92,9 +92,9 @@ class AffliateUserModel(admin.ModelAdmin):
 
 class CouponUserModel(admin.ModelAdmin):
     fields = ['email', 'first_name', 'last_name', 'code', 'activity_date']
-    list_display = ['email', 'fullname', 'affiliate_user_name', 'total_amount', 'user_discount', 'affiliate_commission', 'code', 'activity_date']
+    list_display = ['email', 'fullname', 'affiliate_user_name', 'affiliate_user_email', 'total_amount', 'user_discount', 'affiliate_commission', 'code', 'plan_name', 'activity_date']
     list_filter = (
-        ('activity_date', DateRangeFilter),
+        ('activity_date', DateRangeFilter), 'affiliate_user__email',
     )
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'affiliate_user__code', 'affiliate_user__first_name', 'affiliate_user__last_name']
     actions = ['export_as_csv']
@@ -128,20 +128,28 @@ class CouponUserModel(admin.ModelAdmin):
         return obj.commission
 
     def affiliate_user_name(self, obj):
-        return obj.affiliate_user.first_name + ' ' + obj.affiliate_user.last_name
+        return obj.affiliate_user.first_name + ' ' + obj.affiliate_user.last_name if obj.affiliate_user else "N/A"
+
+    def affiliate_user_email(self, obj):
+        return obj.affiliate_user.email if obj.affiliate_user else "N/A"
+
+    def plan_name(self, obj):
+        return obj.plan.plan_name if obj.plan else "N/A"
 
     def export_as_csv(self, request, queryset):
         field_names = self.list_display
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename={}.csv'.format('coupon_user')
+        response['Content-Disposition'] = 'attachment; filename={}.csv'.format('applied_coupons')
         writer = csv.writer(response)
 
         writer.writerow(field_names)
         for s in queryset:
             fullname = s.user.first_name + ' ' + s.user.last_name
-            affiliate_user_name = s.affiliate_user.first_name + ' ' + s.affiliate_user.last_name
+            affiliate_user_name = s.affiliate_user.first_name + ' ' + s.affiliate_user.last_name if s.affiliate_user else "N/A"
+            affiliate_user_email = s.affiliate_user.email if s.affiliate_user else "N/A"
+            plan_name = s.plan.plan_name if s.plan else "N/A"
             activity_date = s.activity_date.strftime("%Y-%m-%d")
-            writer.writerow([s.user.email, fullname, affiliate_user_name, s.total_amount, s.discount, s.commission, s.affiliate_user.code, activity_date])
+            writer.writerow([s.user.email, fullname, affiliate_user_name, affiliate_user_email, s.total_amount, s.discount, s.commission, s.affiliate_user.code, plan_name, activity_date])
         return response
 
     export_as_csv.short_description = "Export as CSV"

@@ -553,6 +553,7 @@ class CouponUser(models.Model):
     discount = models.FloatField(null=True)
     commission = models.FloatField(null=True)
     total_amount = models.FloatField(null=True)
+    plan = models.ForeignKey(Plans, on_delete=models.SET_NULL, null=True, default=None)
     activity_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
