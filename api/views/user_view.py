@@ -209,9 +209,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
             if 'coupon' in request.data:
                 coupon = request.data['coupon']
-                affiliate_user = AffliateUser.objects.filter(code=coupon)
-                if affiliate_user.exists():
-                    user.affiliate_user_id = affiliate_user[0].id
+                if coupon != '':
+                    affiliate_user = AffliateUser.objects.filter(code=coupon)
+                    if affiliate_user.exists():
+                        user.affiliate_user_id = affiliate_user[0].id
+                    else:
+                        status = False
+                        data = None
+                        message = "Incorrect Coupon code"
+                        return Response({'status': status, 'data': data, 'message': message})
 
             Invitations.objects.filter(email=user.email).delete()  # delete new user from invitation
 
