@@ -12,6 +12,15 @@ class MyAdminSite(admin.AdminSite):
     index_title = 'Houzes Admin'
 
 
+def custom_titled_filter(title):
+    class Wrapper(admin.FieldListFilter):
+        def __new__(cls, *args, **kwargs):
+            instance = admin.FieldListFilter.create(*args, **kwargs)
+            instance.title = title
+            return instance
+    return Wrapper
+
+
 class AdminUserModel(admin.ModelAdmin):
     fields = ['first_name', 'last_name', 'email', 'phone_number', 'is_active', 'created_at']
     readonly_fields = ['email', 'created_at']
@@ -94,7 +103,7 @@ class CouponUserModel(admin.ModelAdmin):
     fields = ['email', 'first_name', 'last_name', 'code', 'activity_date']
     list_display = ['email', 'fullname', 'affiliate_user_name', 'affiliate_user_email', 'total_amount', 'user_discount', 'affiliate_commission', 'code', 'plan_name', 'activity_date']
     list_filter = (
-        ('activity_date', DateRangeFilter), 'affiliate_user__email',
+        ('activity_date', DateRangeFilter), ('affiliate_user__email', custom_titled_filter('Affiliate User')),
     )
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'affiliate_user__code', 'affiliate_user__first_name', 'affiliate_user__last_name', 'affiliate_user__email', 'plan__plan_name']
     actions = ['export_as_csv']
