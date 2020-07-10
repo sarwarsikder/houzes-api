@@ -15,6 +15,7 @@ from authorization.views.checkSubscription import CheckSubscription
 from api.serializers import *
 from rest_framework.response import Response
 from houzes_api import settings as AUTHORIZE_DOT_NET_CONFIG
+from rest_framework import status
 
 AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME = getattr(AUTHORIZE_DOT_NET_CONFIG, 'AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME', None)
 AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY = getattr(AUTHORIZE_DOT_NET_CONFIG, "AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY", None)
@@ -197,6 +198,27 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             return Response(response_data)
 
         return Response(upgrade_profile_serializer.data)
+
+    @action(detail=False, methods=['POST'], url_path='add-coupon')
+    def add_coupon_by_user(self, request, *args, **kwargs):
+        response_data = {'status': False, 'message': ''}
+        try:
+            user = User.objects.get(id=request.user.id)
+            coupon = request.data['coupon']
+            affiliate_user = AffliateUser.objects.filter(code=coupon)
+            if affiliate_user.exists():
+                user.affiliate_user_id = affiliate_user[0].id
+                user.save()
+                response_data['status'] = True
+                response_data['message'] = "Coupon added successfully."
+                return Response(response_data, status=status.HTTP_200_OK)
+            else:
+                response_data['status'] = False
+                response_data['message'] = "Incorrect coupon code"
+                return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            response_data['message'] = "Something went wrong. Please try again."
+            return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get_coupon_details(self, user, amount):
         response = {}
