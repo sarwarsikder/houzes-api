@@ -201,7 +201,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='add-coupon')
     def add_coupon_by_user(self, request, *args, **kwargs):
-        response_data = {'status': False, 'message': ''}
+        response_data = {'status': False, 'data': '', 'message': ''}
         try:
             user = User.objects.get(id=request.user.id)
             coupon = request.data['coupon']
@@ -211,6 +211,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
                 user.save()
                 response_data['status'] = True
                 response_data['message'] = "Coupon added successfully."
+                user_serializer = UserSerializer(user)
+                response_data['data'] = user_serializer.data
                 return Response(response_data, status=status.HTTP_200_OK)
             else:
                 response_data['status'] = False
