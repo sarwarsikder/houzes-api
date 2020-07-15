@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
+from django.core.validators import RegexValidator
 
 
 class AffliateUser(models.Model):
@@ -10,7 +11,7 @@ class AffliateUser(models.Model):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
     phone_number = models.CharField(max_length=255, null=True, default=None)
-    code = models.CharField(max_length=8, null=False, unique=True)
+    code = models.CharField(max_length=8, null=False, unique=True, validators=[RegexValidator(regex='^.{8}$', message='Length has to be 8')])
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
