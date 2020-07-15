@@ -11,7 +11,7 @@ class AffliateUser(models.Model):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
     phone_number = models.CharField(max_length=255, null=True, default=None)
-    code = models.CharField(max_length=8, null=False, unique=True, validators=[RegexValidator(regex='^.{8}$', message='Length has to be 8')])
+    code = models.CharField(max_length=6, null=False, unique=True, validators=[RegexValidator(regex='^.{6}$', message='Length has to be 6')])
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
