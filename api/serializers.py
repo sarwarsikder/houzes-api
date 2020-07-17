@@ -57,13 +57,13 @@ class UserSerializer(serializers.ModelSerializer):
             print("EXCEPTION IN  DEFAULT USER LIST FIELD IN USER SERIALIZER")
             print(traceback.print_exc())
         discount = None
-        try:
-            setting_discount = Setting.objects.filter(key='discount')
-            default_discount = setting_discount[0].value if setting_discount[0].value else None
-        except Exception as e:
-            default_discount = None
+        # try:
+        #     setting_discount = Setting.objects.filter(key='discount')
+        #     default_discount = setting_discount[0].value if setting_discount[0].value else None
+        # except Exception as e:
+        #     default_discount = None
         if instance.affiliate_user and instance.affiliate_user.is_active:
-            discount = default_discount
+            discount = instance.affiliate_user.discount
         representation = {
             'id' : instance.id,
             'last_login' : instance.last_login,
