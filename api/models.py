@@ -12,6 +12,8 @@ class AffliateUser(models.Model):
     last_name = models.CharField(max_length=255, null=True)
     phone_number = models.CharField(max_length=255, null=True, default=None)
     code = models.CharField(max_length=6, null=False, unique=True, validators=[RegexValidator(regex='^.{6}$', message='Length has to be 6')])
+    discount = models.FloatField(null=False, default=0.0)
+    commission = models.FloatField(null=False, default=0.0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
