@@ -162,7 +162,6 @@ class CouponUserModel(admin.ModelAdmin):
 
         writer.writerow(field_names)
         for s in queryset:
-            print(s.user);
             fullname = s.user.first_name + ' ' + s.user.last_name
             affiliate_user_name = s.affiliate_user.first_name + ' ' + s.affiliate_user.last_name if s.affiliate_user else "N/A"
             affiliate_user_email = s.affiliate_user.email if s.affiliate_user else "N/A"
