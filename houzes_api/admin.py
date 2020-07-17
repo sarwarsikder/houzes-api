@@ -77,7 +77,7 @@ class UpgradeProfileModel(admin.ModelAdmin):
 
 class AffliateUserModel(admin.ModelAdmin):
     fields = ['email', 'first_name', 'last_name', 'phone_number', 'code', 'discount', 'commission', 'is_active']
-    list_display = ['email', 'first_name', 'last_name', 'code', 'phone_number', 'discount', 'commission', 'is_active',
+    list_display = ['email', 'first_name', 'last_name', 'code', 'phone_number', 'user_discount', 'commission', 'is_active',
                     'created_at']
     list_filter = ['email', ]
     search_fields = ['email', 'first_name', 'last_name', 'phone_number', 'code']
@@ -99,6 +99,9 @@ class AffliateUserModel(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return True
+
+    def user_discount(self, obj):
+        return obj.discount
 
 
 class CouponUserModel(admin.ModelAdmin):
@@ -179,36 +182,36 @@ class CouponUserModel(admin.ModelAdmin):
     export_as_csv.short_description = "Export as CSV"
 
 
-class SettingModel(admin.ModelAdmin):
-    fields = ['key', 'value']
-    list_display = ['key_name', 'key_value']
-    search_fields = ['key']
-    readonly_fields = ['key']
-    actions_on_top = False
-    actions_on_bottom = True
-    list_per_page = 10
-    list_max_show_all = 20
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return True
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def key_name(self, obj):
-        return obj.key
-
-    def key_value(self, obj):
-        if obj.value:
-            return str(obj.value) + ' %'
-        else:
-            return obj.value
-
-    key_name.short_description = 'Key Name'
-    key_value.short_description = 'Value (%)'
+# class SettingModel(admin.ModelAdmin):
+#     fields = ['key', 'value']
+#     list_display = ['key_name', 'key_value']
+#     search_fields = ['key']
+#     readonly_fields = ['key']
+#     actions_on_top = False
+#     actions_on_bottom = True
+#     list_per_page = 10
+#     list_max_show_all = 20
+#
+#     def has_add_permission(self, request):
+#         return False
+#
+#     def has_change_permission(self, request, obj=None):
+#         return True
+#
+#     def has_delete_permission(self, request, obj=None):
+#         return False
+#
+#     def key_name(self, obj):
+#         return obj.key
+#
+#     def key_value(self, obj):
+#         if obj.value:
+#             return str(obj.value) + ' %'
+#         else:
+#             return obj.value
+#
+#     key_name.short_description = 'Key Name'
+#     key_value.short_description = 'Value (%)'
 
 
 admin_site = MyAdminSite()
@@ -216,4 +219,4 @@ admin_site.register(User, AdminUserModel)
 admin_site.register(UpgradeProfile, UpgradeProfileModel)
 admin_site.register(AffliateUser, AffliateUserModel)
 admin_site.register(CouponUser, CouponUserModel)
-admin_site.register(Setting, SettingModel)
+# admin_site.register(Setting, SettingModel)

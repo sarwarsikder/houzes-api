@@ -226,9 +226,9 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         response = {}
         try:
             response['success'] = False
-            default_discount = Setting.objects.filter(key='discount').first().value
-            default_commission = Setting.objects.filter(key='commission').first().value
             if user.affiliate_user and user.affiliate_user.is_active:
+                default_discount = user.affiliate_user.discount
+                default_commission = user.affiliate_user.commission
                 total_discount = round((float(amount)/100)*float(default_discount), 2)
                 total_commission = round((float(amount)/100)*float(default_commission), 2)
                 total_amount = amount - total_discount
