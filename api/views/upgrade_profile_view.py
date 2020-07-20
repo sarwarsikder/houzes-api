@@ -468,6 +468,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         request.subscription = subscription
 
         controller = ARBUpdateSubscriptionController(request)
+        if getattr(settings, 'APP_ENV', None) == 'PROD':
+            controller.setenvironment(constants.PRODUCTION)
         controller.execute()
 
         response = controller.getresponse()
