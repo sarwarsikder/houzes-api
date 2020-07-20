@@ -201,7 +201,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path='add-coupon')
     def add_coupon_by_user(self, request, *args, **kwargs):
-        response_data = {'status': False, 'data': '', 'message': ''}
+        response_data = {'status': False, 'data': None, 'message': ''}
         try:
             user = User.objects.get(id=request.user.id)
             coupon = request.data['coupon']
@@ -217,7 +217,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             else:
                 response_data['status'] = False
                 response_data['message'] = "Incorrect coupon code"
-                return Response(response_data, status=status.HTTP_404_NOT_FOUND)
+                return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
             response_data['message'] = "Something went wrong. Please try again."
             return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
