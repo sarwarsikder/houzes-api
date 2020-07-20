@@ -25,7 +25,8 @@ class CheckSubscription:
             getSubscription.includeTransactions = True
 
             getSubscriptionController = ARBGetSubscriptionController(getSubscription)
-            getSubscriptionController.setenvironment(constants.PRODUCTION)
+            if getattr(settings, 'APP_ENV', None) == 'PROD':
+                getSubscriptionController.setenvironment(constants.PRODUCTION)
             getSubscriptionController.execute()
 
             response = getSubscriptionController.getresponse()

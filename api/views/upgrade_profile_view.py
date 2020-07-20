@@ -6,7 +6,7 @@ import calendar
 
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import ARBCreateSubscriptionController, ARBCancelSubscriptionController, \
-    createTransactionController
+    createTransactionController, ARBUpdateSubscriptionController
 from notifications.signals import notify
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -209,6 +209,15 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
             if affiliate_user.exists():
                 user.affiliate_user_id = affiliate_user[0].id
                 user.save()
+                upgrade_profile = UpgradeProfile.objects.filter(user=user).first()
+                if upgrade_profile:
+                    discount = user.affiliate_user.discount if user.affiliate_user.discount!=None else 0
+                    amount = Plans.objects.get(id = upgrade_profile.plan.id).plan_coin
+                    discounted_price = (amount / 100) * Decimal(discount)
+                    total_amount = amount - discounted_price
+                    if not UpgradeProfileViewSet.update_subscription(self, upgrade_profile.subscriptionId,user, total_amount):
+                        response_data['message'] = "Something went wrong. Please try again."
+                        return Response(response_data, status=status.HTTP_200_OK)
                 response_data['status'] = True
                 response_data['message'] = "Coupon added successfully."
                 user_serializer = UserSerializer(user)
@@ -219,6 +228,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
                 response_data['message'] = "Incorrect coupon code"
                 return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
+            print(e)
             response_data['message'] = "Something went wrong. Please try again."
             return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -291,7 +301,7 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         # Get Coupon details
         coupon_reponse = UpgradeProfileViewSet.get_coupon_details(self, upgrade_profile.user, amount)
         if coupon_reponse['success']:
-            amount = coupon_reponse['amount']
+            amount = coupon_reponse['total_amount']
 
         # Setting subscription details
         subscription = apicontractsv1.ARBSubscriptionType()
@@ -311,7 +321,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         request.subscription = subscription
         # Creating and executing the controller
         controller = ARBCreateSubscriptionController(request)
-        controller.setenvironment(constants.PRODUCTION)
+        if getattr(settings, 'APP_ENV', None) == 'PROD':
+            controller.setenvironment(constants.PRODUCTION)
         controller.execute()
         # Getting the response
         response = controller.getresponse()
@@ -325,9 +336,11 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
                 'discount': total_discount,
                 'commission': total_commission,
                 'total_amount': total_amount,
+                'plan_id': plan_id,
                 'activity_date': datetime.now()
             }
-            coupon_user = CouponUser.objects.create(**coupon_user_form)
+            coupon_user = CouponUser(**coupon_user_form)
+            coupon_user.save()
         print(json_response)
         return json_response
 
@@ -342,7 +355,8 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         request.subscriptionId = upgrade_profile.subscriptionId
 
         controller = ARBCancelSubscriptionController(request)
-        controller.setenvironment(constants.PRODUCTION)
+        if getattr(settings, 'APP_ENV', None) == 'PROD':
+            controller.setenvironment(constants.PRODUCTION)
         controller.execute()
 
         response = controller.getresponse()
@@ -413,13 +427,57 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         # Create the controller
         createtransactioncontroller = createTransactionController(
             createtransactionrequest)
-        createtransactioncontroller.setenvironment(constants.PRODUCTION)
+        if getattr(settings, 'APP_ENV', None) == 'PROD':
+            createtransactioncontroller.setenvironment(constants.PRODUCTION)
         createtransactioncontroller.execute()
 
         response = createtransactioncontroller.getresponse()
         payment_response = to_dict(response)
         print(payment_response)
         return payment_response
+
+    def update_subscription(self, subscriptionId,user, amount):
+        merchantAuth = apicontractsv1.merchantAuthenticationType()
+        merchantAuth.name = AUTHORIZE_DOT_NET_MERCHANT_AUTH_NAME
+        merchantAuth.transactionKey = AUTHORIZE_DOT_NET_MERCHANT_AUTH_TRANSACTION_KEY
+
+        # creditcard = apicontractsv1.creditCardType()
+        # creditcard.cardNumber = "4111111111111111"
+        # creditcard.expirationDate = "2020-12"
+
+        # payment = apicontractsv1.paymentType()
+        # payment.creditCard = creditcard
+
+        # set profile information
+        # profile = apicontractsv1.customerProfileIdType()
+        # profile.customerProfileId = "121212"
+        # profile.customerPaymentProfileId = "131313"
+        # profile.customerAddressId = "141414"
+
+        subscription = apicontractsv1.ARBSubscriptionType()
+        # subscription.payment = payment
+        # to update customer profile information
+        # subscription.profile = profile
+        TWOPLACES = Decimal(10) ** -2
+        subscription.amount = Decimal(amount).quantize(TWOPLACES)
+
+        request = apicontractsv1.ARBUpdateSubscriptionRequest()
+        request.merchantAuthentication = merchantAuth
+        # request.refId = "Sample"
+        request.subscriptionId = subscriptionId
+        request.subscription = subscription
+
+        controller = ARBUpdateSubscriptionController(request)
+        controller.execute()
+
+        response = controller.getresponse()
+
+        print(to_dict(response))
+
+        if (response.messages.resultCode == "Ok"):
+            return True
+        else:
+            return False
 
 def to_dict(element):
     ret = {}

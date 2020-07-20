@@ -113,7 +113,9 @@ def charge_credit_card(request):
         # Create the controller
         createtransactioncontroller = createTransactionController(
             createtransactionrequest)
-        createtransactioncontroller.setenvironment(constants.PRODUCTION)
+
+        if getattr(settings, 'APP_ENV', None)=='PROD':
+            createtransactioncontroller.setenvironment(constants.PRODUCTION)
         createtransactioncontroller.execute()
 
         response = createtransactioncontroller.getresponse()
