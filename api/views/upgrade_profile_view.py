@@ -215,9 +215,10 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
                     amount = Plans.objects.get(id = upgrade_profile.plan.id).plan_coin
                     discounted_price = (amount / 100) * Decimal(discount)
                     total_amount = amount - discounted_price
-                    if not UpgradeProfileViewSet.update_subscription(self, upgrade_profile.subscriptionId,user, total_amount):
-                        response_data['message'] = "Something went wrong. Please try again."
-                        return Response(response_data, status=status.HTTP_200_OK)
+                    if total_amount>0:
+                        if not UpgradeProfileViewSet.update_subscription(self, upgrade_profile.subscriptionId,user, total_amount):
+                            response_data['message'] = "Something went wrong. Please try again."
+                            return Response(response_data, status=status.HTTP_200_OK)
                 response_data['status'] = True
                 response_data['message'] = "Coupon added successfully."
                 user_serializer = UserSerializer(user)
