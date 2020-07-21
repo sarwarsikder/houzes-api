@@ -77,7 +77,7 @@ class UpgradeProfileModel(admin.ModelAdmin):
 
 class AffliateUserModel(admin.ModelAdmin):
     fields = ['email', 'first_name', 'last_name', 'phone_number', 'code', 'discount', 'commission', 'is_active']
-    list_display = ['email', 'first_name', 'last_name', 'code', 'phone_number', 'user_discount', 'commission', 'is_active',
+    list_display = ['email', 'first_name', 'last_name', 'code', 'phone_number', 'user_discount', 'affliate_commission', 'is_active',
                     'created_at']
     list_filter = ['email', ]
     search_fields = ['email', 'first_name', 'last_name', 'phone_number', 'code']
@@ -101,7 +101,13 @@ class AffliateUserModel(admin.ModelAdmin):
         return True
 
     def user_discount(self, obj):
-        return obj.discount
+        return str(obj.discount) + ' %'
+
+    def affliate_commission(self, obj):
+        return str(obj.commission) + ' %'
+
+    user_discount.short_description = 'User Discount (%)'
+    affliate_commission.short_description = 'Commission (%)'
 
 
 class CouponUserModel(admin.ModelAdmin):
