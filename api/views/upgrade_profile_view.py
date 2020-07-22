@@ -217,20 +217,20 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
                     total_amount = amount - discounted_price
                     if total_amount>0:
                         if not UpgradeProfileViewSet.update_subscription(self, upgrade_profile.subscriptionId,user, total_amount):
-                            response_data['message'] = "Something went wrong. Please try again."
+                            response_data['message'] = "Opps! Something went wrong. Please try again."
                             return Response(response_data, status=status.HTTP_200_OK)
                 response_data['status'] = True
-                response_data['message'] = "Coupon added successfully."
+                response_data['message'] = "Coupon applied successfully."
                 user_serializer = UserSerializer(user)
                 response_data['data'] = user_serializer.data
                 return Response(response_data, status=status.HTTP_200_OK)
             else:
                 response_data['status'] = False
-                response_data['message'] = "Incorrect coupon code"
+                response_data['message'] = "Oops! code is not recognized"
                 return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
-            response_data['message'] = "Something went wrong. Please try again."
+            response_data['message'] = "Oops! Something went wrong. Please try again."
             return Response(response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get_coupon_details(self, user, amount):
