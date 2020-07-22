@@ -237,12 +237,16 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
         response = {}
         try:
             response['success'] = False
-            if user.affiliate_user and user.affiliate_user.is_active:
+            if user.affiliate_user:
                 default_discount = user.affiliate_user.discount
                 default_commission = user.affiliate_user.commission
-                total_discount = round((float(amount)/100)*float(default_discount), 2)
-                total_commission = round((float(amount)/100)*float(default_commission), 2)
+                discount = (float(amount) / 100)*float(default_discount)
+                total_discount = int(discount * 10**2) / 10**2
                 total_amount = amount - total_discount
+                commission = (float(total_amount) / 100) * float(default_commission)
+                total_commission = int(commission * 10 ** 2) / 10 ** 2
+                # total_discount = round((float(amount)/100)*float(default_discount), 2)
+                # total_commission = round((float(amount)/100)*float(default_commission), 2)
                 response['success'] = True
                 response['discount'] = total_discount
                 response['commission'] = total_commission
@@ -338,11 +342,11 @@ class UpgradeProfileViewSet(viewsets.ModelViewSet):
                 'commission': total_commission,
                 'total_amount': total_amount,
                 'plan_id': plan_id,
-                'activity_date': datetime.now()
+                'activity_date': datetime.now(),
+                'affiliate_is_active': upgrade_profile.user.affiliate_user.is_active
             }
             coupon_user = CouponUser(**coupon_user_form)
             coupon_user.save()
-        print(json_response)
         return json_response
 
     def cancel_subscription(self, upgrade_profile):

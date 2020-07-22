@@ -62,7 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
         #     default_discount = setting_discount[0].value if setting_discount[0].value else None
         # except Exception as e:
         #     default_discount = None
-        if instance.affiliate_user and instance.affiliate_user.is_active:
+        if instance.affiliate_user:
             discount = instance.affiliate_user.discount
         representation = {
             'id' : instance.id,
