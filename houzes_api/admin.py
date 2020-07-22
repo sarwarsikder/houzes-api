@@ -114,14 +114,14 @@ class CouponUserModel(admin.ModelAdmin):
     fields = ['email', 'first_name', 'last_name', 'code', 'activity_date']
     list_display = ['email', 'fullname', 'affiliate_user_name', 'affiliate_user_email', 'total_amount', 'user_discount',
                     'discounted_amount',
-                    'affiliate_commission', 'code', 'plan_name', 'activity_date', 'affiliate_is_active']
+                    'affiliate_commission', 'code', 'plan_name', 'activity_date', 'affiliate_is_active', 'payment_status']
     list_filter = (
         ('activity_date', DateRangeFilter), ('affiliate_user__email', custom_titled_filter('Affiliate User')),
     )
     search_fields = ['user__email', 'user__first_name', 'user__last_name', 'affiliate_user__code',
                      'affiliate_user__first_name', 'affiliate_user__last_name', 'affiliate_user__email',
                      'plan__plan_name']
-    actions = ['export_as_csv']
+    actions = ['export_as_csv', 'paid_selected_commission']
     actions_on_top = True
     actions_on_bottom = False
     list_per_page = 10
@@ -185,7 +185,12 @@ class CouponUserModel(admin.ModelAdmin):
                  s.commission, s.affiliate_user.code, plan_name, activity_date])
         return response
 
+    def paid_selected_commission(self, request, queryset):
+        queryset.update(payment_status=True)
+
+
     export_as_csv.short_description = "Export as CSV"
+    paid_selected_commission.short_description = "Pay Commission"
 
 
 # class SettingModel(admin.ModelAdmin):

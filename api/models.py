@@ -559,6 +559,7 @@ class CouponUser(models.Model):
     plan = models.ForeignKey(Plans, on_delete=models.SET_NULL, null=True, default=None)
     activity_date = models.DateTimeField(auto_now_add=True)
     affiliate_is_active = models.BooleanField(default=True)
+    payment_status = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'coupon_user'
