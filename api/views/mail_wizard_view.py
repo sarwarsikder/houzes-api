@@ -1,3 +1,5 @@
+import time
+
 import pytz
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -9,6 +11,8 @@ import datetime
 from houzes_api import settings
 import traceback
 
+from houzes_api.util.s3_image_upload import image_upload
+
 
 class MailWizardInfoViewSet(viewsets.ModelViewSet):
     queryset = MailWizardInfo.objects.all()
@@ -18,6 +22,10 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
     def send_mail_to_property_owner(self, request, *args, **kwargs):
         response = {'status': False, 'data': {}, 'message': ''}
         property = Property.objects.get(id=kwargs['id'])
+        try:
+            data = request.data
+        except:
+            data = request.POST
         user = User.objects.get(id=request.user.id)
 
         # print(property.__dict__)
@@ -34,13 +42,14 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         mailing_state = property.owner_info[0]['formatted_address']['state']
         mailing_zip = property.owner_info[0]['formatted_address']['zip_code']
 
-        user_info = request.data['user_info']
+        # user_info = request.data['user_info']
 
-        item_id = request.data['tem_item_id']
-        subs_id = request.data['subs_id']
-        mail_count_target = request.data['mail_count']
+        item_id = data['tem_item_id']
+        subs_id = data['subs_id']
+        mail_count_target = data['mail_count']
+
         return self.hit_mailer_wizard(user, property, full_name, mailing_street, mailing_city, mailing_state, mailing_zip,
-                                      user_info, item_id, subs_id, mail_count_target, False)
+                                    item_id, subs_id, mail_count_target, False,data, request)
 
     @action(detail=False, url_path='all')
     def get_mail_wizard(self, request, *args, **kwargs):
@@ -69,6 +78,11 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path='neighbor/(?P<id>[\w-]+)')
     def send_mail_to_neighbor_owner(self, request, *args, **kwargs):
         response = {'status': False, 'data' : {},'message': ''}
+        try:
+            data = request.data
+        except:
+            data = request.POST
+
         get_neighborhood = GetNeighborhood.objects.get(id=kwargs['id'])
         user = User.objects.get(id=request.user.id)
 
@@ -83,14 +97,14 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         mailing_state = get_neighborhood.ownership_info['owner_info']['formatted_address']['state']
         mailing_zip = get_neighborhood.ownership_info['owner_info']['formatted_address']['zip_code']
 
-        user_info = request.data['user_info']
+        # user_info = request.data['user_info']
 
-        item_id = request.data['tem_item_id']
-        subs_id = request.data['subs_id']
-        mail_count_target = request.data['mail_count']
+        item_id = data['tem_item_id']
+        subs_id = data['subs_id']
+        mail_count_target = data['mail_count']
 
         return self.hit_mailer_wizard(user, get_neighborhood, full_name, mailing_street, mailing_city, mailing_state, mailing_zip,
-                                      user_info, item_id, subs_id, mail_count_target, True)
+                                       item_id, subs_id, mail_count_target, True, data, request)
 
     @staticmethod
     def dict_val(dict_obj, key):
@@ -99,19 +113,21 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         return ""
 
     def hit_mailer_wizard(self, user, requested_property, full_name, mailing_street, mailing_city, mailing_state, mailing_zip,
-                          user_info, item_id, subs_id, mail_count_target, is_neighbor):
+                           item_id, subs_id, mail_count_target, is_neighbor,data, request):
 
         response = {'status': False, 'data': {}, 'message': ''}
         manager = user
+        is_file = False
+        if 'logo' in data or 'mailing_list' in data or 'property_image' in data or 'user_photo' in data:
+            is_file = True
+
         if not manager.is_team_admin:
             manager = User.objects.get(id=manager.invited_by)
-        return_address_street = self.dict_val(user_info, 'address_street')
-        return_address_city = self.dict_val(user_info, 'address_city')
-        return_address_state = self.dict_val(user_info, 'address_state')
-        return_address_zip = str(self.dict_val(user_info, 'address_zip'))
 
-        # prop_address1 = [property.street, property.city, property.state, property.zip]
-        # separator = ', '
+        return_address_street =data['address_street']
+        return_address_city = data['address_city']
+        return_address_state = data['address_state']
+        return_address_zip = data['address_zip']
 
         mailer_response_text = 'TEST RESPONSE'
 
@@ -123,14 +139,15 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             "user_id": user.id,
             "list_id": requested_property.id,
             "response_text": mailer_response_text.strip(),
+            "is_file" : False,
             "user_info": {
-                "firstName": self.dict_val(user_info, 'first_name'),
-                "lastName": self.dict_val(user_info, 'last_name'),
-                "email": self.dict_val(user_info, 'email'),
-                "proofEmail": self.dict_val(user_info, 'email'),
-                "compName": self.dict_val(user_info, 'company_name'),
-                "website": self.dict_val(user_info, 'website'),
-                "telephoneNo": self.dict_val(user_info, 'phone_no')
+                "firstName": data['first_name'].strip() if 'first_name' in data else '',
+                "lastName": data['last_name'].strip() if 'last_name' in data else '',
+                "email": data['email'].strip() if 'email' in data else '',
+                "proofEmail": data['email'].strip() if 'email' in data else '',
+                "compName": data['company_name'].strip() if 'company_name' in data else '',
+                "website": data['website'].strip() if 'website' in data else '',
+                "telephoneNo": data['phone_no'].strip() if 'phone_no' in data else '',
             },
             "letter_info": {
                 "type": "Letter",
@@ -155,10 +172,29 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                     "prop_address1": requested_property.street,
                     "prop_city": requested_property.city,
                     "prop_state": requested_property.state,
-                    "prop_zip": requested_property.zip
+                    "prop_zip": requested_property.zip,
+                    'offer_code': data['offer_code'].strip() if 'offer_code' in data else None
                 },
             ]
         }
+        if is_file:
+            if 'logo' in data:
+                img_url = self.get_uploaded_img_url(request.FILES['logo'])
+                if img_url:
+                    request_json["logo"] = img_url
+            if 'property_image' in data:
+                img_url = self.get_uploaded_img_url(request.FILES['property_image'])
+                if img_url:
+                    request_json["property_image"] = img_url
+            if 'user_photo' in data:
+                img_url = self.get_uploaded_img_url(request.FILES['user_photo'])
+                if img_url:
+                    request_json["user_photo"] = img_url
+
+            request_json["is_file"] = True
+
+        else:
+            request_json["is_file"] = False
         print(request_json)
         try:
             upgrade_profile = UpgradeProfile.objects.filter(user=manager).first()
@@ -177,6 +213,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             upgrade_profile.coin = float(upgrade_profile.coin) - required_coin
             upgrade_profile.save()
             r = requests.post(url=url, json=request_json, headers=headers)
+            print(r)
             if r.status_code == 200:
                 mail_wizard_subs_type = MailWizardSubsType.objects.filter(id=subs_id).first()
 
@@ -195,10 +232,12 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 except MailWizardUserInfo.DoesNotExist:
                     mailer_wizard_user_info = MailWizardUserInfo()
                 mailer_wizard_user_info.user_id = user.id
-                mailer_wizard_user_info.first_name = self.dict_val(user_info, 'first_name')
-                mailer_wizard_user_info.last_name = self.dict_val(user_info, 'last_name')
-                mailer_wizard_user_info.email = self.dict_val(user_info, 'email')
-                mailer_wizard_user_info.phone_no = self.dict_val(user_info, 'phone_no')
+
+                mailer_wizard_user_info.first_name = data['first_name'].strip() if 'first_name' in data else ''
+                mailer_wizard_user_info.last_name = data['last_name'].strip() if 'last_name' in data else ''
+                mailer_wizard_user_info.email = data['email'].strip() if 'email' in data else ''
+                mailer_wizard_user_info.phone_no = data['phone_no'].strip() if 'phone_no' in data else ''
+
                 mailer_wizard_user_info.address_street = return_address_street
                 mailer_wizard_user_info.address_city = return_address_city
                 mailer_wizard_user_info.address_state = return_address_state
@@ -241,4 +280,20 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             }
             response['message'] = 'Mail sending unsuccessful'
         return Response(response)
+
+    def get_uploaded_img_url(self,file):
+        try:
+            s3_path_prefix = "photos/mail-wizard/"
+            file_name = generate_shortuuid() + str(time.time()) + '.png'
+            img_data = image_upload(file, s3_path_prefix, file_name, True)
+            if img_data["status"]:
+                full_img_path = img_data['full_img_url']
+                thumb_img_path = img_data['thumb_url']
+                print(full_img_path)
+                return full_img_path
+
+        except:
+            print('::::EXCEPTION OCCOURED WHILE UPLOADING::::')
+            traceback.print_exc()
+            return None
 
