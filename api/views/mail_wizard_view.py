@@ -37,7 +37,11 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
             return Response(response)
 
         full_name = property.owner_info[0]['full_name']
-        mailing_street = property.owner_info[0]['formatted_address']['street']['formatted_full_street_name']
+        try:
+            mailing_street = property.owner_info[0]['formatted_address']['street']['formatted_full_street_name']
+        except:
+            mailing_street = str(property.owner_info[0]['formatted_address']['street']['street_number'])+' '+property.owner_info[0]['formatted_address']['street']['street_name']
+
         mailing_city = property.owner_info[0]['formatted_address']['city']
         mailing_state = property.owner_info[0]['formatted_address']['state']
         mailing_zip = property.owner_info[0]['formatted_address']['zip_code']
