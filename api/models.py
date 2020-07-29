@@ -504,7 +504,9 @@ class MailWizardUserInfo(models.Model):
     address_city = models.CharField(max_length=255, null=True)
     address_state = models.CharField(max_length=50, null=True)
     address_zip = models.CharField(max_length=10, null=True)
-
+    logo = models.TextField(null=True, default= None)
+    cover_photo = models.TextField(null=True, default=None)
+    agent_license = models.CharField(max_length=255, null=True,default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
