@@ -95,7 +95,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
         try:
             mailing_street = get_neighborhood.ownership_info['owner_info']['formatted_address']['street']['formatted_full_street_name']
         except:
-            mailing_street = get_neighborhood.ownership_info['owner_info']['formatted_address']['street']['street_number']+' '+get_neighborhood.ownership_info['owner_info']['formatted_address']['street']['street_name']
+            mailing_street = str(get_neighborhood.ownership_info['owner_info']['formatted_address']['street']['street_number'])+' '+get_neighborhood.ownership_info['owner_info']['formatted_address']['street']['street_name']
         mailing_city = get_neighborhood.ownership_info['owner_info']['formatted_address']['city']
         mailing_state = get_neighborhood.ownership_info['owner_info']['formatted_address']['state']
         mailing_zip = get_neighborhood.ownership_info['owner_info']['formatted_address']['zip_code']
