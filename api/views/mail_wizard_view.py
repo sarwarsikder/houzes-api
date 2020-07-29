@@ -242,8 +242,10 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 mailer_wizard_user_info.email = data['email'].strip() if 'email' in data else ''
                 mailer_wizard_user_info.phone_no = data['phone_no'].strip() if 'phone_no' in data else ''
                 mailer_wizard_user_info.website = data['website'].strip() if 'website' in data else ''
-                mailer_wizard_user_info.logo = logo
-                mailer_wizard_user_info.cover_photo = cover_photo
+                if logo:
+                    mailer_wizard_user_info.logo = logo
+                if cover_photo:
+                    mailer_wizard_user_info.cover_photo = cover_photo
                 mailer_wizard_user_info.agent_license = data['offer_code'].strip() if 'offer_code' in data else ''
                 mailer_wizard_user_info.address_street = return_address_street
                 mailer_wizard_user_info.address_city = return_address_city
