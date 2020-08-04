@@ -249,6 +249,7 @@ class MailWizardInfoViewSet(viewsets.ModelViewSet):
                 mailer_wizard_user_info.email = data['email'].strip() if 'email' in data else ''
                 mailer_wizard_user_info.phone_no = data['phone_no'].strip() if 'phone_no' in data else ''
                 mailer_wizard_user_info.website = data['website'].strip() if 'website' in data else ''
+                mailer_wizard_user_info.company_name = data['company_name'].strip() if 'company_name' in data else ''
                 if logo:
                     mailer_wizard_user_info.logo = logo
                 if cover_photo:
