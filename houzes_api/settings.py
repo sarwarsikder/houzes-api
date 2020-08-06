@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'rangefilter'
 ]
-APP_ENV = 'DEV'  # PROD, DEV
+APP_ENV = 'PROD'  # PROD, DEV
 
 # Application definition
 
