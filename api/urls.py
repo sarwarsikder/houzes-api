@@ -5,7 +5,7 @@ from rest_framework.documentation import include_docs_urls
 # from.views import *
 from api.views import power_trace_view, photos_view, scout_form_view, payment_gateway_view, microservice_endpoint_view, \
     notifications_view, fcm_notification, user_token_view, apple_payment_gateway_view, apple_upgrade_profile_view, \
-    export_csv_view
+    export_csv_view, arb_webhook
 from api.views.activity_log_view import ActivityLogViewSet
 from api.views.assign_member_to_list_view import AssignMemberToListViewSet
 from api.views.forget_password_view import ForgetPasswordViewSet
@@ -107,7 +107,8 @@ urlpatterns = [
     path('apple-payment-gateway/', apple_payment_gateway_view.apple_payment_gateway, name='apple-payment-gateway'),
     path('apple-upgrade-profile/', apple_upgrade_profile_view.apple_upgrade_profile, name='apple-upgrade-profile'),
     path('export-csv/csv-properties/', export_csv_view.get_csv_properties, name='get-csv-properties'),
-    path('export-csv/download-csv/', export_csv_view.download_CSV, name='download-csv')
+    path('export-csv/download-csv/', export_csv_view.download_CSV, name='download-csv'),
+    path('fail-subscription/', arb_webhook.subscription_fail_webhook, name='fail-webhook')
 
 ]
 
